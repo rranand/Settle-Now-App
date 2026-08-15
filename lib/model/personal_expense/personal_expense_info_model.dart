@@ -2,7 +2,6 @@ import 'package:settlenow/constant/constant_core.dart';
 
 class PersonalExpenseInfoModel {
   bool hasData = true;
-  String id = "";
   double amount = 0;
   String monthName = "";
   String year = "";
@@ -10,7 +9,6 @@ class PersonalExpenseInfoModel {
   int transactionCount = 0;
 
   PersonalExpenseInfoModel({
-    required this.id,
     required this.amount,
     required this.monthName,
     required this.year,
@@ -18,10 +16,11 @@ class PersonalExpenseInfoModel {
     required this.createdOn,
   });
 
+  String get id => (year + monthName).toLowerCase();
+
   PersonalExpenseInfoModel.empty({this.hasData = false});
 
   PersonalExpenseInfoModel copyWith({
-    String? id,
     double? amount,
     String? monthName,
     String? year,
@@ -29,7 +28,6 @@ class PersonalExpenseInfoModel {
     DateTime? createdOn,
   }) {
     return PersonalExpenseInfoModel(
-      id: id ?? this.id,
       amount: amount ?? this.amount,
       monthName: monthName ?? this.monthName,
       year: year ?? this.year,
@@ -40,7 +38,6 @@ class PersonalExpenseInfoModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
       'amount': amount,
       'month_name': monthName,
       'year': year,
@@ -56,7 +53,6 @@ class PersonalExpenseInfoModel {
     int monthIndex = int.parse(date.substring(0, date.length - 4));
 
     return PersonalExpenseInfoModel(
-      id: map['id'],
       amount: double.parse(map['amount'].toString()),
       monthName: CalenderConstant.monthName[monthIndex],
       year: year,

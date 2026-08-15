@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +35,9 @@ class _PersonalExpenseDashboardScreenState
   ) {
     if (state is PersonalExpenseDashboardFailure) {
       showNormalSnackBar(context, state.error);
+    } else if (state is PersonalExpenseDashboardFetchSuccess &&
+        state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -87,16 +89,25 @@ class _PersonalExpenseDashboardScreenState
         );
       }
 
-      _gridViewScrollController.addListener(() {
-        if (_gridViewScrollController.position.pixels ==
-            _gridViewScrollController.position.maxScrollExtent) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            context.read<PersonalExpenseDashboardBloc>().add(
+      addPaginationListener<
+        PersonalExpenseDashboardBloc,
+        PersonalExpenseDashboardState
+      >(
+        scrollController: _gridViewScrollController,
+        context: context,
+        hasMore:
+            (state) =>
+                state is PersonalExpenseDashboardFetchSuccess &&
+                state.hasMoreData,
+        isLoadingMore:
+            (state) =>
+                state is PersonalExpenseDashboardFetchSuccess &&
+                state.isLoadingMore,
+        onFetch:
+            () => context.read<PersonalExpenseDashboardBloc>().add(
               PersonalExpenseDashboardFetch(isFreshFetch: false),
-            );
-          });
-        }
-      });
+            ),
+      );
     }
   }
 
@@ -104,6 +115,17 @@ class _PersonalExpenseDashboardScreenState
   void dispose() {
     _gridViewScrollController.dispose();
     super.dispose();
+  }
+
+  Widget _builderFooter(
+    BuildContext context,
+    PersonalExpenseDashboardState state,
+  ) {
+    if (state is PersonalExpenseDashboardFetchSuccess) {
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
+    }
+
+    return const SizedBox.shrink();
   }
 
   Future<void> onRefresh() async {
@@ -144,17 +166,11 @@ class _PersonalExpenseDashboardScreenState
           body: RefreshIndicator(
             onRefresh: onRefresh,
             notificationPredicate: (ScrollNotification notification) {
-              final state = context.read<PersonalExpenseDashboardBloc>().state;
-              if (state is PersonalExpenseDashboardFetchSuccess &&
-                  state.data.isNotEmpty) {
-                return notification.depth == 0;
-              } else {
-                // When there's no data, allow refresh from the main scroll view
-                return notification.depth == 1;
-              }
+              return notification.depth == 0;
             },
             child: CustomScrollView(
               controller: _gridViewScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 ValueListenableBuilder(
                   valueListenable: widget.isSearchEnabled,
@@ -228,7 +244,17 @@ class _PersonalExpenseDashboardScreenState
                             ),
                           );
                         }
-                        return monthWiseCardsWidget(filterData);
+                        return SliverMainAxisGroup(
+                          slivers: [
+                            monthWiseCardsWidget(filterData),
+                            genericFooterForDashboard(
+                              widget.isSearchEnabled,
+                              _builderFooter,
+                              context,
+                              state,
+                            ),
+                          ],
+                        );
                       },
                     );
                   },

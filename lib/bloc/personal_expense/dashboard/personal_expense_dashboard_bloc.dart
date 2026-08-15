@@ -121,7 +121,6 @@ class PersonalExpenseDashboardBloc
 
     PersonalExpenseInfoModel currentMonthPersonalExpense =
         PersonalExpenseInfoModel(
-          id: "",
           amount: 0,
           monthName: CalenderConstant.monthName[now.month - 1],
           transactionCount: 0,

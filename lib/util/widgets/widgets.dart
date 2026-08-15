@@ -343,12 +343,18 @@ Widget genericFooterForDashboard<S>(
       }
       return child!;
     },
-    child: SliverPadding(
-      padding: EdgeInsets.only(
-        top: 2 * UiConstant.spaceBetweenSection,
-        bottom: UiConstant.spaceAtBottom,
+    child: SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 2 * UiConstant.spaceBetweenSection,
+          bottom: UiConstant.spaceAtBottom,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [builderFooterLogic(context, state)],
+        ),
       ),
-      sliver: SliverToBoxAdapter(child: builderFooterLogic(context, state)),
     ),
   );
 }
