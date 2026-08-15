@@ -501,7 +501,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                   isLoaded
                       ? (lendenTransactionData.isEmpty
                           ? [
-                            SliverToBoxAdapter(
+                            SliverFillRemaining(
                               child: noRecordFoundWidget(
                                 "No Transaction Found",
                                 context,
@@ -588,7 +588,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                       );
 
                                       if (searchedData.isEmpty) {
-                                        return SliverToBoxAdapter(
+                                        return SliverFillRemaining(
                                           child: noRecordFoundWidget(
                                             ApiConstant.noMatchingRecords,
                                             context,

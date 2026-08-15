@@ -215,7 +215,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                 slivers:
                     transactionArr.isEmpty && isLoaded
                         ? [
-                          SliverToBoxAdapter(
+                          SliverFillRemaining(
                             child: noRecordFoundWidget(
                               "No Transaction Found",
                               context,

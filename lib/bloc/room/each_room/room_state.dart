@@ -17,14 +17,14 @@ final class RoomFetchSuccess extends RoomState {
   final List<RoomTransactionModel> dataList;
   final bool hasMoreData;
   final bool isLoadingMore;
-  final String? toastMessage;
+  final String? error;
 
   RoomFetchSuccess({
     required this.id,
     required this.data,
     required this.hasMoreData,
     this.isLoadingMore = false,
-    this.toastMessage,
+    this.error,
   }) : dataList = data.values.toList();
 
   RoomFetchSuccess copyWith({
@@ -32,14 +32,14 @@ final class RoomFetchSuccess extends RoomState {
     LinkedHashMap<String, RoomTransactionModel>? data,
     bool? hasMoreData,
     bool? isLoadingMore,
-    String? toastMessage,
+    String? error,
   }) {
     return RoomFetchSuccess(
       id: id ?? this.id,
       data: data ?? this.data,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }

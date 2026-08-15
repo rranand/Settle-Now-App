@@ -97,7 +97,7 @@ class _PersonalExpenseCategoriesSectionScreenState
 
         if (state is PersonalMonthlyExpenseFetchSuccess) {
           if (state.data.isEmpty) {
-            return SliverToBoxAdapter(
+            return SliverFillRemaining(
               child: noRecordFoundWidget("No Transaction Found", context),
             );
           }
@@ -118,7 +118,7 @@ class _PersonalExpenseCategoriesSectionScreenState
                 categoryWiseExpense[index].second += 1;
               }
               if (filterState.data.isEmpty) {
-                return SliverToBoxAdapter(
+                return SliverFillRemaining(
                   child: noRecordFoundWidget(
                     ApiConstant.noMatchingRecords,
                     context,

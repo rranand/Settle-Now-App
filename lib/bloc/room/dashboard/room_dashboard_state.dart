@@ -10,25 +10,25 @@ final class RoomDashboardLoading extends RoomDashboardState {}
 final class RoomDashboardFetchSuccess extends RoomDashboardState {
   final RoomDashboardModel activeRoomDashboardModel;
   final RoomDashboardModel inactiveRoomDashboardModel;
-  final String? toastMessage;
+  final String? error;
 
   RoomDashboardFetchSuccess({
     required this.activeRoomDashboardModel,
     required this.inactiveRoomDashboardModel,
-    this.toastMessage,
+    this.error,
   });
 
   RoomDashboardFetchSuccess copyWith({
     RoomDashboardModel? activeRoomDashboardModel,
     RoomDashboardModel? inactiveRoomDashboardModel,
-    String? toastMessage,
+    String? error,
   }) {
     return RoomDashboardFetchSuccess(
       activeRoomDashboardModel:
           activeRoomDashboardModel ?? this.activeRoomDashboardModel,
       inactiveRoomDashboardModel:
           inactiveRoomDashboardModel ?? this.inactiveRoomDashboardModel,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }

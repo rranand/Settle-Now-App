@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -41,6 +40,8 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   void _blocListenerHandler(BuildContext context, RoomDashboardState state) {
     if (state is RoomDashboardFailure) {
       showNormalSnackBar(context, state.error);
+    } else if (state is RoomDashboardFetchSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -97,19 +98,29 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
         }
       });
 
-      _gridViewScrollController.addListener(() {
-        if (_gridViewScrollController.position.pixels ==
-            _gridViewScrollController.position.maxScrollExtent) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            context.read<RoomDashboardBloc>().add(
+      addPaginationListener<RoomDashboardBloc, RoomDashboardState>(
+        scrollController: _gridViewScrollController,
+        context: context,
+        hasMore:
+            (state) =>
+                state is RoomDashboardFetchSuccess &&
+                (_navBarIndex.value == 0
+                    ? state.activeRoomDashboardModel.hasMoreData
+                    : state.inactiveRoomDashboardModel.hasMoreData),
+        isLoadingMore:
+            (state) =>
+                state is RoomDashboardFetchSuccess &&
+                (_navBarIndex.value == 0
+                    ? state.activeRoomDashboardModel.isLoadingMore
+                    : state.inactiveRoomDashboardModel.isLoadingMore),
+        onFetch:
+            () => context.read<RoomDashboardBloc>().add(
               RoomDashboardFetch(
                 isActiveRoom: _navBarIndex.value == 0,
                 isFreshFetch: false,
               ),
-            );
-          });
-        }
-      });
+            ),
+      );
     }
 
     _createRoomListener = context.read<CreateJoinRoomCubit>().stream.listen((
@@ -266,6 +277,26 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     }).toList();
   }
 
+  Widget _builderFooter(BuildContext context, RoomDashboardState state) {
+    if (state is RoomDashboardFetchSuccess) {
+      if (_navBarIndex.value == 0) {
+        return buildFooter(
+          context,
+          state.activeRoomDashboardModel.isLoadingMore,
+          state.activeRoomDashboardModel.hasMoreData,
+        );
+      } else {
+        return buildFooter(
+          context,
+          state.inactiveRoomDashboardModel.isLoadingMore,
+          state.inactiveRoomDashboardModel.hasMoreData,
+        );
+      }
+    }
+
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
@@ -278,20 +309,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       body: RefreshIndicator(
         onRefresh: onRefresh,
         notificationPredicate: (ScrollNotification notification) {
-          final state = context.read<RoomDashboardBloc>().state;
-          if (state is RoomDashboardFetchSuccess) {
-            if (_navBarIndex.value == 0 &&
-                state.activeRoomDashboardModel.data.isNotEmpty) {
-              return notification.depth == 0;
-            } else if (_navBarIndex.value == 1 &&
-                state.inactiveRoomDashboardModel.data.isNotEmpty) {
-              return notification.depth == 0;
-            } else {
-              return notification.depth == 1;
-            }
-          } else {
-            return notification.depth == 1;
-          }
+          return notification.depth == 0;
         },
         child: Consumer<PreferenceProvider>(
           builder: (context, prefData, _) {
@@ -360,7 +378,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                             );
                           }
                           if (roomInfoData.isEmpty) {
-                            return SliverToBoxAdapter(
+                            return SliverFillRemaining(
                               child: noRecordFoundWidget(
                                 ApiConstant.noRoomFound,
                                 context,
@@ -392,7 +410,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                                   }
 
                                   if (filterData.isEmpty) {
-                                    return SliverToBoxAdapter(
+                                    return SliverFillRemaining(
                                       child: noRecordFoundWidget(
                                         ApiConstant.noMatchingRecords,
                                         context,
@@ -400,7 +418,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                                     );
                                   }
                                   return SliverGrid.builder(
-                                    itemCount: filterData.length,
+                                    itemCount: filterData.length + 1,
                                     gridDelegate:
                                         SliverGridDelegateWithMaxCrossAxisExtent(
                                           maxCrossAxisExtent: cardSizeInfo[0],
@@ -414,6 +432,9 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                                       BuildContext context,
                                       int index,
                                     ) {
+                                      if (index == filterData.length) {
+                                        return _builderFooter(context, state);
+                                      }
                                       return RoomCard(data: filterData[index]);
                                     },
                                   );

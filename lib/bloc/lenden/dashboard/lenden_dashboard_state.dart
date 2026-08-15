@@ -12,26 +12,26 @@ final class LendenDashboardFetchSuccess extends LendenDashboardState {
   final List<LendenDashboardModel> dataList;
   final bool hasMoreData;
   final bool isLoadingMore;
-  final String? toastMessage;
+  final String? error;
 
   LendenDashboardFetchSuccess({
     required this.data,
     required this.hasMoreData,
     this.isLoadingMore = false,
-    this.toastMessage,
+    this.error,
   }) : dataList = data.values.toList();
 
   LendenDashboardFetchSuccess copyWith({
     LinkedHashMap<String, LendenDashboardModel>? data,
     bool? hasMoreData,
     bool? isLoadingMore,
-    String? toastMessage,
+    String? error,
   }) {
     return LendenDashboardFetchSuccess(
       data: data ?? this.data,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }

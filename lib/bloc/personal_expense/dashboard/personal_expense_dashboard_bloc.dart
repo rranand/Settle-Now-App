@@ -45,7 +45,7 @@ class PersonalExpenseDashboardBloc
         return;
       }
 
-      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+      emit(oldState.copyWith(isLoadingMore: true, error: null));
     } else {
       emit(PersonalExpenseDashboardLoading());
     }
@@ -74,11 +74,11 @@ class PersonalExpenseDashboardBloc
         ),
       );
     } catch (e) {
-      if (oldState == null) {
+      if (oldState == null || event.isFreshFetch) {
         return emit(PersonalExpenseDashboardFailure(error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }

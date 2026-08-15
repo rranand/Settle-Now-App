@@ -153,3 +153,24 @@ void logDebug(String text) {
     developer.log(text);
   }
 }
+
+void addPaginationListener<B extends StateStreamable<S>, S>({
+  required ScrollController scrollController,
+  required BuildContext context,
+  required bool Function(S state) hasMore,
+  required bool Function(S state) isLoadingMore,
+  required void Function() onFetch,
+  double threshold = 0.85,
+}) {
+  scrollController.addListener(() {
+    final position = scrollController.position;
+    final thresholdPixels = position.maxScrollExtent * threshold;
+
+    if (position.pixels >= thresholdPixels) {
+      final state = context.read<B>().state;
+      if (!isLoadingMore(state) && hasMore(state)) {
+        onFetch();
+      }
+    }
+  });
+}

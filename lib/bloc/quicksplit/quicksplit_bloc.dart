@@ -50,7 +50,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
         return;
       }
 
-      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+      emit(oldState.copyWith(isLoadingMore: true, error: null));
     } else {
       emit(QuicksplitLoading());
     }
@@ -78,11 +78,11 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
         QuicksplitFetchSuccess(data: allRecords, hasMoreData: data.second),
       );
     } catch (e) {
-      if (oldState == null) {
+      if (oldState == null || event.isFreshFetch) {
         return emit(QuicksplitFailure(error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }

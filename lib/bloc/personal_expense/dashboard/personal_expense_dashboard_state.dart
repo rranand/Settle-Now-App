@@ -15,26 +15,26 @@ final class PersonalExpenseDashboardFetchSuccess
   final List<PersonalExpenseInfoModel> dataList;
   final bool hasMoreData;
   final bool isLoadingMore;
-  final String? toastMessage;
+  final String? error;
 
   PersonalExpenseDashboardFetchSuccess({
     required this.data,
     required this.hasMoreData,
     this.isLoadingMore = false,
-    this.toastMessage,
+    this.error,
   }) : dataList = data.values.toList();
 
   PersonalExpenseDashboardFetchSuccess copyWith({
     LinkedHashMap<String, PersonalExpenseInfoModel>? data,
     bool? hasMoreData,
     bool? isLoadingMore,
-    String? toastMessage,
+    String? error,
   }) {
     return PersonalExpenseDashboardFetchSuccess(
       data: data ?? this.data,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }

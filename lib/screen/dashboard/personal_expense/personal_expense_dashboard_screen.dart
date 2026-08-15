@@ -197,7 +197,7 @@ class _PersonalExpenseDashboardScreenState
                     }
 
                     if (transactionData.isEmpty) {
-                      return SliverToBoxAdapter(
+                      return SliverFillRemaining(
                         child: noRecordFoundWidget(
                           ApiConstant.noPersonalExpenseFound,
                           context,
@@ -221,7 +221,7 @@ class _PersonalExpenseDashboardScreenState
                         }
 
                         if (filterData.isEmpty) {
-                          return SliverToBoxAdapter(
+                          return SliverFillRemaining(
                             child: noRecordFoundWidget(
                               ApiConstant.noMatchingRecords,
                               context,

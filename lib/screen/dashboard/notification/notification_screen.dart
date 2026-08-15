@@ -113,7 +113,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   );
                 }
                 if (notificationData.isEmpty) {
-                  return SliverToBoxAdapter(
+                  return SliverFillRemaining(
                     child: noRecordFoundWidget(
                       "No Notification Found",
                       context,
@@ -155,9 +155,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       }
 
                       if (filterData.isEmpty) {
-                        return noRecordFoundWidget(
-                          ApiConstant.noMatchingRecords,
-                          context,
+                        return SliverFillRemaining(
+                          child: noRecordFoundWidget(
+                            ApiConstant.noMatchingRecords,
+                            context,
+                          ),
                         );
                       }
 

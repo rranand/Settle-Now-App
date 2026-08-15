@@ -12,26 +12,26 @@ final class QuicksplitFetchSuccess extends QuicksplitState {
   final List<QuicksplitTransactionModel> dataList;
   final bool hasMoreData;
   final bool isLoadingMore;
-  final String? toastMessage;
+  final String? error;
 
   QuicksplitFetchSuccess({
     required this.data,
     required this.hasMoreData,
     this.isLoadingMore = false,
-    this.toastMessage,
+    this.error,
   }) : dataList = data.values.toList();
 
   QuicksplitFetchSuccess copyWith({
     LinkedHashMap<String, QuicksplitTransactionModel>? data,
     bool? hasMoreData,
     bool? isLoadingMore,
-    String? toastMessage,
+    String? error,
   }) {
     return QuicksplitFetchSuccess(
       data: data ?? this.data,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }

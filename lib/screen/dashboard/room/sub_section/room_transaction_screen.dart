@@ -103,7 +103,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
           }
 
           if (data.isEmpty) {
-            return SliverToBoxAdapter(
+            return SliverFillRemaining(
               child: noRecordFoundWidget("No Transaction Found", context),
             );
           }
@@ -124,7 +124,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                   );
 
                   if (searchedData.isEmpty) {
-                    return SliverToBoxAdapter(
+                    return SliverFillRemaining(
                       child: noRecordFoundWidget(
                         ApiConstant.noMatchingRecords,
                         context,

@@ -183,21 +183,8 @@ Future<dynamic> loadingWidget(BuildContext context) {
 }
 
 Widget noRecordFoundWidget(String txt, BuildContext context) {
-  return ListView(
-    shrinkWrap: true,
-    physics: const AlwaysScrollableScrollPhysics(),
-    children: [
-      SizedBox(
-        height:
-            MediaQuery.of(context).size.height -
-            kToolbarHeight -
-            kBottomNavigationBarHeight -
-            2 * UiConstant.spaceAtBottom,
-        child: Center(
-          child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
-        ),
-      ),
-    ],
+  return Center(
+    child: Text(txt, style: const TextStyle(fontSize: 20, color: Colors.grey)),
   );
 }
 
@@ -340,4 +327,88 @@ List<BoxShadow> getContainerBoxShadow(BuildContext context) {
       ),
     ];
   }
+}
+
+Widget buildFooter(BuildContext context, bool isLoading, bool hasMore) {
+  if (isLoading) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+  if (!hasMore) {
+    return youAreCaughtUpWidget(context);
+  }
+  return const SizedBox.shrink();
+}
+
+Widget youAreCaughtUpWidget(BuildContext context) {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.green.withValues(alpha: 0.25),
+                  thickness: 1,
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Container(
+                  margin: const EdgeInsets.all(7),
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              Expanded(
+                child: Divider(
+                  color: Colors.green.withValues(alpha: 0.25),
+                  thickness: 1,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          const Text(
+            'You’re all caught up!',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'That’s everything for now.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ],
+      ),
+    ),
+  );
 }

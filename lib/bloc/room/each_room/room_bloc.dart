@@ -46,7 +46,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
           return;
         }
 
-        emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+        emit(oldState.copyWith(isLoadingMore: true, error: null));
       } else {
         oldState = null;
       }
@@ -84,7 +84,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
         return emit(RoomFailure(error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }

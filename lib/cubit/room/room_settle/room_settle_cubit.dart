@@ -27,7 +27,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
           return;
         }
 
-        emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+        emit(oldState.copyWith(isLoadingMore: true, error: null));
       } else {
         oldState = null;
       }
@@ -60,7 +60,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
         return emit(RoomSettleFailure(error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }

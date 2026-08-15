@@ -52,7 +52,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         return;
       }
 
-      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+      emit(oldState.copyWith(isLoadingMore: true, error: null));
     } else {
       emit(LendenRoomLoading());
     }
@@ -76,11 +76,11 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         ),
       );
     } catch (e) {
-      if (oldState == null) {
+      if (oldState == null || event.isFreshFetch) {
         return emit(LendenRoomFailure(error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }
@@ -97,7 +97,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       return;
     }
 
-    emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+    emit(oldState.copyWith(isLoadingMore: true, error: null));
 
     try {
       Pair<List<LendenTransactionModel>, bool> data = await repo
@@ -122,15 +122,13 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         oldState.copyWith(
           data: allRecords,
           isLoadingMore: false,
-          toastMessage: null,
+          error: null,
           hasMoreData: data.second,
         ),
       );
     } catch (e) {
       emit(LendenRoomFailure(error: e.toString()));
-      return emit(
-        oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
-      );
+      return emit(oldState.copyWith(isLoadingMore: false, error: e.toString()));
     }
   }
 
@@ -316,7 +314,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       );
     } catch (e) {
       emit(LendenRoomFailure(error: e.toString()));
-      return emit(oldState.copyWith(isLoadingMore: false, toastMessage: null));
+      return emit(oldState.copyWith(isLoadingMore: false, error: null));
     }
   }
 
@@ -368,7 +366,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       emit(LendenRoomFailure(error: e.toString()));
 
-      return emit(oldState.copyWith(isLoadingMore: false, toastMessage: null));
+      return emit(oldState.copyWith(isLoadingMore: false, error: null));
     }
   }
 
@@ -409,7 +407,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       emit(LendenRoomFailure(error: e.toString()));
 
-      return emit(oldData.copyWith(isLoadingMore: false, toastMessage: null));
+      return emit(oldData.copyWith(isLoadingMore: false, error: null));
     }
   }
 }

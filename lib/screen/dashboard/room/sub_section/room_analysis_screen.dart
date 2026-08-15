@@ -82,7 +82,7 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
           List<RoomTransactionModel> data = state.dataList;
 
           if (data.isEmpty) {
-            return SliverToBoxAdapter(
+            return SliverFillRemaining(
               child: noRecordFoundWidget("No Transaction Found", context),
             );
           } else {

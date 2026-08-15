@@ -163,7 +163,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
           data = state.data;
 
           if (data.isEmpty) {
-            return SliverToBoxAdapter(
+            return SliverFillRemaining(
               child: noRecordFoundWidget(
                 "Something went wrong, Refresh!",
                 context,

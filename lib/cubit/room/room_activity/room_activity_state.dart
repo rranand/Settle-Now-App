@@ -16,7 +16,7 @@ final class RoomActivitySuccess extends RoomActivityState {
   final LinkedHashMap<String, List<ActivityModel>> transactionWiseActivity;
   final bool hasMoreData;
   final bool isLoadingMore;
-  final String? toastMessage;
+  final String? error;
 
   RoomActivitySuccess({
     required this.id,
@@ -24,7 +24,7 @@ final class RoomActivitySuccess extends RoomActivityState {
     required this.transactionWiseActivity,
     required this.hasMoreData,
     this.isLoadingMore = false,
-    this.toastMessage,
+    this.error,
   });
 
   RoomActivitySuccess copyWith({
@@ -33,7 +33,7 @@ final class RoomActivitySuccess extends RoomActivityState {
     LinkedHashMap<String, List<ActivityModel>>? transactionWiseActivity,
     bool? hasMoreData,
     bool? isLoadingMore,
-    String? toastMessage,
+    String? error,
   }) {
     return RoomActivitySuccess(
       id: id ?? this.id,
@@ -42,7 +42,7 @@ final class RoomActivitySuccess extends RoomActivityState {
           transactionWiseActivity ?? this.transactionWiseActivity,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }

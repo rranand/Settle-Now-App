@@ -34,7 +34,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     );
   }
 
-  DateTime getCursor(
+  DateTime _getCursor(
     bool isFreshFetch,
     bool isActiveRoom,
     RoomDashboardFetchSuccess? oldState,
@@ -78,7 +78,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         emit(
           oldState.copyWith(
             activeRoomDashboardModel: oldRoomDashboardModel,
-            toastMessage: null,
+            error: null,
           ),
         );
       }
@@ -93,7 +93,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         emit(
           oldState.copyWith(
             inactiveRoomDashboardModel: oldRoomDashboardModel,
-            toastMessage: null,
+            error: null,
           ),
         );
       }
@@ -104,7 +104,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     try {
       Pair<List<RoomInfoModel>, bool> data = await repo.fetchData(
         event.isActiveRoom,
-        getCursor(event.isFreshFetch, event.isActiveRoom, oldState),
+        _getCursor(event.isFreshFetch, event.isActiveRoom, oldState),
       );
 
       final newData = LinkedHashMap<String, RoomInfoModel>.fromEntries(
@@ -172,7 +172,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         );
       }
     } catch (e) {
-      if (oldState == null) {
+      if (oldState == null || event.isFreshFetch) {
         return emit(RoomDashboardFailure(error: e.toString()));
       } else {
         return emit(
@@ -181,7 +181,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
                 .copyWith(isLoadingMore: false),
             inactiveRoomDashboardModel: oldState.inactiveRoomDashboardModel
                 .copyWith(isLoadingMore: false),
-            toastMessage: e.toString(),
+            error: e.toString(),
           ),
         );
       }

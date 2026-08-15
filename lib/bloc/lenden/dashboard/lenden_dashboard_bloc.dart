@@ -42,7 +42,7 @@ class LendenDashboardBloc
         return;
       }
 
-      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+      emit(oldState.copyWith(isLoadingMore: true, error: null));
     } else {
       emit(LendenDashboardLoading());
     }
@@ -66,11 +66,11 @@ class LendenDashboardBloc
         LendenDashboardFetchSuccess(data: allRecords, hasMoreData: data.second),
       );
     } catch (e) {
-      if (oldState == null) {
+      if (oldState == null || event.isFreshFetch) {
         return emit(LendenDashboardFailure(error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }

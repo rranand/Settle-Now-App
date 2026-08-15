@@ -27,7 +27,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
           return;
         }
 
-        emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+        emit(oldState.copyWith(isLoadingMore: true, error: null));
       } else {
         oldState = null;
       }
@@ -90,7 +90,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
         return emit(RoomActivityFailure(id: id, error: e.toString()));
       } else {
         return emit(
-          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
         );
       }
     }

@@ -17,14 +17,14 @@ final class RoomSettleSuccess extends RoomSettleState {
   final List<RoomSettleModel> dataList;
   final bool hasMoreData;
   final bool isLoadingMore;
-  final String? toastMessage;
+  final String? error;
 
   RoomSettleSuccess({
     required this.id,
     required this.data,
     required this.hasMoreData,
     this.isLoadingMore = false,
-    this.toastMessage,
+    this.error,
   }) : dataList = data.values.toList();
 
   RoomSettleSuccess copyWith({
@@ -32,14 +32,14 @@ final class RoomSettleSuccess extends RoomSettleState {
     LinkedHashMap<String, RoomSettleModel>? data,
     bool? hasMoreData,
     bool? isLoadingMore,
-    String? toastMessage,
+    String? error,
   }) {
     return RoomSettleSuccess(
       id: id ?? this.id,
       data: data ?? this.data,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      toastMessage: toastMessage,
+      error: error,
     );
   }
 }
