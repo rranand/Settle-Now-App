@@ -333,12 +333,13 @@ Widget genericFooterForDashboard<S>(
   ValueNotifier<bool> isSearchEnabled,
   Widget Function(BuildContext context, S state) builderFooterLogic,
   BuildContext context,
-  S state,
-) {
+  S state, {
+  bool isFilterApplied = false,
+}) {
   return ValueListenableBuilder(
     valueListenable: isSearchEnabled,
     builder: (BuildContext context, bool value, Widget? child) {
-      if (value) {
+      if (value || isFilterApplied) {
         return SliverToBoxAdapter(child: SizedBox.shrink());
       }
       return child!;

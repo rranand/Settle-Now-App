@@ -7,7 +7,7 @@ final class LendenRoomFetch extends LendenRoomEvent {
   final String id;
   final bool isFreshFetch;
 
-  LendenRoomFetch({required this.id, this.isFreshFetch = true});
+  LendenRoomFetch({required this.id, required this.isFreshFetch});
 }
 
 final class LendenAddNewTransaction extends LendenRoomEvent {

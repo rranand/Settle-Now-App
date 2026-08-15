@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -30,6 +29,8 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   void _blocListenerHandler(BuildContext context, LendenDashboardState state) {
     if (state is LendenDashboardFailure) {
       showNormalSnackBar(context, state.error);
+    } else if (state is LendenDashboardFetchSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -57,16 +58,20 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
         );
       }
 
-      _gridViewScrollController.addListener(() {
-        if (_gridViewScrollController.position.pixels ==
-            _gridViewScrollController.position.maxScrollExtent) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            context.read<LendenDashboardBloc>().add(
+      addPaginationListener<LendenDashboardBloc, LendenDashboardState>(
+        scrollController: _gridViewScrollController,
+        context: context,
+        hasMore:
+            (state) =>
+                state is LendenDashboardFetchSuccess && state.hasMoreData,
+        isLoadingMore:
+            (state) =>
+                state is LendenDashboardFetchSuccess && state.isLoadingMore,
+        onFetch:
+            () => context.read<LendenDashboardBloc>().add(
               LendenDashboardFetch(isFreshFetch: false),
-            );
-          });
-        }
-      });
+            ),
+      );
     }
     widget.isSearchEnabled.addListener(() {
       _searchController.text = "";
@@ -198,6 +203,14 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     }).toList();
   }
 
+  Widget _builderFooter(BuildContext context, LendenDashboardState state) {
+    if (state is LendenDashboardFetchSuccess) {
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
+    }
+
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
@@ -213,16 +226,11 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
           body: RefreshIndicator(
             onRefresh: onRefresh,
             notificationPredicate: (ScrollNotification notification) {
-              final state = context.read<LendenDashboardBloc>().state;
-              if (state is LendenDashboardFetchSuccess &&
-                  state.data.isNotEmpty) {
-                return notification.depth == 0;
-              } else {
-                return notification.depth == 1;
-              }
+              return notification.depth == 0;
             },
             child: CustomScrollView(
               controller: _gridViewScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 ValueListenableBuilder(
                   valueListenable: widget.isSearchEnabled,
@@ -319,24 +327,34 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                                     ),
                                   );
                                 }
-                                return SliverGrid.builder(
-                                  itemCount: filterData.length,
-                                  gridDelegate:
-                                      SliverGridDelegateWithMaxCrossAxisExtent(
-                                        maxCrossAxisExtent: cardSizeInfo[0],
-                                        mainAxisSpacing:
-                                            UiConstant.spaceBetweenCard,
-                                        crossAxisSpacing:
-                                            UiConstant.spaceBetweenCard,
-                                        childAspectRatio: cardSizeInfo[1],
-                                      ),
-                                  itemBuilder:
-                                      (context, index) => SizedBox(
-                                        width: cardSizeInfo[0],
-                                        child: LendenCard(
-                                          data: filterData[index],
-                                        ),
-                                      ),
+                                return SliverMainAxisGroup(
+                                  slivers: [
+                                    SliverGrid.builder(
+                                      itemCount: filterData.length,
+                                      gridDelegate:
+                                          SliverGridDelegateWithMaxCrossAxisExtent(
+                                            maxCrossAxisExtent: cardSizeInfo[0],
+                                            mainAxisSpacing:
+                                                UiConstant.spaceBetweenCard,
+                                            crossAxisSpacing:
+                                                UiConstant.spaceBetweenCard,
+                                            childAspectRatio: cardSizeInfo[1],
+                                          ),
+                                      itemBuilder:
+                                          (context, index) => SizedBox(
+                                            width: cardSizeInfo[0],
+                                            child: LendenCard(
+                                              data: filterData[index],
+                                            ),
+                                          ),
+                                    ),
+                                    genericFooterForDashboard(
+                                      widget.isSearchEnabled,
+                                      _builderFooter,
+                                      context,
+                                      state,
+                                    ),
+                                  ],
                                 );
                               },
                             ),

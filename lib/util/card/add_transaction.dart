@@ -578,15 +578,15 @@ class _AddTransactionState extends State<AddTransaction> {
           {
             data = LendenTransactionModel(
               id: oldTransID,
-              amount: totalAmount,
+              amount:
+                  _lendenTransactionType.value == LendenType.owe
+                      ? -1 * totalAmount
+                      : totalAmount,
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
               modifiedOn: DateTime.now(),
               createdBy: createdBy.id,
             );
-            if (_lendenTransactionType.value == LendenType.owe) {
-              data.amount = -1 * data.amount;
-            }
             break;
           }
         case TransactionType.personal:
@@ -684,7 +684,7 @@ class _AddTransactionState extends State<AddTransaction> {
             transactionType,
           );
         } else {
-          if (widget.transactionData.hashCode != data.hashCode) {
+          if (widget.transactionData != data) {
             context.read<NewTransactionCubit>().updateExpense(
               context,
               data,

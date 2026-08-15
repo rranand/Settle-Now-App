@@ -105,7 +105,6 @@ class QuicksplitTransactionModel
         other.description == description &&
         other.amount == amount &&
         other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn &&
         other.createdBy == createdBy &&
         other.category == category &&
         other.splitType == splitType &&

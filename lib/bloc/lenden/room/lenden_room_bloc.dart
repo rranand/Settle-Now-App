@@ -127,7 +127,6 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         ),
       );
     } catch (e) {
-      emit(LendenRoomFailure(error: e.toString()));
       return emit(oldState.copyWith(isLoadingMore: false, error: e.toString()));
     }
   }

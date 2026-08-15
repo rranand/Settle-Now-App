@@ -112,7 +112,6 @@ class PersonalExpenseTransactionModel extends BaseTransactionModel {
         other.description == description &&
         other.category == category &&
         other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn &&
         other.roomData == roomData;
   }
 

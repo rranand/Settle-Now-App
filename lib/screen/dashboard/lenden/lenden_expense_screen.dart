@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -45,6 +44,8 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       if (context.canPop()) {
         context.pop();
       }
+    } else if (state is LendenRoomFetchSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -293,17 +294,21 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       final state = context.read<LendenRoomBloc>().state;
 
       if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
-        context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
+        context.read<LendenRoomBloc>().add(
+          LendenRoomFetch(id: widget.id, isFreshFetch: true),
+        );
       }
 
-      _gridViewScrollController.addListener(() {
-        if (_gridViewScrollController.position.pixels ==
-            _gridViewScrollController.position.maxScrollExtent) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            context.read<LendenRoomBloc>().add(LendenFetchTransaction());
-          });
-        }
-      });
+      addPaginationListener<LendenRoomBloc, LendenRoomState>(
+        scrollController: _gridViewScrollController,
+        context: context,
+        hasMore:
+            (state) => state is LendenRoomFetchSuccess && state.hasMoreData,
+        isLoadingMore:
+            (state) => state is LendenRoomFetchSuccess && state.isLoadingMore,
+        onFetch:
+            () => context.read<LendenRoomBloc>().add(LendenFetchTransaction()),
+      );
     }
 
     _createRoomListener = context.read<CreateRoomCubit>().stream.listen((
@@ -340,6 +345,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   @override
   void dispose() {
     _createRoomListener.cancel();
+    _gridViewScrollController.dispose();
     super.dispose();
   }
 
@@ -351,7 +357,17 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       );
       return;
     }
-    context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
+    context.read<LendenRoomBloc>().add(
+      LendenRoomFetch(id: widget.id, isFreshFetch: true),
+    );
+  }
+
+  Widget _builderFooter(BuildContext context, LendenRoomState state) {
+    if (state is LendenRoomFetchSuccess) {
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
+    }
+
+    return const SizedBox.shrink();
   }
 
   PreferredSizeWidget _buildAppBar(
@@ -394,11 +410,15 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () => _showBottomSheet(context, users, roomName),
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: const Icon(Iconsax.profile_2user_copy),
-          ),
+          users.isEmpty
+              ? const SizedBox.shrink()
+              : InkWell(
+                onTap: () => _showBottomSheet(context, users, roomName),
+                borderRadius: BorderRadius.circular(
+                  UiConstant.cardBorderRadius,
+                ),
+                child: const Icon(Iconsax.profile_2user_copy),
+              ),
           Visibility(
             visible: isEditable,
             child: IconButton(
@@ -458,8 +478,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
         List<LendenUserModel> users = [];
         String roomName = "";
 
-        if (state is LendenRoomFetchSuccess) {
+        if (state is! LendenRoomLoading) {
           isLoaded = true;
+        }
+
+        if (state is LendenRoomFetchSuccess) {
           lendenRoomData = state.roomData;
           lendenTransactionData = state.dataList;
           loggedInUserData = state.roomData.users.firstWhere(
@@ -488,15 +511,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
           body: RefreshIndicator(
             onRefresh: onRefresh,
             notificationPredicate: (ScrollNotification notification) {
-              final state = context.read<LendenRoomBloc>().state;
-              if (state is LendenRoomFetchSuccess && state.data.isNotEmpty) {
-                return notification.depth == 0;
-              } else {
-                return notification.depth == 1;
-              }
+              return notification.depth == 0;
             },
             child: CustomScrollView(
               controller: _gridViewScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers:
                   isLoaded
                       ? (lendenTransactionData.isEmpty
@@ -595,9 +614,21 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                           ),
                                         );
                                       }
-                                      return transactionCardDisplay(
-                                        searchedData,
-                                        isEditable,
+                                      return SliverMainAxisGroup(
+                                        slivers: [
+                                          transactionCardDisplay(
+                                            searchedData,
+                                            isEditable,
+                                          ),
+                                          genericFooterForDashboard(
+                                            isSearchEnabled,
+                                            _builderFooter,
+                                            context,
+                                            state,
+                                            isFilterApplied:
+                                                filterState.isFilterApplied,
+                                          ),
+                                        ],
                                       );
                                     },
                                   );

@@ -8,9 +8,7 @@ class NotificationRepository {
 
   Future<List<NotificationModel>> fetchData() async {
     try {
-      List<NotificationModel> data = await _dataProvider.fetchData();
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
-      return data;
+      return await _dataProvider.fetchData();
     } catch (e) {
       rethrow;
     }

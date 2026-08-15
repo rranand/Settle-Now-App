@@ -71,14 +71,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
       body: RefreshIndicator(
         onRefresh: onRefresh,
         notificationPredicate: (ScrollNotification notification) {
-          final state = context.read<NotificationBloc>().state;
-          if (state is NotificationFetchSuccess && state.data.isNotEmpty) {
-            return notification.depth == 0;
-          } else {
-            return notification.depth == 1;
-          }
+          return notification.depth == 0;
         },
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             ValueListenableBuilder(
               valueListenable: widget.isSearchEnabled,
