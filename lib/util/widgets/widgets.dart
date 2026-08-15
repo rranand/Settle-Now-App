@@ -331,10 +331,7 @@ List<BoxShadow> getContainerBoxShadow(BuildContext context) {
 
 Widget buildFooter(BuildContext context, bool isLoading, bool hasMore) {
   if (isLoading) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      child: Center(child: CircularProgressIndicator()),
-    );
+    return Center(child: CircularProgressIndicator());
   }
   if (!hasMore) {
     return youAreCaughtUpWidget(context);
@@ -344,71 +341,68 @@ Widget buildFooter(BuildContext context, bool isLoading, bool hasMore) {
 
 Widget youAreCaughtUpWidget(BuildContext context) {
   return Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Divider(
-                  color: Colors.green.withValues(alpha: 0.25),
-                  thickness: 1,
-                ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Divider(
+                color: Colors.green.withValues(alpha: 0.25),
+                thickness: 1,
               ),
+            ),
 
-              const SizedBox(width: 14),
+            const SizedBox(width: 14),
 
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.10),
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(7),
+                decoration: const BoxDecoration(
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
-                child: Container(
-                  margin: const EdgeInsets.all(7),
-                  decoration: const BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: Colors.white,
-                    size: 26,
-                  ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 26,
                 ),
               ),
+            ),
 
-              const SizedBox(width: 14),
+            const SizedBox(width: 14),
 
-              Expanded(
-                child: Divider(
-                  color: Colors.green.withValues(alpha: 0.25),
-                  thickness: 1,
-                ),
+            Expanded(
+              child: Divider(
+                color: Colors.green.withValues(alpha: 0.25),
+                thickness: 1,
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
 
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-          const Text(
-            'You’re all caught up!',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-          ),
+        const Text(
+          'You’re all caught up!',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+        ),
 
-          const SizedBox(height: 8),
+        const SizedBox(height: 8),
 
-          Text(
-            'That’s everything for now.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
-      ),
+        Text(
+          'That’s everything for now.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+      ],
     ),
   );
 }

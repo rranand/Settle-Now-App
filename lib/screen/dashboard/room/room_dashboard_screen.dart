@@ -417,26 +417,59 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                                       ),
                                     );
                                   }
-                                  return SliverGrid.builder(
-                                    itemCount: filterData.length + 1,
-                                    gridDelegate:
-                                        SliverGridDelegateWithMaxCrossAxisExtent(
-                                          maxCrossAxisExtent: cardSizeInfo[0],
-                                          mainAxisSpacing:
-                                              UiConstant.spaceBetweenCard,
-                                          crossAxisSpacing:
-                                              UiConstant.spaceBetweenCard,
-                                          childAspectRatio: cardSizeInfo[1],
+                                  return SliverMainAxisGroup(
+                                    slivers: [
+                                      SliverGrid.builder(
+                                        itemCount: filterData.length,
+                                        gridDelegate:
+                                            SliverGridDelegateWithMaxCrossAxisExtent(
+                                              maxCrossAxisExtent:
+                                                  cardSizeInfo[0],
+                                              mainAxisSpacing:
+                                                  UiConstant.spaceBetweenCard,
+                                              crossAxisSpacing:
+                                                  UiConstant.spaceBetweenCard,
+                                              childAspectRatio: cardSizeInfo[1],
+                                            ),
+                                        itemBuilder: (
+                                          BuildContext context,
+                                          int index,
+                                        ) {
+                                          return RoomCard(
+                                            data: filterData[index],
+                                          );
+                                        },
+                                      ),
+                                      ValueListenableBuilder(
+                                        valueListenable: widget.isSearchEnabled,
+                                        builder: (
+                                          BuildContext context,
+                                          bool value,
+                                          Widget? child,
+                                        ) {
+                                          if (value) {
+                                            return SliverToBoxAdapter(
+                                              child: SizedBox.shrink(),
+                                            );
+                                          }
+                                          return child!;
+                                        },
+                                        child: SliverPadding(
+                                          padding: EdgeInsets.only(
+                                            top:
+                                                2 *
+                                                UiConstant.spaceBetweenSection,
+                                            bottom: UiConstant.spaceAtBottom,
+                                          ),
+                                          sliver: SliverToBoxAdapter(
+                                            child: _builderFooter(
+                                              context,
+                                              state,
+                                            ),
+                                          ),
                                         ),
-                                    itemBuilder: (
-                                      BuildContext context,
-                                      int index,
-                                    ) {
-                                      if (index == filterData.length) {
-                                        return _builderFooter(context, state);
-                                      }
-                                      return RoomCard(data: filterData[index]);
-                                    },
+                                      ),
+                                    ],
                                   );
                                 },
                               ),
