@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
@@ -9,23 +12,26 @@ part 'notification_state.dart';
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final NotificationRepository repo;
   NotificationBloc(this.repo) : super(NotificationInitial()) {
-    on<NotificationOnAdd>(_notificationOnAdd);
-    on<NotificationOnDelete>(_notificationOnDelete);
-    on<NotificationFetch>(_notificationFetch);
-    on<NotificationReset>(_notificationReset);
+    on<NotificationOnAdd>(_notificationOnAdd, transformer: sequential());
+    on<NotificationOnDelete>(_notificationOnDelete, transformer: sequential());
+    on<NotificationFetch>(_notificationFetch, transformer: droppable());
+    on<NotificationReset>(_notificationReset, transformer: droppable());
   }
 
   void _notificationFetch(
     NotificationFetch event,
     Emitter<NotificationState> emit,
   ) async {
-    if (state is NotificationLoading) return;
     emit(NotificationLoading());
+
     try {
       List<NotificationModel> data = await repo.fetchData();
-      return emit(NotificationFetchSuccess(data));
+      final newData = LinkedHashMap<String, NotificationModel>.fromEntries(
+        data.map((t) => MapEntry(t.id, t)),
+      );
+      return emit(NotificationFetchSuccess(data: newData));
     } catch (e) {
-      return emit(NotificationFailure(e.toString()));
+      return emit(NotificationFailure(error: e.toString()));
     }
   }
 
@@ -33,39 +39,32 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationOnAdd event,
     Emitter<NotificationState> emit,
   ) {
-    List<NotificationModel> data = [];
-    Set<int> notificationHashCode = {};
+    LinkedHashMap<String, NotificationModel> data =
+        LinkedHashMap<String, NotificationModel>.fromEntries(
+          event.data.map((t) => MapEntry(t.id, t)),
+        );
 
     if (state is NotificationFetchSuccess) {
       final oldState = state as NotificationFetchSuccess;
-      for (int i = 0; i < oldState.data.length; i++) {
-        notificationHashCode.add(oldState.data[i].hashCode);
-        data.add(oldState.data[i]);
-      }
+      data.addAll(oldState.data);
     }
 
-    for (int i = 0; i < event.data.length; i++) {
-      if (!notificationHashCode.contains(event.data[i].hashCode)) {
-        data.add(event.data[i]);
-      }
-    }
-
-    data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
-    return emit(NotificationFetchSuccess(data));
+    return emit(NotificationFetchSuccess(data: data));
   }
 
   void _notificationOnDelete(
     NotificationOnDelete event,
     Emitter<NotificationState> emit,
   ) {
-    List<NotificationModel> data = [];
+    LinkedHashMap<String, NotificationModel> data = LinkedHashMap();
+
     if (state is NotificationFetchSuccess) {
       final oldState = state as NotificationFetchSuccess;
       data.addAll(oldState.data);
-
-      data.removeWhere((ele) => ele.id == event.id);
+      data.remove(event.id);
     }
-    return emit(NotificationFetchSuccess(data));
+
+    return emit(NotificationFetchSuccess(data: data));
   }
 
   void _notificationReset(

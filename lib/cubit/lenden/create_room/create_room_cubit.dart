@@ -38,10 +38,13 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
         users: [LendenUserModel.fromUserModel(authLoginState.userData)],
       );
 
-      newData = await repo.createRoom(newData);
+      String newRoomId = await repo.createRoom(newData);
 
       lendenDashboardCtx.add(
-        LendenDashboardOnAddNewRoom(data: newData, isLoading: false),
+        LendenDashboardOnAddNewRoom(
+          data: newData.copyWith(id: newRoomId),
+          isLoading: false,
+        ),
       );
       return emit(CreateRoomSuccess());
     } catch (e) {

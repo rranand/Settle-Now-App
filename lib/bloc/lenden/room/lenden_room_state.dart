@@ -10,17 +10,38 @@ final class LendenRoomLoading extends LendenRoomState {}
 final class LendenRoomFetchSuccess extends LendenRoomState {
   final String id;
   final LendenDashboardModel roomData;
-  final List<LendenTransactionModel> data;
+  final LinkedHashMap<String, LendenTransactionModel> data;
+  final List<LendenTransactionModel> dataList;
   final bool hasMoreData;
-  final FetchStatus fetchStatus;
+  final bool isLoadingMore;
+  final String? toastMessage;
 
   LendenRoomFetchSuccess({
     required this.id,
     required this.roomData,
     required this.data,
     required this.hasMoreData,
-    required this.fetchStatus,
-  });
+    this.isLoadingMore = false,
+    this.toastMessage,
+  }) : dataList = data.values.toList();
+
+  LendenRoomFetchSuccess copyWith({
+    String? id,
+    LendenDashboardModel? roomData,
+    LinkedHashMap<String, LendenTransactionModel>? data,
+    bool? hasMoreData,
+    bool? isLoadingMore,
+    String? toastMessage,
+  }) {
+    return LendenRoomFetchSuccess(
+      id: id ?? this.id,
+      roomData: roomData ?? this.roomData,
+      data: data ?? this.data,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      toastMessage: toastMessage,
+    );
+  }
 }
 
 final class LendenRoomFailure extends LendenRoomState {

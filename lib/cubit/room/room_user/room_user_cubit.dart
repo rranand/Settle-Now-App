@@ -16,9 +16,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     if (state is RoomUserLoading) return;
     emit(RoomUserLoading());
     try {
-      return emit(RoomUserSuccess(id, userArr));
+      return emit(RoomUserSuccess(id: id, data: userArr));
     } catch (e) {
-      return emit(RoomUserFailure(e.toString()));
+      return emit(RoomUserFailure(error: e.toString()));
     }
   }
 
@@ -35,7 +35,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
           }
         }
         _roomInfoCubit.updateUserData(id, userData, forceUpdate: true);
-        return emit(RoomUserSuccess(id, userData));
+        return emit(RoomUserSuccess(id: id, data: userData));
       }
     }
 
@@ -83,7 +83,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       }
     }
     _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
+    return emit(RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()));
   }
 
   void onUpdateTransaction(
@@ -166,7 +166,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       }
     }
     _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
+    return emit(RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()));
   }
 
   void onDeleteTransaction(RoomTransactionModel data) {
@@ -210,7 +210,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       }
     }
     _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
+    return emit(RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()));
   }
 
   void onAddNewSettleExpense(RoomSettleModel data) {
@@ -228,7 +228,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       }
     }
     _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
+    return emit(RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()));
   }
 
   void updateSettleExpense(RoomSettleModel oldData, RoomSettleModel data) {
@@ -252,7 +252,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       }
     }
     _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
+    return emit(RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()));
   }
 
   void deleteSettleExpense(RoomSettleModel data) {
@@ -270,7 +270,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       }
     }
     _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
+    return emit(RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()));
   }
 
   void reset() {

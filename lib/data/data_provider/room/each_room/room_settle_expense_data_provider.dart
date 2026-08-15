@@ -75,14 +75,14 @@ extension RoomSettleExpenseDataProvider on RoomDataProvider {
     }
   }
 
-  Future<bool> deleteSettleExpense(String id, String expenseID) async {
+  Future<void> deleteSettleExpense(String id, String expenseID) async {
     final response = await createAPICall('room/$id/settle', "delete", {
       "id": expenseID,
     });
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      return true;
+      return;
     } else {
       throw respData['message'];
     }

@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
@@ -14,39 +17,72 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
 
   LendenRoomBloc(this.repo, this.lendenDashboardBloc)
     : super(LendenRoomInitial()) {
-    on<LendenRoomFetch>(_lendenRoomFetch);
-    on<LendenCloseRoom>(_lendenCloseRoom);
-    on<LendenFetchTransaction>(_lendenFetchTransaction);
-    on<LendenAddNewTransaction>(_lendenAddNewTransaction);
-    on<LendenUpdateTransaction>(_lendenUpdateTransaction);
-    on<LendenDeleteTransaction>(_lendenDeleteTransaction);
-    on<LendenRoomDelete>(_lendenRoomDelete);
-    on<LendenRoomReset>(_lendenRoomReset);
-    on<LendenRoomUpdate>(_lendenRoomUpdate);
+    on<LendenRoomFetch>(_lendenRoomFetch, transformer: droppable());
+    on<LendenCloseRoom>(_lendenCloseRoom, transformer: droppable());
+    on<LendenFetchTransaction>(
+      _lendenFetchTransaction,
+      transformer: droppable(),
+    );
+    on<LendenAddNewTransaction>(
+      _lendenAddNewTransaction,
+      transformer: sequential(),
+    );
+    on<LendenUpdateTransaction>(
+      _lendenUpdateTransaction,
+      transformer: sequential(),
+    );
+    on<LendenDeleteTransaction>(
+      _lendenDeleteTransaction,
+      transformer: sequential(),
+    );
+    on<LendenRoomDelete>(_lendenRoomDelete, transformer: droppable());
+    on<LendenRoomReset>(_lendenRoomReset, transformer: droppable());
+    on<LendenRoomUpdate>(_lendenRoomUpdate, transformer: droppable());
   }
 
   void _lendenRoomFetch(
     LendenRoomFetch event,
     Emitter<LendenRoomState> emit,
   ) async {
-    if (state is LendenRoomLoading) return;
-    emit(LendenRoomLoading());
+    LendenRoomFetchSuccess? oldState;
+
+    if (!event.isFreshFetch && state is LendenRoomFetchSuccess) {
+      oldState = state as LendenRoomFetchSuccess;
+      if (!oldState.hasMoreData) {
+        return;
+      }
+
+      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+    } else {
+      emit(LendenRoomLoading());
+    }
+
     try {
       Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool> data =
           await repo.fetchData(event.id);
 
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
+
+      final newData = LinkedHashMap<String, LendenTransactionModel>.fromEntries(
+        data.second.map((t) => MapEntry(t.id, t)),
+      );
+
       return emit(
         LendenRoomFetchSuccess(
           id: event.id,
           roomData: data.first,
-          data: data.second,
-          fetchStatus: FetchStatus.done,
+          data: newData,
           hasMoreData: data.third,
         ),
       );
     } catch (e) {
-      return emit(LendenRoomFailure(error: e.toString()));
+      if (oldState == null) {
+        return emit(LendenRoomFailure(error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+        );
+      }
     }
   }
 
@@ -55,48 +91,45 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     Emitter<LendenRoomState> emit,
   ) async {
     if (state is! LendenRoomFetchSuccess) return;
-    if (!(state as LendenRoomFetchSuccess).hasMoreData) return;
-
     final oldState = (state as LendenRoomFetchSuccess);
 
-    emit(
-      LendenRoomFetchSuccess(
-        id: oldState.id,
-        roomData: oldState.roomData,
-        data: oldState.data,
-        fetchStatus: FetchStatus.progress,
-        hasMoreData: oldState.hasMoreData,
-      ),
-    );
+    if (!oldState.hasMoreData) {
+      return;
+    }
+
+    emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
 
     try {
       Pair<List<LendenTransactionModel>, bool> data = await repo
           .fetchTransaction(
             oldState.id,
-            oldState.data.isEmpty
+            oldState.dataList.isEmpty
                 ? DateTime.now()
-                : oldState.data.last.createdOn,
+                : oldState.dataList.last.createdOn,
           );
 
+      LinkedHashMap<String, LendenTransactionModel> allRecords =
+          LinkedHashMap();
+
+      allRecords.addAll(oldState.data);
+      allRecords.addAll(
+        LinkedHashMap<String, LendenTransactionModel>.fromEntries(
+          data.first.map((t) => MapEntry(t.id, t)),
+        ),
+      );
+
       return emit(
-        LendenRoomFetchSuccess(
-          id: oldState.id,
-          roomData: oldState.roomData,
-          data: [...oldState.data, ...data.first],
-          fetchStatus: FetchStatus.done,
+        oldState.copyWith(
+          data: allRecords,
+          isLoadingMore: false,
+          toastMessage: null,
           hasMoreData: data.second,
         ),
       );
     } catch (e) {
       emit(LendenRoomFailure(error: e.toString()));
       return emit(
-        LendenRoomFetchSuccess(
-          id: oldState.id,
-          roomData: oldState.roomData,
-          data: oldState.data,
-          fetchStatus: FetchStatus.done,
-          hasMoreData: oldState.hasMoreData,
-        ),
+        oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
       );
     }
   }
@@ -108,9 +141,13 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     if (state is! LendenRoomFetchSuccess) {
       return;
     }
-    final oldData = state as LendenRoomFetchSuccess;
-    List<LendenTransactionModel> data = [...oldData.data, event.data];
-    List<LendenUserModel> newUserArr = [...oldData.roomData.users];
+    final oldState = state as LendenRoomFetchSuccess;
+
+    LinkedHashMap<String, LendenTransactionModel> data =
+        LinkedHashMap()..addAll(oldState.data);
+    data.addAll({event.data.id: event.data});
+
+    List<LendenUserModel> newUserArr = [...oldState.roomData.users];
 
     for (int i = 0; i < newUserArr.length; i++) {
       if (newUserArr[i].id == event.data.createdBy) {
@@ -124,19 +161,19 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       }
     }
 
-    LendenDashboardModel roomData = oldData.roomData.copyWith(
+    LendenDashboardModel roomData = oldState.roomData.copyWith(
       users: newUserArr,
       modifiedOn: DateTime.now(),
     );
 
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+
     return emit(
       LendenRoomFetchSuccess(
-        id: oldData.id,
+        id: oldState.id,
         roomData: roomData,
         data: data,
-        hasMoreData: oldData.hasMoreData,
-        fetchStatus: oldData.fetchStatus,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }
@@ -148,46 +185,46 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     if (state is! LendenRoomFetchSuccess) {
       return;
     }
-    final oldData = state as LendenRoomFetchSuccess;
-    List<LendenTransactionModel> data = [...oldData.data];
-    List<LendenUserModel> newUserArr = [...oldData.roomData.users];
+    final oldState = state as LendenRoomFetchSuccess;
 
-    for (int i = 0; i < data.length; i++) {
-      if (data[i].id == event.data.id) {
-        for (int j = 0; j < newUserArr.length; j++) {
-          if (newUserArr[j].id == event.data.createdBy) {
-            if (event.data.amount < 0) {
-              newUserArr[j].owe += event.data.amount * -1;
-            } else {
-              newUserArr[j].gave += event.data.amount;
-            }
+    LinkedHashMap<String, LendenTransactionModel> data =
+        LinkedHashMap()..addAll(oldState.data);
 
-            if (data[i].amount < 0) {
-              newUserArr[j].owe -= data[i].amount * -1;
-            } else {
-              newUserArr[j].gave -= data[i].amount;
-            }
+    List<LendenUserModel> newUserArr = [...oldState.roomData.users];
+    double oldAmount = data[event.data.id]?.amount ?? 0.0;
 
-            break;
-          }
+    for (int i = 0; i < newUserArr.length; i++) {
+      if (newUserArr[i].id == event.data.createdBy) {
+        if (event.data.amount < 0) {
+          newUserArr[i].owe += event.data.amount * -1;
+        } else {
+          newUserArr[i].gave += event.data.amount;
         }
 
-        data[i] = event.data;
+        if (oldAmount < 0) {
+          newUserArr[i].owe -= oldAmount * -1;
+        } else {
+          newUserArr[i].gave -= oldAmount;
+        }
+
         break;
       }
     }
-    LendenDashboardModel roomData = oldData.roomData.copyWith(
+
+    data[event.data.id] = event.data;
+    LendenDashboardModel roomData = oldState.roomData.copyWith(
       users: newUserArr,
       modifiedOn: DateTime.now(),
     );
+
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+
     return emit(
       LendenRoomFetchSuccess(
-        id: oldData.id,
+        id: oldState.id,
         roomData: roomData,
         data: data,
-        hasMoreData: oldData.hasMoreData,
-        fetchStatus: oldData.fetchStatus,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }
@@ -199,40 +236,41 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     if (state is! LendenRoomFetchSuccess) {
       return;
     }
-    final oldData = state as LendenRoomFetchSuccess;
-    List<LendenTransactionModel> data = [...oldData.data];
-    List<LendenUserModel> newUserArr = [...oldData.roomData.users];
+    final oldState = state as LendenRoomFetchSuccess;
 
-    data.removeWhere((element) {
-      if (element.id == event.expenseID) {
-        for (int j = 0; j < newUserArr.length; j++) {
-          if (newUserArr[j].id == element.createdBy) {
-            if (element.amount < 0) {
-              newUserArr[j].owe -= element.amount * -1;
-            } else {
-              newUserArr[j].gave -= element.amount;
-            }
+    LinkedHashMap<String, LendenTransactionModel> data =
+        LinkedHashMap()..addAll(oldState.data);
 
-            break;
-          }
+    List<LendenUserModel> newUserArr = [...oldState.roomData.users];
+    double oldAmount = data[event.expenseID]?.amount ?? 0.0;
+    String createdBy = data[event.expenseID]?.createdBy ?? "";
+
+    for (int j = 0; j < newUserArr.length; j++) {
+      if (newUserArr[j].id == createdBy) {
+        if (oldAmount < 0) {
+          newUserArr[j].owe -= oldAmount * -1;
+        } else {
+          newUserArr[j].gave -= oldAmount;
         }
-        return true;
-      } else {
-        return false;
+
+        break;
       }
-    });
-    LendenDashboardModel roomData = oldData.roomData.copyWith(
+    }
+
+    data.remove(event.expenseID);
+    LendenDashboardModel roomData = oldState.roomData.copyWith(
       users: newUserArr,
       modifiedOn: DateTime.now(),
     );
+
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+
     return emit(
       LendenRoomFetchSuccess(
-        id: oldData.id,
+        id: oldState.id,
         roomData: roomData,
         data: data,
-        hasMoreData: oldData.hasMoreData,
-        fetchStatus: oldData.fetchStatus,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }
@@ -244,11 +282,13 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     if (state is! LendenRoomFetchSuccess) {
       return;
     }
-    final oldData = state as LendenRoomFetchSuccess;
+    final oldState = state as LendenRoomFetchSuccess;
     emit(LendenRoomLoading());
-    List<LendenUserModel> users = [...oldData.roomData.users];
+
+    List<LendenUserModel> users = [...oldState.roomData.users];
     try {
-      await repo.closeRoom(oldData.id);
+      await repo.closeRoom(oldState.id);
+
       bool active = false;
       for (int i = 0; i < users.length; i++) {
         if (users[i].id == event.uid) {
@@ -257,32 +297,26 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
           active = users[i].active;
         }
       }
-      LendenDashboardModel roomData = oldData.roomData.copyWith(
+
+      LendenDashboardModel roomData = oldState.roomData.copyWith(
         status: active ? RoomStatus.partiallyClosed : RoomStatus.closed,
         users: users,
         modifiedOn: DateTime.now(),
       );
+
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+
       return emit(
         LendenRoomFetchSuccess(
-          id: oldData.id,
+          id: oldState.id,
           roomData: roomData,
-          data: oldData.data,
-          hasMoreData: oldData.hasMoreData,
-          fetchStatus: oldData.fetchStatus,
+          data: oldState.data,
+          hasMoreData: oldState.hasMoreData,
         ),
       );
     } catch (e) {
       emit(LendenRoomFailure(error: e.toString()));
-      return emit(
-        LendenRoomFetchSuccess(
-          id: oldData.id,
-          roomData: oldData.roomData,
-          data: oldData.data,
-          hasMoreData: oldData.hasMoreData,
-          fetchStatus: oldData.fetchStatus,
-        ),
-      );
+      return emit(oldState.copyWith(isLoadingMore: false, toastMessage: null));
     }
   }
 
@@ -297,7 +331,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     if (state is! LendenRoomFetchSuccess) {
       return;
     }
-    final oldData = state as LendenRoomFetchSuccess;
+    final oldState = state as LendenRoomFetchSuccess;
 
     showSnackbarWithChildWidget(
       "Updating Name",
@@ -305,39 +339,36 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       duration: Duration(minutes: 2),
       scaffoldMessenger: event.scaffoldMessengerState,
     );
+
     try {
-      await repo.updateRoom(oldData.id, event.roomName);
-      LendenDashboardModel updatedData = oldData.roomData.copyWith(
+      await repo.updateRoom(oldState.id, event.roomName);
+
+      LendenDashboardModel updatedData = oldState.roomData.copyWith(
         roomName: event.roomName,
       );
+
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: updatedData));
+
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
         child: snackbarSuccessIcon(),
         scaffoldMessenger: event.scaffoldMessengerState,
       );
+
       return emit(
         LendenRoomFetchSuccess(
-          id: oldData.id,
+          id: oldState.id,
           roomData: updatedData,
-          data: oldData.data,
-          hasMoreData: oldData.hasMoreData,
-          fetchStatus: oldData.fetchStatus,
+          data: oldState.data,
+          hasMoreData: oldState.hasMoreData,
         ),
       );
     } catch (e) {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       emit(LendenRoomFailure(error: e.toString()));
-      return emit(
-        LendenRoomFetchSuccess(
-          id: oldData.id,
-          roomData: oldData.roomData,
-          data: oldData.data,
-          hasMoreData: oldData.hasMoreData,
-          fetchStatus: oldData.fetchStatus,
-        ),
-      );
+
+      return emit(oldState.copyWith(isLoadingMore: false, toastMessage: null));
     }
   }
 
@@ -360,28 +391,25 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       duration: Duration(minutes: 2),
       scaffoldMessenger: event.scaffoldMessengerState,
     );
+
     try {
       await repo.deleteRoom(oldData.id);
+
       lendenDashboardBloc.add(LendenDashboardOnDeleteRoom(id: event.id));
+
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         event.isRemoving ? "You’ve left the room" : "Room deleted successfully",
         child: snackbarSuccessIcon(),
         scaffoldMessenger: event.scaffoldMessengerState,
       );
+
       return emit(LendenRoomInitial());
     } catch (e) {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       emit(LendenRoomFailure(error: e.toString()));
-      return emit(
-        LendenRoomFetchSuccess(
-          id: oldData.id,
-          roomData: oldData.roomData,
-          data: oldData.data,
-          hasMoreData: oldData.hasMoreData,
-          fetchStatus: oldData.fetchStatus,
-        ),
-      );
+
+      return emit(oldData.copyWith(isLoadingMore: false, toastMessage: null));
     }
   }
 }

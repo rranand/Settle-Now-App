@@ -146,9 +146,9 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         if (state is PersonalMonthlyExpenseFetchSuccess) {
           isLoaded = true;
           if (state.data.isNotEmpty) {
-            transactionArr = state.data;
+            transactionArr = state.dataList;
             context.read<FilterCubit>().updateState(
-              FilterState(id: state.id, data: state.data),
+              FilterState(id: state.id, data: transactionArr),
               _loggedInUser.id,
               TransactionType.personal,
             );

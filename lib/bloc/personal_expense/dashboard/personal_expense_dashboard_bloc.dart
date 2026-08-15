@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
@@ -12,43 +15,72 @@ class PersonalExpenseDashboardBloc
 
   PersonalExpenseDashboardBloc(this.repo)
     : super(PersonalExpenseDashboardInitial()) {
-    on<PersonalExpenseDashboardFetch>(_personalExpenseFetch);
-    on<PersonalExpenseDashboardUpdate>(_personalExpenseDashboardUpdate);
-    on<PersonalExpenseDashboardReset>(_personalExpenseDashboardReset);
-    on<PersonalExpenseDashboardOnAdd>(_personalExpenseDashboardOnAdd);
+    on<PersonalExpenseDashboardFetch>(
+      _personalExpenseFetch,
+      transformer: droppable(),
+    );
+    on<PersonalExpenseDashboardUpdate>(
+      _personalExpenseDashboardUpdate,
+      transformer: sequential(),
+    );
+    on<PersonalExpenseDashboardReset>(
+      _personalExpenseDashboardReset,
+      transformer: droppable(),
+    );
+    on<PersonalExpenseDashboardOnAdd>(
+      _personalExpenseDashboardOnAdd,
+      transformer: droppable(),
+    );
   }
 
   void _personalExpenseFetch(
     PersonalExpenseDashboardFetch event,
     Emitter<PersonalExpenseDashboardState> emit,
   ) async {
-    List<PersonalExpenseInfoModel> oldData = [];
+    PersonalExpenseDashboardFetchSuccess? oldState;
 
     if (!event.isFreshFetch && state is PersonalExpenseDashboardFetchSuccess) {
-      final allRoomState = state as PersonalExpenseDashboardFetchSuccess;
-      if (!allRoomState.hasMoreData) {
+      oldState = state as PersonalExpenseDashboardFetchSuccess;
+      if (!oldState.hasMoreData) {
         return;
       }
-      oldData = allRoomState.data;
+
+      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+    } else {
+      emit(PersonalExpenseDashboardLoading());
     }
 
-    if (state is PersonalExpenseDashboardLoading) {
-      return;
-    }
-    emit(PersonalExpenseDashboardLoading());
     try {
       final data = await repo.fetchData(
-        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
+        oldState?.dataList.isEmpty ?? true
+            ? DateTime.now()
+            : oldState!.dataList.last.createdOn,
       );
+
+      final newData =
+          LinkedHashMap<String, PersonalExpenseInfoModel>.fromEntries(
+            data.first.map((t) => MapEntry(t.id, t)),
+          );
+
+      LinkedHashMap<String, PersonalExpenseInfoModel> allRecords =
+          LinkedHashMap();
+      allRecords.addAll(oldState?.data ?? <String, PersonalExpenseInfoModel>{});
+      allRecords.addAll(newData);
 
       return emit(
         PersonalExpenseDashboardFetchSuccess(
-          data: [...oldData, ...data.first],
+          data: allRecords,
           hasMoreData: data.second,
         ),
       );
     } catch (e) {
-      return emit(PersonalExpenseDashboardFailure(error: e.toString()));
+      if (oldState == null) {
+        return emit(PersonalExpenseDashboardFailure(error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+        );
+      }
     }
   }
 
@@ -57,19 +89,19 @@ class PersonalExpenseDashboardBloc
     Emitter<PersonalExpenseDashboardState> emit,
   ) async {
     if (state is! PersonalExpenseDashboardFetchSuccess) {
-      return emit(PersonalExpenseDashboardInitial());
+      return;
     }
+
     final oldState = state as PersonalExpenseDashboardFetchSuccess;
 
-    final updatedData = [...oldState.data];
+    LinkedHashMap<String, PersonalExpenseInfoModel> updatedData =
+        LinkedHashMap()..addAll(oldState.data);
 
-    for (int i = 0; i < updatedData.length; i++) {
-      if (updatedData[i].id == event.id) {
-        updatedData[i] = updatedData[i].copyWith(
-          amount: event.totalAmount,
-          transactionCount: event.transactionCount,
-        );
-      }
+    if (updatedData.containsKey(event.id)) {
+      updatedData[event.id] = updatedData[event.id]!.copyWith(
+        amount: event.totalAmount,
+        transactionCount: event.transactionCount,
+      );
     }
 
     return emit(
@@ -97,19 +129,24 @@ class PersonalExpenseDashboardBloc
           createdOn: now,
         );
 
-    List<PersonalExpenseInfoModel> oldData = [];
+    LinkedHashMap<String, PersonalExpenseInfoModel> allRecords =
+        LinkedHashMap();
     bool hasMoreDataOld = true;
+
+    allRecords.addAll({
+      currentMonthPersonalExpense.id: currentMonthPersonalExpense,
+    });
 
     if (state is PersonalExpenseDashboardFetchSuccess) {
       final oldState = state as PersonalExpenseDashboardFetchSuccess;
 
-      oldData = oldState.data;
+      allRecords.addAll(oldState.data);
       hasMoreDataOld = oldState.hasMoreData;
     }
 
     return emit(
       PersonalExpenseDashboardFetchSuccess(
-        data: [currentMonthPersonalExpense, ...oldData],
+        data: allRecords,
         hasMoreData: hasMoreDataOld,
       ),
     );

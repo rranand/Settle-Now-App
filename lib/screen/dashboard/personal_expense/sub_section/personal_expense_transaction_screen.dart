@@ -42,7 +42,7 @@ class _PersonalExpenseTransactionScreenState
           PersonalExpenseTransactionModel.empty(),
         );
         if (state is PersonalMonthlyExpenseFetchSuccess) {
-          data = state.data;
+          data = state.dataList;
 
           DateTime currentDate = DateTime.now();
           int year = int.parse(state.id.substring(0, 4));

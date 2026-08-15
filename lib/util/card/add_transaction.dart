@@ -44,6 +44,7 @@ class _AddTransactionState extends State<AddTransaction> {
   );
   bool _isNewExpense = true;
   TransactionType expenseType = TransactionType.personal;
+  int activityCount = 0;
 
   final List<SplitType> _splitType = SplitType.values;
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
@@ -371,6 +372,7 @@ class _AddTransactionState extends State<AddTransaction> {
     _selectedUserIDs.value = {};
     _selectedUserIDs.value = {};
     _categoryIndex.value = 0;
+    activityCount = 0;
     _splitTypeIndex.value = _splitType.indexOf(SplitType.equal);
 
     if (transactionType == TransactionType.quicksplit) {
@@ -407,6 +409,7 @@ class _AddTransactionState extends State<AddTransaction> {
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );
+          activityCount = transTemp.activityCount;
         }
       case TransactionType.personal:
         {
@@ -648,6 +651,7 @@ class _AddTransactionState extends State<AddTransaction> {
               users: userWithAmount,
               splitType: expenseSplitType,
               personalExpenseId: '',
+              activityCount: activityCount,
             );
             break;
           }

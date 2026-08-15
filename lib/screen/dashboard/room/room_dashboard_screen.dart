@@ -250,11 +250,9 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       return oldData;
     }
 
-    List<RoomInfoModel> data = [];
-
-    for (int i = 0; i < oldData.length; i++) {
+    return oldData.where((value) {
       bool isSettledByYou =
-          !oldData[i].users
+          !value.users
               .firstWhere(
                 (ele) => ele.id == _loggedInUser.id,
                 orElse: () => RoomUserModel.empty(),
@@ -262,12 +260,10 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
               .active;
 
       if (pref.isSettled != isSettledByYou) {
-        continue;
+        return false;
       }
-      data.add(oldData[i]);
-    }
-
-    return data;
+      return true;
+    }).toList();
   }
 
   @override
@@ -284,10 +280,11 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
         notificationPredicate: (ScrollNotification notification) {
           final state = context.read<RoomDashboardBloc>().state;
           if (state is RoomDashboardFetchSuccess) {
-            if (_navBarIndex.value == 0 && state.activeData.isNotEmpty) {
+            if (_navBarIndex.value == 0 &&
+                state.activeRoomDashboardModel.data.isNotEmpty) {
               return notification.depth == 0;
             } else if (_navBarIndex.value == 1 &&
-                state.inactiveData.isNotEmpty) {
+                state.inactiveRoomDashboardModel.data.isNotEmpty) {
               return notification.depth == 0;
             } else {
               return notification.depth == 1;
@@ -352,10 +349,10 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                             roomInfoData =
                                 _navBarIndex.value == 0
                                     ? filterDataByPreference(
-                                      state.activeData,
+                                      state.activeRoomDashboardModel.dataList,
                                       prefData.roomPref,
                                     )
-                                    : state.inactiveData;
+                                    : state.inactiveRoomDashboardModel.dataList;
                           } else if (state is RoomDashboardLoading) {
                             roomInfoData = List.generate(
                               11,

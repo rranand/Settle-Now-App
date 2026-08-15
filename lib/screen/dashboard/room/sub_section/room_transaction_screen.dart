@@ -91,12 +91,12 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
       builder: (context, state) {
         List<RoomTransactionModel> data = [];
         if (state is RoomFetchSuccess) {
-          data = state.data;
+          data = state.dataList;
 
           final filterState = context.read<FilterCubit>().state;
           if (!filterState.isFilterApplied) {
             context.read<FilterCubit>().updateState(
-              FilterState(id: state.id, data: state.data),
+              FilterState(id: state.id, data: data),
               _loggedInUser.id,
               TransactionType.room,
             );

@@ -7,10 +7,7 @@ final class RoomDashboardFetch extends RoomDashboardEvent {
   final bool isActiveRoom;
   final bool isFreshFetch;
 
-  RoomDashboardFetch({
-    required this.isActiveRoom,
-    required this.isFreshFetch,
-  });
+  RoomDashboardFetch({required this.isActiveRoom, required this.isFreshFetch});
 }
 
 final class RoomDashboardOnAddNewRoom extends RoomDashboardEvent {

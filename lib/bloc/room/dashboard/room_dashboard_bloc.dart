@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
@@ -11,114 +14,177 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
   final RoomDashboardRepository repo;
 
   RoomDashboardBloc(this.repo) : super(RoomDashboardInitial()) {
-    on<RoomDashboardFetch>(_roomFetch);
-    on<RoomDashboardOnAddNewRoom>(_roomDashboardOnAddNewRoom);
-    on<RoomDashboardOnCloseRoom>(_roomDashboardOnCloseRoom);
-    on<RoomDashboardReset>(_roomDashboardReset);
-    on<RoomDashboardOnUpdateRoom>(_roomDashboardOnUpdateRoom);
-    on<RoomDashboardOnDeleteRoom>(_roomDashboardOnDeleteRoom);
+    on<RoomDashboardFetch>(_roomFetch, transformer: droppable());
+    on<RoomDashboardOnAddNewRoom>(
+      _roomDashboardOnAddNewRoom,
+      transformer: sequential(),
+    );
+    on<RoomDashboardOnCloseRoom>(
+      _roomDashboardOnCloseRoom,
+      transformer: sequential(),
+    );
+    on<RoomDashboardReset>(_roomDashboardReset, transformer: droppable());
+    on<RoomDashboardOnUpdateRoom>(
+      _roomDashboardOnUpdateRoom,
+      transformer: sequential(),
+    );
+    on<RoomDashboardOnDeleteRoom>(
+      _roomDashboardOnDeleteRoom,
+      transformer: sequential(),
+    );
   }
 
-  DateTime getCursor(bool isFreshFetch, List<RoomInfoModel> data) {
-    if (isFreshFetch || data.isEmpty) {
+  DateTime getCursor(
+    bool isFreshFetch,
+    bool isActiveRoom,
+    RoomDashboardFetchSuccess? oldState,
+  ) {
+    if (isFreshFetch || oldState == null) {
       return DateTime.now();
     }
 
-    return data.last.createdOn;
+    if (isActiveRoom) {
+      if (oldState.activeRoomDashboardModel.dataList.isEmpty) {
+        return DateTime.now();
+      }
+      return oldState.activeRoomDashboardModel.dataList.last.createdOn;
+    } else {
+      if (oldState.inactiveRoomDashboardModel.dataList.isEmpty) {
+        return DateTime.now();
+      }
+      return oldState.inactiveRoomDashboardModel.dataList.last.createdOn;
+    }
   }
 
   void _roomFetch(
     RoomDashboardFetch event,
     Emitter<RoomDashboardState> emit,
   ) async {
-    if (state is RoomDashboardLoading) return;
-
-    List<RoomInfoModel> oldRoomActiveData = [];
-    List<RoomInfoModel> oldRoomInActiveData = [];
-    bool activeHasMoreData = false;
-    bool inactiveHasMoreData = false;
+    RoomDashboardFetchSuccess? oldState;
 
     if (state is RoomDashboardFetchSuccess) {
-      final oldState = state as RoomDashboardFetchSuccess;
-      oldRoomActiveData = oldState.activeData;
-      oldRoomInActiveData = oldState.inactiveData;
-      activeHasMoreData = oldState.activeHasMoreData;
-      inactiveHasMoreData = oldState.inactiveHasMoreData;
+      oldState = state as RoomDashboardFetchSuccess;
+    }
 
-      if (!event.isFreshFetch &&
-          ((event.isActiveRoom && !activeHasMoreData) ||
-              (!event.isActiveRoom && !inactiveHasMoreData))) {
-        return emit(
-          RoomDashboardFetchSuccess(
-            activeHasMoreData: activeHasMoreData,
-            inactiveHasMoreData: inactiveHasMoreData,
-            activeData: oldRoomActiveData,
-            inactiveData: oldRoomInActiveData,
+    if (!event.isFreshFetch && oldState != null) {
+      if (event.isActiveRoom) {
+        if (!oldState.activeRoomDashboardModel.hasMoreData) {
+          return;
+        }
+
+        final oldRoomDashboardModel = oldState.activeRoomDashboardModel
+            .copyWith(isLoadingMore: true);
+
+        emit(
+          oldState.copyWith(
+            activeRoomDashboardModel: oldRoomDashboardModel,
+            toastMessage: null,
           ),
         );
       }
+      if (!event.isActiveRoom) {
+        if (!oldState.inactiveRoomDashboardModel.hasMoreData) {
+          return;
+        }
+
+        final oldRoomDashboardModel = oldState.inactiveRoomDashboardModel
+            .copyWith(isLoadingMore: true);
+
+        emit(
+          oldState.copyWith(
+            inactiveRoomDashboardModel: oldRoomDashboardModel,
+            toastMessage: null,
+          ),
+        );
+      }
+    } else {
+      emit(RoomDashboardLoading());
     }
 
-    emit(RoomDashboardLoading());
     try {
       Pair<List<RoomInfoModel>, bool> data = await repo.fetchData(
         event.isActiveRoom,
-        getCursor(
-          event.isFreshFetch,
-          event.isActiveRoom ? oldRoomActiveData : oldRoomInActiveData,
-        ),
+        getCursor(event.isFreshFetch, event.isActiveRoom, oldState),
       );
+
+      final newData = LinkedHashMap<String, RoomInfoModel>.fromEntries(
+        data.first.map((t) => MapEntry(t.id, t)),
+      );
+
+      LinkedHashMap<String, RoomInfoModel> allRecords = LinkedHashMap();
       if (event.isActiveRoom) {
-        if (event.isFreshFetch) {
-          emit(
-            RoomDashboardFetchSuccess(
-              activeHasMoreData: data.second,
-              inactiveHasMoreData: inactiveHasMoreData,
-              activeData: data.first,
-              inactiveData: oldRoomInActiveData,
-            ),
-          );
-        } else {
-          return emit(
-            RoomDashboardFetchSuccess(
-              activeHasMoreData: data.second,
-              inactiveHasMoreData: inactiveHasMoreData,
-              activeData: [...oldRoomActiveData, ...data.first],
-              inactiveData: oldRoomInActiveData,
-            ),
-          );
-        }
+        allRecords.addAll(
+          oldState?.activeRoomDashboardModel.data ?? <String, RoomInfoModel>{},
+        );
       } else {
-        if (event.isFreshFetch) {
-          return emit(
-            RoomDashboardFetchSuccess(
-              activeHasMoreData: activeHasMoreData,
-              inactiveHasMoreData: data.second,
-              activeData: oldRoomActiveData,
-              inactiveData: data.first,
-            ),
-          );
-        } else {
-          return emit(
-            RoomDashboardFetchSuccess(
-              activeHasMoreData: activeHasMoreData,
-              inactiveHasMoreData: data.second,
-              activeData: oldRoomActiveData,
-              inactiveData: [...oldRoomInActiveData, ...data.first],
-            ),
-          );
-        }
+        allRecords.addAll(
+          oldState?.inactiveRoomDashboardModel.data ??
+              <String, RoomInfoModel>{},
+        );
+      }
+      allRecords.addAll(newData);
+
+      if (event.isActiveRoom) {
+        return emit(
+          RoomDashboardFetchSuccess(
+            activeRoomDashboardModel: (oldState?.activeRoomDashboardModel ??
+                    RoomDashboardModel(
+                      data: LinkedHashMap(),
+                      hasMoreData: true,
+                      isLoadingMore: false,
+                    ))
+                .copyWith(
+                  data: allRecords,
+                  hasMoreData: data.second,
+                  isLoadingMore: false,
+                ),
+            inactiveRoomDashboardModel:
+                oldState?.inactiveRoomDashboardModel ??
+                RoomDashboardModel(
+                  data: LinkedHashMap(),
+                  hasMoreData: true,
+                  isLoadingMore: false,
+                ),
+          ),
+        );
+      } else {
+        return emit(
+          RoomDashboardFetchSuccess(
+            activeRoomDashboardModel:
+                (oldState?.activeRoomDashboardModel ??
+                    RoomDashboardModel(
+                      data: LinkedHashMap(),
+                      hasMoreData: true,
+                      isLoadingMore: false,
+                    )),
+            inactiveRoomDashboardModel: (oldState?.inactiveRoomDashboardModel ??
+                    RoomDashboardModel(
+                      data: LinkedHashMap(),
+                      hasMoreData: true,
+                      isLoadingMore: false,
+                    ))
+                .copyWith(
+                  data: allRecords,
+                  hasMoreData: data.second,
+                  isLoadingMore: false,
+                ),
+          ),
+        );
       }
     } catch (e) {
-      emit(RoomDashboardFailure(e.toString()));
-      return emit(
-        RoomDashboardFetchSuccess(
-          activeHasMoreData: activeHasMoreData,
-          inactiveHasMoreData: inactiveHasMoreData,
-          activeData: oldRoomActiveData,
-          inactiveData: oldRoomInActiveData,
-        ),
-      );
+      if (oldState == null) {
+        return emit(RoomDashboardFailure(error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(
+            activeRoomDashboardModel: oldState.activeRoomDashboardModel
+                .copyWith(isLoadingMore: false),
+            inactiveRoomDashboardModel: oldState.inactiveRoomDashboardModel
+                .copyWith(isLoadingMore: false),
+            toastMessage: e.toString(),
+          ),
+        );
+      }
     }
   }
 
@@ -129,26 +195,22 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     if (state is! RoomDashboardFetchSuccess) {
       return;
     }
-    final allRoomState = (state as RoomDashboardFetchSuccess);
-    List<RoomInfoModel> data = [];
-    if (event.isLoading) {
-      data = [event.data, ...allRoomState.activeData];
-    } else {
-      if (event.data.hasData) {
-        data = [event.data];
-      }
-      for (int i = 0; i < allRoomState.activeData.length; i++) {
-        if (allRoomState.activeData[i].hasData) {
-          data.add(allRoomState.activeData[i]);
-        }
-      }
+    final oldState = (state as RoomDashboardFetchSuccess);
+    LinkedHashMap<String, RoomInfoModel> data = LinkedHashMap();
+
+    data.addAll({event.data.id: event.data});
+    data.addAll(oldState.activeRoomDashboardModel.data);
+
+    if (!event.isLoading) {
+      data.remove("");
     }
+
     return emit(
       RoomDashboardFetchSuccess(
-        activeHasMoreData: allRoomState.activeHasMoreData,
-        inactiveHasMoreData: allRoomState.inactiveHasMoreData,
-        activeData: data,
-        inactiveData: allRoomState.inactiveData,
+        activeRoomDashboardModel: oldState.activeRoomDashboardModel.copyWith(
+          data: data,
+        ),
+        inactiveRoomDashboardModel: oldState.inactiveRoomDashboardModel,
       ),
     );
   }
@@ -157,58 +219,68 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     RoomDashboardOnCloseRoom event,
     Emitter<RoomDashboardState> emit,
   ) async {
-    if (state is RoomDashboardFetchSuccess) {
-      final allRoomState = (state as RoomDashboardFetchSuccess);
-      List<RoomInfoModel> activeRoomData = [];
-      List<RoomInfoModel> inactiveRoomData = [];
-
-      for (int i = 0; i < allRoomState.activeData.length; i++) {
-        if (allRoomState.activeData[i].id == event.data.id &&
-            !event.data.active) {
-          inactiveRoomData.add(event.data);
-        } else {
-          activeRoomData.add(allRoomState.activeData[i]);
-        }
-      }
-      inactiveRoomData.addAll(allRoomState.inactiveData);
-      return emit(
-        RoomDashboardFetchSuccess(
-          activeHasMoreData: allRoomState.activeHasMoreData,
-          inactiveHasMoreData: allRoomState.inactiveHasMoreData,
-          activeData: activeRoomData,
-          inactiveData: inactiveRoomData,
-        ),
-      );
-    } else {
+    if (state is! RoomDashboardFetchSuccess) {
       return;
     }
+    final oldState = (state as RoomDashboardFetchSuccess);
+    LinkedHashMap<String, RoomInfoModel> activeRoomData =
+        LinkedHashMap<String, RoomInfoModel>.from(
+          oldState.activeRoomDashboardModel.data,
+        );
+    LinkedHashMap<String, RoomInfoModel> inactiveRoomData = LinkedHashMap();
+
+    if (!event.data.active) {
+      activeRoomData.remove(event.data.id);
+      inactiveRoomData.addAll({event.data.id: event.data});
+    } else {
+      activeRoomData[event.data.id] = event.data;
+    }
+
+    inactiveRoomData.addAll(
+      LinkedHashMap<String, RoomInfoModel>.from(
+        oldState.inactiveRoomDashboardModel.data,
+      ),
+    );
+
+    return emit(
+      RoomDashboardFetchSuccess(
+        activeRoomDashboardModel: oldState.activeRoomDashboardModel.copyWith(
+          data: activeRoomData,
+          isLoadingMore: false,
+        ),
+        inactiveRoomDashboardModel: oldState.inactiveRoomDashboardModel
+            .copyWith(data: inactiveRoomData, isLoadingMore: false),
+      ),
+    );
   }
 
   void _roomDashboardOnUpdateRoom(
     RoomDashboardOnUpdateRoom event,
     Emitter<RoomDashboardState> emit,
   ) async {
-    if (state is RoomDashboardFetchSuccess) {
-      final allRoomState = (state as RoomDashboardFetchSuccess);
-      List<RoomInfoModel> activeRoomData = [...allRoomState.activeData];
-
-      for (int i = 0; i < activeRoomData.length; i++) {
-        if (allRoomState.activeData[i].id == event.data.id) {
-          activeRoomData[i] = event.data;
-          break;
-        }
-      }
-      return emit(
-        RoomDashboardFetchSuccess(
-          activeHasMoreData: allRoomState.activeHasMoreData,
-          inactiveHasMoreData: allRoomState.inactiveHasMoreData,
-          activeData: activeRoomData,
-          inactiveData: allRoomState.inactiveData,
-        ),
-      );
-    } else {
+    if (state is! RoomDashboardFetchSuccess) {
       return;
     }
+    final oldState = (state as RoomDashboardFetchSuccess);
+
+    LinkedHashMap<String, RoomInfoModel> activeRoomData =
+        LinkedHashMap<String, RoomInfoModel>.from(
+          oldState.activeRoomDashboardModel.data,
+        );
+
+    if (activeRoomData.containsKey(event.data.id)) {
+      activeRoomData[event.data.id] = event.data;
+    }
+
+    return emit(
+      RoomDashboardFetchSuccess(
+        activeRoomDashboardModel: oldState.activeRoomDashboardModel.copyWith(
+          data: activeRoomData,
+          isLoadingMore: false,
+        ),
+        inactiveRoomDashboardModel: oldState.inactiveRoomDashboardModel,
+      ),
+    );
   }
 
   void _roomDashboardReset(
@@ -225,17 +297,22 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     if (state is! RoomDashboardFetchSuccess) {
       return;
     }
-    final allRoomState = (state as RoomDashboardFetchSuccess);
-    List<RoomInfoModel> data = [...allRoomState.activeData];
+    final oldState = (state as RoomDashboardFetchSuccess);
 
-    data.removeWhere((ele) => ele.id == event.id);
+    LinkedHashMap<String, RoomInfoModel> activeRoomData =
+        LinkedHashMap<String, RoomInfoModel>.from(
+          oldState.activeRoomDashboardModel.data,
+        );
+
+    activeRoomData.remove(event.id);
 
     return emit(
       RoomDashboardFetchSuccess(
-        activeHasMoreData: allRoomState.activeHasMoreData,
-        inactiveHasMoreData: allRoomState.inactiveHasMoreData,
-        activeData: data,
-        inactiveData: allRoomState.inactiveData,
+        activeRoomDashboardModel: oldState.activeRoomDashboardModel.copyWith(
+          data: activeRoomData,
+          isLoadingMore: false,
+        ),
+        inactiveRoomDashboardModel: oldState.inactiveRoomDashboardModel,
       ),
     );
   }

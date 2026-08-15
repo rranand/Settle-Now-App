@@ -12,5 +12,5 @@ final class CreateJoinRoomSuccess extends CreateJoinRoomState {}
 final class CreateJoinRoomFailure extends CreateJoinRoomState {
   final String error;
 
-  CreateJoinRoomFailure(this.error);
+  CreateJoinRoomFailure({required this.error});
 }

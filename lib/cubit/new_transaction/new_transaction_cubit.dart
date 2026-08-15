@@ -169,8 +169,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final roomID = blocState.id;
             final data = baseTransData as RoomTransactionModel;
             await repoRD.updateExpense(roomID, data);
-            bloc.add(RoomUpdateTransaction(data: data));
-            return emit(NewTransactionSuccess(data: data));
+            final newUpdatedData = data.copyWith(
+              activityCount: data.activityCount + 1,
+            );
+            bloc.add(RoomUpdateTransaction(data: newUpdatedData));
+            return emit(NewTransactionSuccess(data: newUpdatedData));
           }
       }
     } catch (e) {

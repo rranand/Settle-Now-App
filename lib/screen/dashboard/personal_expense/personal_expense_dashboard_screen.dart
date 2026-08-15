@@ -127,20 +127,13 @@ class _PersonalExpenseDashboardScreenState
       return oldData;
     }
 
-    List<PersonalExpenseInfoModel> data = [];
+    return oldData.where((value) {
+      int monthIndex = CalenderConstant.getIndexOfMonth(value.monthName) + 1;
 
-    for (int i = 0; i < oldData.length; i++) {
-      int monthIndex =
-          CalenderConstant.getIndexOfMonth(oldData[i].monthName) + 1;
-
-      if (oldData[i].amount > 0 ||
-          (DateTime.now().year.toString() == oldData[i].year &&
-              monthIndex == DateTime.now().month)) {
-        data.add(oldData[i]);
-      }
-    }
-
-    return data;
+      return (value.amount > 0 ||
+          (DateTime.now().year.toString() == value.year &&
+              monthIndex == DateTime.now().month));
+    }).toList();
   }
 
   @override
@@ -193,7 +186,7 @@ class _PersonalExpenseDashboardScreenState
 
                     if (state is PersonalExpenseDashboardFetchSuccess) {
                       transactionData = filterDataByPreference(
-                        state.data,
+                        state.dataList,
                         prefData.personalExpensePref,
                       );
                     } else if (state is PersonalExpenseDashboardLoading) {
@@ -254,7 +247,7 @@ class _PersonalExpenseDashboardScreenState
                 int month = now.month - 1;
 
                 PersonalExpenseInfoModel currentMonthPersonalExpense = state
-                    .data
+                    .dataList
                     .firstWhere(
                       (ele) =>
                           year == ele.year &&

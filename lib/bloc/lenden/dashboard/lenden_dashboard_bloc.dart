@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
@@ -11,42 +14,65 @@ class LendenDashboardBloc
   final LendenDashboardRepository repo;
 
   LendenDashboardBloc(this.repo) : super(LendenDashboardInitial()) {
-    on<LendenDashboardFetch>(_lendenDashboardFetch);
-    on<LendenDashboardOnAddNewRoom>(_lendenDashboardOnAddNewRoom);
-    on<LendenDashboardOnUpdateRoom>(_lendenDashboardOnUpdateRoom);
-    on<LendenDashboardReset>(_lendenDashboardReset);
-    on<LendenDashboardOnDeleteRoom>(_lendenDashboardOnDeleteRoom);
+    on<LendenDashboardFetch>(_lendenDashboardFetch, transformer: droppable());
+    on<LendenDashboardOnAddNewRoom>(
+      _lendenDashboardOnAddNewRoom,
+      transformer: sequential(),
+    );
+    on<LendenDashboardOnUpdateRoom>(
+      _lendenDashboardOnUpdateRoom,
+      transformer: sequential(),
+    );
+    on<LendenDashboardReset>(_lendenDashboardReset, transformer: droppable());
+    on<LendenDashboardOnDeleteRoom>(
+      _lendenDashboardOnDeleteRoom,
+      transformer: droppable(),
+    );
   }
 
   void _lendenDashboardFetch(
     LendenDashboardFetch event,
     Emitter<LendenDashboardState> emit,
   ) async {
-    List<LendenDashboardModel> oldData = [];
+    LendenDashboardFetchSuccess? oldState;
 
     if (!event.isFreshFetch && state is LendenDashboardFetchSuccess) {
-      final allLendenRoomState = state as LendenDashboardFetchSuccess;
-      if (!allLendenRoomState.hasMoreData) {
+      oldState = state as LendenDashboardFetchSuccess;
+      if (!oldState.hasMoreData) {
         return;
       }
-      oldData = allLendenRoomState.data;
+
+      emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+    } else {
+      emit(LendenDashboardLoading());
     }
 
-    if (state is LendenDashboardLoading) return;
-    emit(LendenDashboardLoading());
     try {
       final data = await repo.fetchData(
-        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
+        oldState == null || oldState.dataList.isEmpty
+            ? DateTime.now()
+            : oldState.dataList.last.createdOn,
       );
 
+      final newData = LinkedHashMap<String, LendenDashboardModel>.fromEntries(
+        data.first.map((t) => MapEntry(t.id, t)),
+      );
+
+      LinkedHashMap<String, LendenDashboardModel> allRecords = LinkedHashMap();
+      allRecords.addAll(oldState?.data ?? <String, LendenDashboardModel>{});
+      allRecords.addAll(newData);
+
       return emit(
-        LendenDashboardFetchSuccess(
-          data: [...oldData, ...data.first],
-          hasMoreData: data.second,
-        ),
+        LendenDashboardFetchSuccess(data: allRecords, hasMoreData: data.second),
       );
     } catch (e) {
-      return emit(LendenDashboardFailure(error: e.toString()));
+      if (oldState == null) {
+        return emit(LendenDashboardFailure(error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+        );
+      }
     }
   }
 
@@ -57,24 +83,20 @@ class LendenDashboardBloc
     if (state is! LendenDashboardFetchSuccess) {
       return;
     }
-    final allLendenRoomState = (state as LendenDashboardFetchSuccess);
-    List<LendenDashboardModel> data = [];
-    if (event.isLoading) {
-      data = [event.data, ...allLendenRoomState.data];
-    } else {
-      if (event.data.hasData) {
-        data = [event.data];
-      }
-      for (int i = 0; i < allLendenRoomState.data.length; i++) {
-        if (allLendenRoomState.data[i].hasData) {
-          data.add(allLendenRoomState.data[i]);
-        }
-      }
+    final oldState = (state as LendenDashboardFetchSuccess);
+    LinkedHashMap<String, LendenDashboardModel> data = LinkedHashMap();
+
+    data.addAll({event.data.id: event.data});
+    data.addAll(oldState.data);
+
+    if (!event.isLoading) {
+      data.remove("");
     }
+
     return emit(
       LendenDashboardFetchSuccess(
         data: data,
-        hasMoreData: allLendenRoomState.hasMoreData,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }
@@ -83,46 +105,44 @@ class LendenDashboardBloc
     LendenDashboardOnUpdateRoom event,
     Emitter<LendenDashboardState> emit,
   ) async {
-    if (state is LendenDashboardFetchSuccess) {
-      final allLendenRoomState = (state as LendenDashboardFetchSuccess);
-      List<LendenDashboardModel> data = allLendenRoomState.data;
-      int index = -1;
-
-      for (int i = 0; i < data.length; i++) {
-        if (data[i].id == event.data.id) {
-          index = i;
-          data[i] = event.data;
-          break;
-        }
-      }
-
-      if (index == -1) {
-        data = [event.data, ...data];
-      }
-      return emit(
-        LendenDashboardFetchSuccess(
-          data: data,
-          hasMoreData: allLendenRoomState.hasMoreData,
-        ),
-      );
+    if (state is! LendenDashboardFetchSuccess) {
+      return;
     }
+
+    final oldState = (state as LendenDashboardFetchSuccess);
+
+    final updated = LinkedHashMap<String, LendenDashboardModel>.from(
+      oldState.data,
+    )..[event.data.id] = event.data;
+
+    return emit(
+      LendenDashboardFetchSuccess(
+        data: updated,
+        hasMoreData: oldState.hasMoreData,
+      ),
+    );
   }
 
   void _lendenDashboardOnDeleteRoom(
     LendenDashboardOnDeleteRoom event,
     Emitter<LendenDashboardState> emit,
   ) async {
-    if (state is LendenDashboardFetchSuccess) {
-      final allLendenRoomState = (state as LendenDashboardFetchSuccess);
-      List<LendenDashboardModel> data = [...allLendenRoomState.data];
-      data.removeWhere((ele) => ele.id == event.id);
-      return emit(
-        LendenDashboardFetchSuccess(
-          data: data,
-          hasMoreData: allLendenRoomState.hasMoreData,
-        ),
-      );
+    if (state is! LendenDashboardFetchSuccess) {
+      return;
     }
+
+    final oldState = (state as LendenDashboardFetchSuccess);
+
+    final updated = LinkedHashMap<String, LendenDashboardModel>.from(
+      oldState.data,
+    )..remove(event.id);
+
+    return emit(
+      LendenDashboardFetchSuccess(
+        data: updated,
+        hasMoreData: oldState.hasMoreData,
+      ),
+    );
   }
 
   void _lendenDashboardReset(

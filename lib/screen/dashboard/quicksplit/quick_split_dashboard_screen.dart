@@ -91,11 +91,9 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       return oldData;
     }
 
-    List<QuicksplitTransactionModel> data = [];
-
-    for (int i = 0; i < oldData.length; i++) {
+    return oldData.where((value) {
       bool isSettledByYou =
-          oldData[i].users
+          value.users
               .firstWhere(
                 (ele) => ele.id == _loggedInUser.id,
                 orElse: () => QuicksplitUserModel.empty(),
@@ -103,11 +101,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
               .isSettled;
 
       if (pref.isSettled != isSettledByYou) {
-        continue;
+        return false;
       }
-      data.add(oldData[i]);
-    }
-    return data;
+      return true;
+    }).toList();
   }
 
   @override
@@ -125,7 +122,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                 List<QuicksplitTransactionModel> splitData = [];
                 if (state is QuicksplitFetchSuccess) {
                   splitData = filterDataByPreference(
-                    state.data,
+                    state.dataList,
                     prefData.quicksplitPref,
                   );
                 } else if (state is QuicksplitLoading) {

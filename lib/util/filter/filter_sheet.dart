@@ -179,33 +179,32 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.personal):
         {
           final state = context.read<PersonalMonthlyExpenseBloc>().state;
-          List<PersonalExpenseTransactionModel> data = [];
           roomData = [];
 
           if (state is PersonalMonthlyExpenseFetchSuccess) {
-            data = state.data;
             Set<String> roomIDs = {};
             double maxAmount = 0;
             DateTime minDate = DateTime.now();
             DateTime maxDate = DateTime(1990);
 
-            for (int i = 0; i < data.length; i++) {
-              maxAmount = max(maxAmount, data[i].amount);
+            for (PersonalExpenseTransactionModel eachTransaction
+                in state.data.values) {
+              maxAmount = max(maxAmount, eachTransaction.amount);
               if (minDate.millisecondsSinceEpoch >
-                  data[i].createdOn.millisecondsSinceEpoch) {
-                minDate = data[i].createdOn;
+                  eachTransaction.createdOn.millisecondsSinceEpoch) {
+                minDate = eachTransaction.createdOn;
               }
               if (maxDate.millisecondsSinceEpoch <
-                  data[i].createdOn.millisecondsSinceEpoch) {
-                maxDate = data[i].createdOn;
+                  eachTransaction.createdOn.millisecondsSinceEpoch) {
+                maxDate = eachTransaction.createdOn;
               }
 
-              if (data[i].roomData.hasData) {
+              if (eachTransaction.roomData.hasData) {
                 String id =
-                    "${data[i].roomData.roomName}###${data[i].roomData.transactionType == TransactionType.quicksplit ? "" : "Room"}";
+                    "${eachTransaction.roomData.roomName}###${eachTransaction.roomData.transactionType == TransactionType.quicksplit ? "" : "Room"}";
                 if (!roomIDs.contains(id)) {
                   roomIDs.add(id);
-                  roomData.add(data[i].roomData);
+                  roomData.add(eachTransaction.roomData);
                 }
               }
             }
@@ -229,23 +228,21 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.lenden):
         {
           final state = context.read<LendenRoomBloc>().state;
-          List<LendenTransactionModel> data = [];
 
           if (state is LendenRoomFetchSuccess) {
-            data = state.data;
             double maxAmount = 0;
             DateTime minDate = DateTime.now();
             DateTime maxDate = DateTime(1990);
 
-            for (int i = 0; i < data.length; i++) {
-              maxAmount = max(maxAmount, data[i].amount.abs());
+            for (LendenTransactionModel eachTransaction in state.data.values) {
+              maxAmount = max(maxAmount, eachTransaction.amount.abs());
               if (minDate.millisecondsSinceEpoch >
-                  data[i].createdOn.millisecondsSinceEpoch) {
-                minDate = data[i].createdOn;
+                  eachTransaction.createdOn.millisecondsSinceEpoch) {
+                minDate = eachTransaction.createdOn;
               }
               if (maxDate.millisecondsSinceEpoch <
-                  data[i].createdOn.millisecondsSinceEpoch) {
-                maxDate = data[i].createdOn;
+                  eachTransaction.createdOn.millisecondsSinceEpoch) {
+                maxDate = eachTransaction.createdOn;
               }
             }
             userData = state.roomData.users;
@@ -270,23 +267,21 @@ class _FilterSheetState extends State<FilterSheet> {
         {
           final state = context.read<RoomBloc>().state;
           final roomInfoState = context.read<RoomInfoCubit>().state;
-          List<RoomTransactionModel> data = [];
 
           if (state is RoomFetchSuccess) {
-            data = state.data;
             double maxAmount = 0;
             DateTime minDate = DateTime.now();
             DateTime maxDate = DateTime(1990);
 
-            for (int i = 0; i < data.length; i++) {
-              maxAmount = max(maxAmount, data[i].amount);
+            for (RoomTransactionModel eachTransaction in state.data.values) {
+              maxAmount = max(maxAmount, eachTransaction.amount);
               if (minDate.millisecondsSinceEpoch >
-                  data[i].createdOn.millisecondsSinceEpoch) {
-                minDate = data[i].createdOn;
+                  eachTransaction.createdOn.millisecondsSinceEpoch) {
+                minDate = eachTransaction.createdOn;
               }
               if (maxDate.millisecondsSinceEpoch <
-                  data[i].createdOn.millisecondsSinceEpoch) {
-                maxDate = data[i].createdOn;
+                  eachTransaction.createdOn.millisecondsSinceEpoch) {
+                maxDate = eachTransaction.createdOn;
               }
             }
             if (roomInfoState is RoomInfoSuccess) {
@@ -413,7 +408,7 @@ class _FilterSheetState extends State<FilterSheet> {
           final expenseState = context.read<PersonalMonthlyExpenseBloc>().state;
           List<PersonalExpenseTransactionModel> data = [];
           if (expenseState is PersonalMonthlyExpenseFetchSuccess) {
-            data = expenseState.data;
+            data = expenseState.dataList;
           }
 
           if (updateState || state.id != widget.id) {
@@ -442,7 +437,7 @@ class _FilterSheetState extends State<FilterSheet> {
           final expenseState = context.read<LendenRoomBloc>().state;
           List<LendenTransactionModel> data = [];
           if (expenseState is LendenRoomFetchSuccess) {
-            data = expenseState.data;
+            data = expenseState.dataList;
           }
 
           if (updateState || state.id != widget.id) {
@@ -471,7 +466,7 @@ class _FilterSheetState extends State<FilterSheet> {
           final expenseState = context.read<RoomBloc>().state;
           List<RoomTransactionModel> data = [];
           if (expenseState is RoomFetchSuccess) {
-            data = expenseState.data;
+            data = expenseState.dataList;
           }
 
           if (updateState || state.id != widget.id) {

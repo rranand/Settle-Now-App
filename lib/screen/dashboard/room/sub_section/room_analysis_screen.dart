@@ -79,7 +79,7 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
     return BlocBuilder<RoomBloc, RoomState>(
       builder: (context, state) {
         if (state is RoomFetchSuccess) {
-          List<RoomTransactionModel> data = state.data;
+          List<RoomTransactionModel> data = state.dataList;
 
           if (data.isEmpty) {
             return SliverToBoxAdapter(

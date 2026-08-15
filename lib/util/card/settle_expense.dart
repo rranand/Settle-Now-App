@@ -162,6 +162,7 @@ class _SettleExpenseState extends State<SettleExpense> {
           amount: (userCanPay > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: DateTime.now(),
           modifiedOn: DateTime.now(),
+          activityCount: 1,
         );
         context.read<RoomSettleUpsertCubit>().addNewSettleExpense(
           widget.roomID,
@@ -176,6 +177,7 @@ class _SettleExpenseState extends State<SettleExpense> {
               ((userCanPay - oldAmount) > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: widget.transactionData!.createdOn,
           modifiedOn: widget.transactionData!.modifiedOn,
+          activityCount: widget.transactionData!.activityCount,
         );
 
         if (widget.transactionData.hashCode != updatedData.hashCode) {

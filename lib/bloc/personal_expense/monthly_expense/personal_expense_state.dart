@@ -10,12 +10,11 @@ final class PersonalMonthlyExpenseLoading extends PersonalMonthlyExpenseState {}
 final class PersonalMonthlyExpenseFetchSuccess
     extends PersonalMonthlyExpenseState {
   final String id;
-  final List<PersonalExpenseTransactionModel> data;
+  final LinkedHashMap<String, PersonalExpenseTransactionModel> data;
+  final List<PersonalExpenseTransactionModel> dataList;
 
-  PersonalMonthlyExpenseFetchSuccess({
-    required this.id,
-    required this.data,
-  });
+  PersonalMonthlyExpenseFetchSuccess({required this.id, required this.data})
+    : dataList = data.values.toList();
 }
 
 final class PersonalMonthlyExpenseFailure extends PersonalMonthlyExpenseState {

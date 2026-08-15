@@ -20,16 +20,14 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     try {
       final roomDashboardState = _roomDashboardBloc.state;
       RoomInfoModel oldData = RoomInfoModel.empty();
-      if (roomDashboardState is RoomDashboardFetchSuccess) {
-        final List<RoomInfoModel> oldArr = [
-          ...roomDashboardState.activeData,
-          ...roomDashboardState.inactiveData,
-        ];
 
-        oldData = oldArr.firstWhere(
-          (ele) => ele.id == id,
-          orElse: () => RoomInfoModel.empty(),
-        );
+      if (roomDashboardState is RoomDashboardFetchSuccess) {
+        if (roomDashboardState.activeRoomDashboardModel.data.containsKey(id)) {
+          oldData = roomDashboardState.activeRoomDashboardModel.data[id]!;
+        } else if (roomDashboardState.inactiveRoomDashboardModel.data
+            .containsKey(id)) {
+          oldData = roomDashboardState.inactiveRoomDashboardModel.data[id]!;
+        }
       }
 
       if (oldData.hasData && !forceRefresh) {

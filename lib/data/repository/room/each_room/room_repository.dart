@@ -162,9 +162,9 @@ class RoomRepository {
     }
   }
 
-  Future<bool> deleteSettleExpense(String id, String expenseID) async {
+  Future<void> deleteSettleExpense(String id, String expenseID) async {
     try {
-      return _dataProvider.deleteSettleExpense(id, expenseID);
+      await _dataProvider.deleteSettleExpense(id, expenseID);
     } catch (e) {
       rethrow;
     }

@@ -33,7 +33,7 @@ class LendenDashboardDataProvider {
     }
   }
 
-  Future<LendenDashboardModel> createRoom(LendenDashboardModel roomData) async {
+  Future<String> createRoom(LendenDashboardModel roomData) async {
     try {
       final response = await createAPICall('lenden', "post", {
         "name": roomData.roomName,
@@ -41,8 +41,7 @@ class LendenDashboardDataProvider {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        roomData.id = data["data"]["id"];
-        return roomData;
+        return data["data"]["id"];
       } else {
         throw data['message'];
       }

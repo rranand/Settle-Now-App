@@ -11,13 +11,32 @@ final class PersonalExpenseDashboardLoading
 
 final class PersonalExpenseDashboardFetchSuccess
     extends PersonalExpenseDashboardState {
-  final List<PersonalExpenseInfoModel> data;
+  final LinkedHashMap<String, PersonalExpenseInfoModel> data;
+  final List<PersonalExpenseInfoModel> dataList;
   final bool hasMoreData;
+  final bool isLoadingMore;
+  final String? toastMessage;
 
   PersonalExpenseDashboardFetchSuccess({
     required this.data,
     required this.hasMoreData,
-  });
+    this.isLoadingMore = false,
+    this.toastMessage,
+  }) : dataList = data.values.toList();
+
+  PersonalExpenseDashboardFetchSuccess copyWith({
+    LinkedHashMap<String, PersonalExpenseInfoModel>? data,
+    bool? hasMoreData,
+    bool? isLoadingMore,
+    String? toastMessage,
+  }) {
+    return PersonalExpenseDashboardFetchSuccess(
+      data: data ?? this.data,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      toastMessage: toastMessage,
+    );
+  }
 }
 
 final class PersonalExpenseDashboardFailure

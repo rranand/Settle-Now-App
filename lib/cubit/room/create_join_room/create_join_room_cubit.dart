@@ -43,7 +43,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
           isLoading: false,
         ),
       );
-      return emit(CreateJoinRoomFailure(e.toString()));
+      return emit(CreateJoinRoomFailure(error: e.toString()));
     }
   }
 
@@ -71,7 +71,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       return emit(CreateJoinRoomSuccess());
     } catch (e) {
       scaffoldMessenger.hideCurrentSnackBar();
-      return emit(CreateJoinRoomFailure(e.toString()));
+      return emit(CreateJoinRoomFailure(error: e.toString()));
     }
   }
 
@@ -110,7 +110,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       return emit(CreateJoinRoomSuccess());
     } catch (e) {
       scaffoldMessenger.hideCurrentSnackBar();
-      return emit(CreateJoinRoomFailure(e.toString()));
+      return emit(CreateJoinRoomFailure(error: e.toString()));
     }
   }
 

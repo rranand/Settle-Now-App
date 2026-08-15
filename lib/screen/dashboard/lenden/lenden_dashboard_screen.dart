@@ -183,22 +183,19 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
       return oldData;
     }
 
-    List<LendenDashboardModel> data = [];
-
-    for (int i = 0; i < oldData.length; i++) {
+    return oldData.where((value) {
       bool isSettledByYou =
-          !oldData[i].users
+          !value.users
               .firstWhere(
                 (ele) => ele.id == _loggedInUser.id,
                 orElse: () => LendenUserModel.empty(),
               )
               .active;
       if (pref.isSettled != isSettledByYou) {
-        continue;
+        return false;
       }
-      data.add(oldData[i]);
-    }
-    return data;
+      return true;
+    }).toList();
   }
 
   @override
@@ -263,7 +260,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                         List<LendenDashboardModel> lendenData = [];
                         if (state is LendenDashboardFetchSuccess) {
                           lendenData = filterDataByPreference(
-                            state.data,
+                            state.dataList,
                             prefData.lendenPref,
                           );
                         } else if (state is LendenDashboardLoading) {

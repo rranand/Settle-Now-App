@@ -6,6 +6,7 @@ import 'package:settlenow/util/util_core.dart';
 class RoomTransactionModel
     extends MultiUserBaseTransactionModel<UserAmountModel> {
   String personalExpenseId;
+  int activityCount;
 
   RoomTransactionModel({
     required super.id,
@@ -18,9 +19,13 @@ class RoomTransactionModel
     required super.users,
     required super.splitType,
     required this.personalExpenseId,
+    required this.activityCount,
   });
 
-  RoomTransactionModel.empty() : personalExpenseId = "", super.empty();
+  RoomTransactionModel.empty()
+    : personalExpenseId = "",
+      activityCount = 0,
+      super.empty();
 
   @override
   RoomTransactionModel copyWith({
@@ -34,6 +39,7 @@ class RoomTransactionModel
     SplitType? splitType,
     String? category,
     String? personalExpenseId,
+    int? activityCount,
   }) {
     return RoomTransactionModel(
       id: id ?? this.id,
@@ -46,6 +52,7 @@ class RoomTransactionModel
       users: users ?? this.users,
       splitType: splitType ?? this.splitType,
       personalExpenseId: personalExpenseId ?? this.personalExpenseId,
+      activityCount: activityCount ?? this.activityCount,
     );
   }
 
@@ -54,6 +61,7 @@ class RoomTransactionModel
     return <String, dynamic>{
       ...super.toMap(),
       'personal_expense_id': personalExpenseId,
+      'activity_count': activityCount,
     };
   }
 
@@ -74,6 +82,7 @@ class RoomTransactionModel
       users: data.users,
       splitType: data.splitType,
       personalExpenseId: map['personal_expense_id'] ?? "",
+      activityCount: map['activity_count'] as int,
     );
   }
 
@@ -112,6 +121,7 @@ class RoomTransactionModel
       users: userWithAmount,
       splitType: SplitType.equal,
       personalExpenseId: "",
+      activityCount: 1,
     );
   }
 
@@ -133,6 +143,7 @@ class RoomTransactionModel
         other.createdBy == createdBy &&
         other.category == category &&
         other.splitType == splitType &&
+        other.activityCount == activityCount &&
         listEquals(other.users, users);
   }
 
@@ -148,6 +159,7 @@ class RoomTransactionModel
         category.hashCode ^
         splitType.hashCode ^
         users.hashCode ^
+        activityCount.hashCode ^
         personalExpenseId.hashCode;
   }
 }

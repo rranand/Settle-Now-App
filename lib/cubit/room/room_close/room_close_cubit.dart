@@ -12,16 +12,19 @@ class RoomCloseCubit extends Cubit<RoomCloseState> {
   void closeRoom(String id, String uid) async {
     if (state is RoomCloseSuccess && (state as RoomCloseSuccess).roomID == id) {
       return emit(
-        RoomCloseSuccess(id, (state as RoomCloseSuccess).retryCount + 1),
+        RoomCloseSuccess(
+          roomID: id,
+          retryCount: (state as RoomCloseSuccess).retryCount + 1,
+        ),
       );
     }
     emit(RoomCloseLoading());
     try {
       await repo.closeRoom(id);
       _roomUserCubit.updateCloseStatus(id, uid, false);
-      return emit(RoomCloseSuccess(id, 1));
+      return emit(RoomCloseSuccess(roomID: id, retryCount: 1));
     } catch (e) {
-      return emit(RoomCloseFailure(id, e.toString()));
+      return emit(RoomCloseFailure(roomID: id, error: e.toString()));
     }
   }
 

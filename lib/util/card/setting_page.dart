@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -86,23 +87,24 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   bool calculateIsLeavableForRoom(
-    List<RoomSettleModel> roomSettleData,
-    List<RoomTransactionModel> transData,
+    LinkedHashMap<String, RoomSettleModel> roomSettleData,
+    LinkedHashMap<String, RoomTransactionModel> transData,
   ) {
-    for (int i = 0; i < roomSettleData.length; i++) {
-      if (roomSettleData[i].sender.id == _loggedInUser.id ||
-          roomSettleData[i].receiver.id == _loggedInUser.id) {
+    for (RoomSettleModel eachTransaction in roomSettleData.values) {
+      if (eachTransaction.sender.id == _loggedInUser.id ||
+          eachTransaction.receiver.id == _loggedInUser.id) {
         return false;
       }
     }
 
-    for (int i = 0; i < transData.length; i++) {
-      if (transData[i].createdBy == _loggedInUser.id) {
+    for (RoomTransactionModel eachTransaction in transData.values) {
+      if (eachTransaction.createdBy == _loggedInUser.id) {
         return false;
       }
 
-      for (int j = 0; j < transData[i].users.length; j++) {
-        if (transData[i].users[j].id == _loggedInUser.id) {
+      final allUsers = eachTransaction.users;
+      for (int i = 0; i < allUsers.length; i++) {
+        if (allUsers[i].id == _loggedInUser.id) {
           return false;
         }
       }
@@ -112,13 +114,14 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   bool calculateIsLeavableForLendenRoom(
-    List<LendenTransactionModel> transData,
+    LinkedHashMap<String, LendenTransactionModel> transData,
   ) {
-    for (int i = 0; i < transData.length; i++) {
-      if (transData[i].createdBy == _loggedInUser.id) {
+    for (LendenTransactionModel eachTransaction in transData.values) {
+      if (eachTransaction.createdBy == _loggedInUser.id) {
         return false;
       }
     }
+
     return true;
   }
 

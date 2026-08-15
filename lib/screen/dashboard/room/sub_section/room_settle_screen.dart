@@ -45,7 +45,7 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
           builder: (context, state) {
             List<RoomSettleModel> data = [];
             if (state is RoomSettleSuccess) {
-              data = state.data;
+              data = state.dataList;
             } else {
               data = List.filled(11, RoomSettleModel.empty());
             }

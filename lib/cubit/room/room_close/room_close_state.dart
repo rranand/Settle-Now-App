@@ -10,12 +10,12 @@ final class RoomCloseLoading extends RoomCloseState {}
 final class RoomCloseSuccess extends RoomCloseState {
   final String roomID;
   final int retryCount;
-  RoomCloseSuccess(this.roomID, this.retryCount);
+  RoomCloseSuccess({required this.roomID, required this.retryCount});
 }
 
 final class RoomCloseFailure extends RoomCloseState {
   final String roomID;
   final String error;
 
-  RoomCloseFailure(this.roomID, this.error);
+  RoomCloseFailure({required this.roomID, required this.error});
 }

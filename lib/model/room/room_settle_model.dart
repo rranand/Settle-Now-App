@@ -9,6 +9,7 @@ class RoomSettleModel {
   double amount = 0;
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
+  int activityCount;
 
   RoomSettleModel({
     required this.id,
@@ -17,9 +18,10 @@ class RoomSettleModel {
     required this.amount,
     required this.createdOn,
     required this.modifiedOn,
+    required this.activityCount,
   });
 
-  RoomSettleModel.empty({this.hasData = false});
+  RoomSettleModel.empty({this.hasData = false}) : activityCount = 0;
 
   RoomSettleModel copyWith({
     String? id,
@@ -28,6 +30,7 @@ class RoomSettleModel {
     double? amount,
     DateTime? createdOn,
     DateTime? modifiedOn,
+    int? activityCount,
   }) {
     return RoomSettleModel(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class RoomSettleModel {
       amount: amount ?? this.amount,
       createdOn: createdOn ?? this.createdOn,
       modifiedOn: modifiedOn ?? this.modifiedOn,
+      activityCount: activityCount ?? this.activityCount,
     );
   }
 
@@ -61,6 +65,7 @@ class RoomSettleModel {
       amount: double.parse(map['amount'].toString()),
       createdOn: DateTime.parse(map['created_on']).toLocal(),
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
+      activityCount: map['activity_count'] as int,
     );
   }
 
@@ -92,7 +97,8 @@ class RoomSettleModel {
         other.sender.id == sender.id &&
         other.amount == amount &&
         other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn;
+        other.modifiedOn == modifiedOn &&
+        other.activityCount == activityCount;
   }
 
   @override
@@ -103,6 +109,7 @@ class RoomSettleModel {
         sender.id.hashCode ^
         amount.hashCode ^
         createdOn.hashCode ^
-        modifiedOn.hashCode;
+        modifiedOn.hashCode ^
+        activityCount.hashCode;
   }
 }

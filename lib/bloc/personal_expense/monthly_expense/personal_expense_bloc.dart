@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
@@ -14,11 +17,26 @@ class PersonalMonthlyExpenseBloc
 
   PersonalMonthlyExpenseBloc(this.repo, this.dashboardBloc)
     : super(PersonalMonthlyExpenseInitial()) {
-    on<PersonalMonthlyExpenseFetch>(_personalExpenseFetch);
-    on<PersonalMonthlyExpenseAdd>(_personalMonthlyExpenseAdd);
-    on<PersonalMonthlyExpenseUpdate>(_personalMonthlyExpenseUpdate);
-    on<PersonalMonthlyExpenseDelete>(_personalMonthlyExpenseDelete);
-    on<PersonalMonthlyExpenseReset>(_personalMonthlyExpenseReset);
+    on<PersonalMonthlyExpenseFetch>(
+      _personalExpenseFetch,
+      transformer: droppable(),
+    );
+    on<PersonalMonthlyExpenseAdd>(
+      _personalMonthlyExpenseAdd,
+      transformer: sequential(),
+    );
+    on<PersonalMonthlyExpenseUpdate>(
+      _personalMonthlyExpenseUpdate,
+      transformer: sequential(),
+    );
+    on<PersonalMonthlyExpenseDelete>(
+      _personalMonthlyExpenseDelete,
+      transformer: sequential(),
+    );
+    on<PersonalMonthlyExpenseReset>(
+      _personalMonthlyExpenseReset,
+      transformer: droppable(),
+    );
   }
 
   void _updateDashboardPersonalExpense(
@@ -40,13 +58,19 @@ class PersonalMonthlyExpenseBloc
     PersonalMonthlyExpenseFetch event,
     Emitter<PersonalMonthlyExpenseState> emit,
   ) async {
-    if (state is PersonalMonthlyExpenseLoading) return;
     emit(PersonalMonthlyExpenseLoading());
+
     try {
       String id = (event.year + event.month).toLowerCase();
       final data = await repo.fetchData(event.year, event.month);
       _updateDashboardPersonalExpense(id, data);
-      return emit(PersonalMonthlyExpenseFetchSuccess(id: id, data: data));
+
+      final allRecords =
+          LinkedHashMap<String, PersonalExpenseTransactionModel>.fromEntries(
+            data.map((t) => MapEntry(t.id, t)),
+          );
+
+      return emit(PersonalMonthlyExpenseFetchSuccess(id: id, data: allRecords));
     } catch (e) {
       return emit(PersonalMonthlyExpenseFailure(error: e.toString()));
     }
@@ -59,10 +83,18 @@ class PersonalMonthlyExpenseBloc
     if (state is! PersonalMonthlyExpenseFetchSuccess) {
       return;
     }
-    final oldData = state as PersonalMonthlyExpenseFetchSuccess;
-    List<PersonalExpenseTransactionModel> data = [event.data, ...oldData.data];
-    _updateDashboardPersonalExpense(oldData.id, data);
-    return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
+    final oldState = state as PersonalMonthlyExpenseFetchSuccess;
+
+    LinkedHashMap<String, PersonalExpenseTransactionModel> allRecords =
+        LinkedHashMap();
+    allRecords.addAll({event.data.id: event.data});
+    allRecords.addAll(oldState.data);
+
+    _updateDashboardPersonalExpense(oldState.id, allRecords.values.toList());
+
+    return emit(
+      PersonalMonthlyExpenseFetchSuccess(id: oldState.id, data: allRecords),
+    );
   }
 
   void _personalMonthlyExpenseUpdate(
@@ -72,16 +104,20 @@ class PersonalMonthlyExpenseBloc
     if (state is! PersonalMonthlyExpenseFetchSuccess) {
       return;
     }
-    final oldData = state as PersonalMonthlyExpenseFetchSuccess;
-    List<PersonalExpenseTransactionModel> data = [...oldData.data];
-    for (int i = 0; i < data.length; i++) {
-      if (data[i].id == event.data.id) {
-        data[i] = event.data;
-        break;
-      }
+    final oldState = state as PersonalMonthlyExpenseFetchSuccess;
+
+    LinkedHashMap<String, PersonalExpenseTransactionModel> allRecords =
+        LinkedHashMap();
+    allRecords.addAll(oldState.data);
+    if (allRecords.containsKey(event.data.id)) {
+      allRecords[event.data.id] = event.data;
     }
-    _updateDashboardPersonalExpense(oldData.id, data);
-    return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
+
+    _updateDashboardPersonalExpense(oldState.id, allRecords.values.toList());
+
+    return emit(
+      PersonalMonthlyExpenseFetchSuccess(id: oldState.id, data: allRecords),
+    );
   }
 
   void _personalMonthlyExpenseDelete(
@@ -91,20 +127,18 @@ class PersonalMonthlyExpenseBloc
     if (state is! PersonalMonthlyExpenseFetchSuccess) {
       return;
     }
-    final oldData = state as PersonalMonthlyExpenseFetchSuccess;
-    List<PersonalExpenseTransactionModel> data = [...oldData.data];
-    if (event.isLoading) {
-      for (int i = 0; i < data.length; i++) {
-        if (data[i].id == event.expenseID) {
-          data[i].hasData = false;
-          break;
-        }
-      }
-    } else {
-      data.removeWhere((element) => element.id == event.expenseID);
-    }
-    _updateDashboardPersonalExpense(oldData.id, data);
-    return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
+    final oldState = state as PersonalMonthlyExpenseFetchSuccess;
+
+    LinkedHashMap<String, PersonalExpenseTransactionModel> allRecords =
+        LinkedHashMap();
+    allRecords.addAll(oldState.data);
+    allRecords.remove(event.expenseID);
+
+    _updateDashboardPersonalExpense(oldState.id, allRecords.values.toList());
+
+    return emit(
+      PersonalMonthlyExpenseFetchSuccess(id: oldState.id, data: allRecords),
+    );
   }
 
   void _personalMonthlyExpenseReset(

@@ -12,17 +12,17 @@ class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {
         (state as RoomCloseRequestSuccess).roomID == id) {
       return emit(
         RoomCloseRequestSuccess(
-          id,
-          (state as RoomCloseRequestSuccess).retryCount + 1,
+          roomID: id,
+          retryCount: (state as RoomCloseRequestSuccess).retryCount + 1,
         ),
       );
     }
     emit(RoomCloseRequestLoading());
     try {
       await repo.closeRoomRequest(id);
-      return emit(RoomCloseRequestSuccess(id, 1));
+      return emit(RoomCloseRequestSuccess(roomID: id, retryCount: 1));
     } catch (e) {
-      return emit(RoomCloseRequestFailure(id, e.toString()));
+      return emit(RoomCloseRequestFailure(roomID: id, error: e.toString()));
     }
   }
 

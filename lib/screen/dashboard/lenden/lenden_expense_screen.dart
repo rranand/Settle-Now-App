@@ -461,7 +461,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
         if (state is LendenRoomFetchSuccess) {
           isLoaded = true;
           lendenRoomData = state.roomData;
-          lendenTransactionData = state.data;
+          lendenTransactionData = state.dataList;
           loggedInUserData = state.roomData.users.firstWhere(
             (ele) => ele.id == _loggedInUser.id,
           );
@@ -471,7 +471,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
           isEditable = loggedInUserData.active;
 
           context.read<FilterCubit>().updateState(
-            FilterState(id: state.id, data: state.data),
+            FilterState(id: state.id, data: lendenTransactionData),
             loggedInUserData.id,
             TransactionType.lenden,
           );

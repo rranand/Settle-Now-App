@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
@@ -12,9 +13,18 @@ class NotificationActionBloc
 
   NotificationActionBloc(this.notificationBloc, this.notificationRepository)
     : super(NotificationActionState()) {
-    on<NotificationActionAcceptRequested>(_notificationActionAcceptRequested);
-    on<NotificationActionDeclineRequested>(_notificationActionDeclineRequested);
-    on<NotificationActionReset>(_notificationActionReset);
+    on<NotificationActionAcceptRequested>(
+      _notificationActionAcceptRequested,
+      transformer: sequential(),
+    );
+    on<NotificationActionDeclineRequested>(
+      _notificationActionDeclineRequested,
+      transformer: sequential(),
+    );
+    on<NotificationActionReset>(
+      _notificationActionReset,
+      transformer: droppable(),
+    );
   }
 
   void _notificationActionAcceptRequested(

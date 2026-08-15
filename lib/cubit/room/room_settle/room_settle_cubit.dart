@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/cubit/cubit_core.dart';
@@ -16,30 +18,51 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
       return;
     }
 
-    List<RoomSettleModel> oldData = [];
+    RoomSettleSuccess? oldState;
 
     if (!forceRefresh && state is RoomSettleSuccess) {
-      final oldState = state as RoomSettleSuccess;
+      oldState = state as RoomSettleSuccess;
       if (oldState.id == id) {
         if (!oldState.hasMoreData) {
           return;
         }
 
-        oldData = [...(oldState.data)];
+        emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+      } else {
+        oldState = null;
       }
     }
 
-    emit(RoomSettleLoading(id: id));
+    if (oldState == null) {
+      emit(RoomSettleLoading(id: id));
+    }
+
     try {
       final data = await repo.fetchSettleData(
         id,
-        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
+        oldState == null || oldState.dataList.isEmpty
+            ? DateTime.now()
+            : oldState.dataList.last.createdOn,
       );
+
+      final newData = LinkedHashMap<String, RoomSettleModel>.fromEntries(
+        data.first.map((t) => MapEntry(t.id, t)),
+      );
+      LinkedHashMap<String, RoomSettleModel> allRecords = LinkedHashMap();
+      allRecords.addAll(oldState?.data ?? <String, RoomSettleModel>{});
+      allRecords.addAll(newData);
+
       return emit(
-        RoomSettleSuccess(id: id, data: data.first, hasMoreData: data.second),
+        RoomSettleSuccess(id: id, data: allRecords, hasMoreData: data.second),
       );
     } catch (e) {
-      return emit(RoomSettleFailure(error: e.toString()));
+      if (oldState == null) {
+        return emit(RoomSettleFailure(error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+        );
+      }
     }
   }
 
@@ -47,14 +70,19 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     if (state is! RoomSettleSuccess) {
       return;
     }
-    final roomSettleSuccessState = state as RoomSettleSuccess;
-    List<RoomSettleModel> newArr = [data, ...roomSettleSuccessState.data];
+    final oldState = state as RoomSettleSuccess;
+
+    LinkedHashMap<String, RoomSettleModel> allRecords = LinkedHashMap();
+    allRecords.addAll({data.id: data});
+    allRecords.addAll(oldState.data);
+
     roomUserCubit.onAddNewSettleExpense(data);
+
     return emit(
       RoomSettleSuccess(
-        id: roomSettleSuccessState.id,
-        data: newArr,
-        hasMoreData: roomSettleSuccessState.hasMoreData,
+        id: oldState.id,
+        data: allRecords,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }
@@ -63,23 +91,21 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     if (state is! RoomSettleSuccess) {
       return;
     }
-    final roomSettleSuccessState = state as RoomSettleSuccess;
-    List<RoomSettleModel> oldArr = [...roomSettleSuccessState.data];
-    RoomSettleModel oldData = RoomSettleModel.empty();
+    final oldState = state as RoomSettleSuccess;
 
-    for (int i = 0; i < oldArr.length; i++) {
-      if (oldArr[i].id == data.id) {
-        oldData = oldArr[i];
-        oldArr[i] = data;
-        break;
-      }
-    }
+    RoomSettleModel oldData = oldState.data[data.id] ?? RoomSettleModel.empty();
+
+    final updatedData = LinkedHashMap<String, RoomSettleModel>.from(
+      oldState.data,
+    )..[data.id] = data;
+
     roomUserCubit.updateSettleExpense(oldData, data);
+
     return emit(
       RoomSettleSuccess(
-        id: roomSettleSuccessState.id,
-        data: oldArr,
-        hasMoreData: roomSettleSuccessState.hasMoreData,
+        id: oldState.id,
+        data: updatedData,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }
@@ -88,24 +114,21 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     if (state is! RoomSettleSuccess) {
       return;
     }
-    final roomSettleSuccessState = state as RoomSettleSuccess;
-    List<RoomSettleModel> oldArr = [...roomSettleSuccessState.data];
+    final oldState = state as RoomSettleSuccess;
+    RoomSettleModel oldData =
+        oldState.data[settleExpenseID] ?? RoomSettleModel.empty();
 
-    int index = -1;
-    for (int i = 0; i < oldArr.length; i++) {
-      if (oldArr[i].id == settleExpenseID) {
-        index = i;
-        break;
-      }
-    }
-    if (index != -1) {
-      roomUserCubit.deleteSettleExpense(oldArr.removeAt(index));
-    }
+    final updatedData = LinkedHashMap<String, RoomSettleModel>.from(
+      oldState.data,
+    )..remove(settleExpenseID);
+
+    roomUserCubit.deleteSettleExpense(oldData);
+
     return emit(
       RoomSettleSuccess(
-        id: roomSettleSuccessState.id,
-        data: oldArr,
-        hasMoreData: roomSettleSuccessState.hasMoreData,
+        id: oldState.id,
+        data: updatedData,
+        hasMoreData: oldState.hasMoreData,
       ),
     );
   }

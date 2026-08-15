@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow/constant/constant_core.dart';
-import 'package:settlenow/cubit/cubit_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/router/router_constant.dart';
@@ -63,33 +61,23 @@ class SettleCard extends StatelessWidget {
     return str;
   }
 
-  Widget showTimeline() {
-    return BlocBuilder<RoomActivityCubit, RoomActivityState>(
-      builder: (context, state) {
-        if (state is RoomActivitySuccess) {
-          List<ActivityModel>? activityData =
-              state.transactionWiseActivity[data.id];
-
-          if (activityData != null && activityData.isNotEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 6.0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(
-                  UiConstant.cardBorderRadius,
-                ),
-                child: Icon(Icons.timeline_outlined, color: Colors.grey),
-                onTap: () {
-                  context.push(
-                    "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomActivityRouteName}/${data.id}",
-                  );
-                },
-              ),
+  Widget showTimeline(BuildContext context) {
+    if (data.activityCount > 0) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 6.0),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          child: Icon(Icons.timeline_outlined, color: Colors.grey),
+          onTap: () {
+            context.push(
+              "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomActivityRouteName}/${data.id}",
             );
-          }
-        }
-        return SizedBox.shrink();
-      },
-    );
+          },
+        ),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
   }
 
   @override
@@ -147,7 +135,7 @@ class SettleCard extends StatelessWidget {
                                 color: Colors.green,
                               ),
                             ),
-                            showTimeline(),
+                            showTimeline(context),
                           ],
                         )
                         : CustomShimmerEffect.textWidget(

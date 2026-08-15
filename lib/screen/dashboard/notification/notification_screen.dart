@@ -105,7 +105,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               builder: (context, state) {
                 List<NotificationModel> notificationData = [];
                 if (state is NotificationFetchSuccess) {
-                  notificationData = state.data;
+                  notificationData = state.dataList;
                 } else if (state is NotificationLoading) {
                   notificationData = List.generate(
                     11,

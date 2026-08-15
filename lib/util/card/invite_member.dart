@@ -156,7 +156,7 @@ class _InviteMemberState extends State<InviteMember> {
             final notificationState = context.watch<NotificationBloc>().state;
             List<NotificationModel> notificationData = [];
             if (notificationState is NotificationFetchSuccess) {
-              notificationData = notificationState.data;
+              notificationData = notificationState.dataList;
             }
             Set<String> alreadyMember = {};
             Set<String> alreadyInvited = {};
@@ -227,7 +227,7 @@ class _InviteMemberState extends State<InviteMember> {
 
       List<NotificationModel> notificationData = [];
       if (notificationState is NotificationFetchSuccess) {
-        notificationData = notificationState.data;
+        notificationData = notificationState.dataList;
       }
       String roomID = "";
       if (lendenRoomState is LendenRoomFetchSuccess) {

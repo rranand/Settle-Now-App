@@ -8,13 +8,15 @@ final class NotificationInitial extends NotificationState {}
 final class NotificationLoading extends NotificationState {}
 
 final class NotificationFetchSuccess extends NotificationState {
-  final List<NotificationModel> data;
+  final LinkedHashMap<String, NotificationModel> data;
+  final List<NotificationModel> dataList;
 
-  NotificationFetchSuccess(this.data);
+  NotificationFetchSuccess({required this.data})
+    : dataList = data.values.toList();
 }
 
 final class NotificationFailure extends NotificationState {
   final String error;
 
-  NotificationFailure(this.error);
+  NotificationFailure({required this.error});
 }

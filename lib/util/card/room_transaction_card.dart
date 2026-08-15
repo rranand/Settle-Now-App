@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
 import 'package:settlenow/constant/constant_core.dart';
-import 'package:settlenow/cubit/cubit_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/router/router_constant.dart';
@@ -143,32 +142,18 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
   }
 
   Widget showTimeline() {
-    if (widget.data.hasData) {
-      return BlocBuilder<RoomActivityCubit, RoomActivityState>(
-        builder: (context, state) {
-          if (state is RoomActivitySuccess) {
-            List<ActivityModel>? data =
-                state.transactionWiseActivity[widget.data.id];
-
-            if (data != null && data.isNotEmpty) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 6.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
-                  ),
-                  child: Icon(Icons.timeline_outlined, color: Colors.grey),
-                  onTap: () {
-                    context.push(
-                      "${RouterConstants.roomRouteName}/${widget.roomID}${RouterConstants.roomActivityRouteName}/${widget.data.id}",
-                    );
-                  },
-                ),
-              );
-            }
-          }
-          return SizedBox.shrink();
-        },
+    if (widget.data.hasData && widget.data.activityCount > 0) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 6.0),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          child: Icon(Icons.timeline_outlined, color: Colors.grey),
+          onTap: () {
+            context.push(
+              "${RouterConstants.roomRouteName}/${widget.roomID}${RouterConstants.roomActivityRouteName}/${widget.data.id}",
+            );
+          },
+        ),
       );
     } else {
       return SizedBox.shrink();

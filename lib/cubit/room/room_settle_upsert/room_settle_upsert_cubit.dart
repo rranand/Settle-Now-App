@@ -20,38 +20,34 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
         data,
       );
       roomSettleCubit.addNewSettleExpense(newData);
-      return emit(RoomSettleUpsertSuccess(newData));
+      return emit(RoomSettleUpsertSuccess(data: newData));
     } catch (e) {
-      return emit(RoomSettleUpsertFailure(e.toString()));
+      return emit(RoomSettleUpsertFailure(error: e.toString()));
     }
   }
 
   void updateSettleExpense(String id, RoomSettleModel data) async {
     emit(RoomSettleUpsertLoading());
     try {
-      final RoomSettleModel updateData = await repo.updateSettleExpense(
-        id,
-        data,
+      final updateData = await repo.updateSettleExpense(id, data);
+      final newUpdatedCount = updateData.copyWith(
+        activityCount: updateData.activityCount + 1,
       );
-      roomSettleCubit.updateSettleExpense(updateData);
-      return emit(RoomSettleUpsertSuccess(updateData));
+      roomSettleCubit.updateSettleExpense(newUpdatedCount);
+      return emit(RoomSettleUpsertSuccess(data: newUpdatedCount));
     } catch (e) {
-      return emit(RoomSettleUpsertFailure(e.toString()));
+      return emit(RoomSettleUpsertFailure(error: e.toString()));
     }
   }
 
   void deleteSettleExpense(String id, String settleExpenseID) async {
     emit(RoomSettleUpsertLoading());
     try {
-      bool isDeleted = await repo.deleteSettleExpense(id, settleExpenseID);
-      if (isDeleted) {
-        roomSettleCubit.deleteSettleExpense(settleExpenseID);
-        return emit(RoomSettleUpsertSuccess(RoomSettleModel.empty()));
-      } else {
-        return emit(RoomSettleUpsertFailure("Something Went Wrong!"));
-      }
+      await repo.deleteSettleExpense(id, settleExpenseID);
+      roomSettleCubit.deleteSettleExpense(settleExpenseID);
+      return emit(RoomSettleUpsertSuccess(data: RoomSettleModel.empty()));
     } catch (e) {
-      return emit(RoomSettleUpsertFailure(e.toString()));
+      return emit(RoomSettleUpsertFailure(error: e.toString()));
     }
   }
 

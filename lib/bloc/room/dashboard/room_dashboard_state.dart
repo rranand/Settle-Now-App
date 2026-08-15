@@ -8,21 +8,33 @@ final class RoomDashboardInitial extends RoomDashboardState {}
 final class RoomDashboardLoading extends RoomDashboardState {}
 
 final class RoomDashboardFetchSuccess extends RoomDashboardState {
-  final bool activeHasMoreData;
-  final bool inactiveHasMoreData;
-  final List<RoomInfoModel> activeData;
-  final List<RoomInfoModel> inactiveData;
+  final RoomDashboardModel activeRoomDashboardModel;
+  final RoomDashboardModel inactiveRoomDashboardModel;
+  final String? toastMessage;
 
   RoomDashboardFetchSuccess({
-    required this.activeHasMoreData,
-    required this.inactiveHasMoreData,
-    required this.activeData,
-    required this.inactiveData,
+    required this.activeRoomDashboardModel,
+    required this.inactiveRoomDashboardModel,
+    this.toastMessage,
   });
+
+  RoomDashboardFetchSuccess copyWith({
+    RoomDashboardModel? activeRoomDashboardModel,
+    RoomDashboardModel? inactiveRoomDashboardModel,
+    String? toastMessage,
+  }) {
+    return RoomDashboardFetchSuccess(
+      activeRoomDashboardModel:
+          activeRoomDashboardModel ?? this.activeRoomDashboardModel,
+      inactiveRoomDashboardModel:
+          inactiveRoomDashboardModel ?? this.inactiveRoomDashboardModel,
+      toastMessage: toastMessage,
+    );
+  }
 }
 
 final class RoomDashboardFailure extends RoomDashboardState {
   final String error;
 
-  RoomDashboardFailure(this.error);
+  RoomDashboardFailure({required this.error});
 }

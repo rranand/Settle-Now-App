@@ -11,11 +11,11 @@ final class RoomUserSuccess extends RoomUserState {
   final String id;
   final List<RoomUserModel> data;
 
-  RoomUserSuccess(this.id, this.data);
+  RoomUserSuccess({required this.id, required this.data});
 }
 
 final class RoomUserFailure extends RoomUserState {
   final String error;
 
-  RoomUserFailure(this.error);
+  RoomUserFailure({required this.error});
 }

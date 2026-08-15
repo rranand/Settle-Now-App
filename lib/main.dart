@@ -22,13 +22,9 @@ import 'package:settlenow/util/util_core.dart';
 import 'firebase/firebase_options.dart' as prod;
 import 'firebase/firebase_options_dev.dart' as dev;
 
-// TODO: Use bloc concurrency
+// TODO: Show better UI to load more data for same room
 // TODO: Add proper way to show error message
-// TODO: Replace list with LinkedHashMap
-// TODO: Add serach apis to search api
-// TODO: Show better UI to load more data for aame room
-// TODO: Don't use elementat
-// TODO: Send if transaction has activity
+// TODO: Add search apis to search api
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

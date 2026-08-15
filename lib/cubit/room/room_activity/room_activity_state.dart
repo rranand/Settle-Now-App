@@ -13,15 +13,38 @@ final class RoomActivityLoading extends RoomActivityState {
 final class RoomActivitySuccess extends RoomActivityState {
   final String id;
   final List<ActivityModel> data;
-  final Map<String, List<ActivityModel>> transactionWiseActivity;
+  final LinkedHashMap<String, List<ActivityModel>> transactionWiseActivity;
   final bool hasMoreData;
+  final bool isLoadingMore;
+  final String? toastMessage;
 
   RoomActivitySuccess({
     required this.id,
     required this.data,
     required this.transactionWiseActivity,
     required this.hasMoreData,
+    this.isLoadingMore = false,
+    this.toastMessage,
   });
+
+  RoomActivitySuccess copyWith({
+    String? id,
+    List<ActivityModel>? data,
+    LinkedHashMap<String, List<ActivityModel>>? transactionWiseActivity,
+    bool? hasMoreData,
+    bool? isLoadingMore,
+    String? toastMessage,
+  }) {
+    return RoomActivitySuccess(
+      id: id ?? this.id,
+      data: data ?? this.data,
+      transactionWiseActivity:
+          transactionWiseActivity ?? this.transactionWiseActivity,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      toastMessage: toastMessage,
+    );
+  }
 }
 
 final class RoomActivityFailure extends RoomActivityState {

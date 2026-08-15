@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
@@ -16,39 +18,58 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
       return;
     }
 
-    List<ActivityModel> oldData = [];
+    RoomActivitySuccess? oldState;
 
     if (!forceRefresh && state is RoomActivitySuccess) {
-      final oldState = state as RoomActivitySuccess;
+      oldState = state as RoomActivitySuccess;
       if (oldState.id == id) {
         if (!oldState.hasMoreData) {
           return;
         }
 
-        oldData = [...(oldState.data)];
+        emit(oldState.copyWith(isLoadingMore: true, toastMessage: null));
+      } else {
+        oldState = null;
       }
     }
 
-    emit(RoomActivityLoading(id: id));
-    try {
-      final pairedData = await repo.fetchActivity(
-        id,
-        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
-      );
-      final data = pairedData.first;
-      Map<String, List<ActivityModel>> transactionWiseActivity = {};
+    if (oldState == null) {
+      emit(RoomActivityLoading(id: id));
+    }
 
-      for (int i = data.length - 1; i >= 0; i--) {
-        switch (data[i].entityType) {
+    try {
+      final data = await repo.fetchActivity(
+        id,
+        oldState?.data.isEmpty ?? true
+            ? DateTime.now()
+            : oldState!.data.last.createdOn,
+      );
+
+      List<ActivityModel> allRecords = <ActivityModel>[];
+      allRecords.addAll(oldState?.data ?? <ActivityModel>[]);
+      allRecords.addAll(data.first);
+
+      LinkedHashMap<String, List<ActivityModel>> transactionWiseActivity =
+          LinkedHashMap<String, List<ActivityModel>>.from(
+            oldState?.transactionWiseActivity ??
+                <String, List<ActivityModel>>{},
+          );
+
+      for (int i = 0; i < data.first.length; i++) {
+        ActivityModel eachActivity = data.first[i];
+
+        switch (eachActivity.entityType) {
           case ActivityType.transactionAdded:
           case ActivityType.transactionUpdated:
           case ActivityType.settlementAdded:
           case ActivityType.settlementUpdated:
             {
-              if (transactionWiseActivity.containsKey(data[i].entityId)) {
-                transactionWiseActivity[data[i].entityId]!.add(data[i]);
+              if (transactionWiseActivity.containsKey(eachActivity.entityId)) {
+                transactionWiseActivity[eachActivity.entityId]!.add(
+                  eachActivity,
+                );
               } else {
-                transactionWiseActivity[data[i].entityId] = [data[i]];
+                transactionWiseActivity[eachActivity.entityId] = [eachActivity];
               }
               break;
             }
@@ -59,13 +80,19 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
       return emit(
         RoomActivitySuccess(
           id: id,
-          data: data,
+          data: allRecords,
           transactionWiseActivity: transactionWiseActivity,
-          hasMoreData: pairedData.second,
+          hasMoreData: data.second,
         ),
       );
     } catch (e) {
-      return emit(RoomActivityFailure(id: id, error: e.toString()));
+      if (oldState == null) {
+        return emit(RoomActivityFailure(id: id, error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(isLoadingMore: false, toastMessage: e.toString()),
+        );
+      }
     }
   }
 }
