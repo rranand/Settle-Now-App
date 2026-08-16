@@ -31,4 +31,34 @@ extension RoomActivityDataProvider on RoomDataProvider {
       rethrow;
     }
   }
+
+  Future<List<ActivityModel>> fetchActivityByEntityID(
+    String id,
+    String entityID,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'room/$id/activity/$entityID',
+        "get",
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final allActivity = data['data'];
+        List<ActivityModel> arr = [];
+
+        if (allActivity != null) {
+          for (int i = 0; i < allActivity.length; i++) {
+            arr.add(ActivityModel.fromMap(allActivity[i]));
+          }
+        }
+        return arr;
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

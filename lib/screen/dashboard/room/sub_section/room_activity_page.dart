@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
 import 'package:settlenow/constant/constant_core.dart';
 
@@ -32,6 +33,72 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
     }
   }
 
+  void _dataFetchNormal() {
+    final oldState = context.read<RoomActivityCubit>().state;
+    bool toBeFetched =
+        !(oldState is RoomActivitySuccess && oldState.id == widget.id);
+
+    context.read<RoomActivityCubit>().fetchData(widget.id, toBeFetched);
+
+    addPaginationListener<RoomActivityCubit, RoomActivityState>(
+      scrollController: _gridViewScrollController,
+      context: context,
+      hasMore: (state) => state is RoomActivitySuccess && state.hasMoreData,
+      isLoadingMore:
+          (state) => state is RoomActivitySuccess && state.isLoadingMore,
+      onFetch:
+          () => context.read<RoomActivityCubit>().fetchData(widget.id, false),
+    );
+  }
+
+  void _dataFetchEntityWise(BuildContext context) {
+    final oldState = context.read<RoomActivityCubit>().state;
+    final roomOldState = context.read<RoomBloc>().state;
+    final roomSettleOldState = context.read<RoomSettleCubit>().state;
+
+    int activityCount = -1;
+
+    if (roomOldState is RoomFetchSuccess && roomOldState.id == widget.id) {
+      final transactionData = roomOldState.data[widget.transactionID!];
+
+      if (transactionData != null) {
+        activityCount = transactionData.activityCount;
+      }
+    }
+
+    if (activityCount == -1 &&
+        roomSettleOldState is RoomSettleSuccess &&
+        roomSettleOldState.id == widget.id) {
+      final settleData = roomSettleOldState.data[widget.transactionID!];
+
+      if (settleData != null) {
+        activityCount = settleData.activityCount;
+      }
+    }
+
+    if (activityCount <= 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted && context.canPop()) {
+          context.pop();
+        }
+      });
+      return;
+    }
+
+    int currentActivityCount = 0;
+    if (oldState is RoomActivitySuccess && oldState.id == widget.id) {
+      currentActivityCount =
+          oldState.transactionWiseActivity[widget.transactionID!]?.length ?? 0;
+    }
+
+    if (currentActivityCount < activityCount) {
+      context.read<RoomActivityCubit>().fetchDataByEntityID(
+        widget.id,
+        widget.transactionID!,
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -39,20 +106,11 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
 
-      final oldState = context.read<RoomActivityCubit>().state;
-      if (!(oldState is RoomActivitySuccess && oldState.id == widget.id)) {
-        context.read<RoomActivityCubit>().fetchData(widget.id, true);
+      if (widget.transactionID != null) {
+        _dataFetchEntityWise(context);
+      } else {
+        _dataFetchNormal();
       }
-
-      addPaginationListener<RoomActivityCubit, RoomActivityState>(
-        scrollController: _gridViewScrollController,
-        context: context,
-        hasMore: (state) => state is RoomActivitySuccess && state.hasMoreData,
-        isLoadingMore:
-            (state) => state is RoomActivitySuccess && state.isLoadingMore,
-        onFetch:
-            () => context.read<RoomActivityCubit>().fetchData(widget.id, false),
-      );
     }
   }
 
@@ -78,7 +136,14 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
       );
       return;
     }
-    context.read<RoomActivityCubit>().fetchData(widget.id, true);
+    if (widget.transactionID != null) {
+      context.read<RoomActivityCubit>().fetchDataByEntityID(
+        widget.id,
+        widget.transactionID!,
+      );
+    } else {
+      context.read<RoomActivityCubit>().fetchData(widget.id, true);
+    }
   }
 
   Widget _builderFooter(BuildContext context, RoomActivityState state) {
@@ -119,7 +184,14 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
                   }
 
                   if (state is RoomActivitySuccess) {
-                    data = state.data;
+                    if (widget.transactionID != null) {
+                      data =
+                          state.transactionWiseActivity[widget
+                              .transactionID!] ??
+                          [];
+                    } else {
+                      data = state.data;
+                    }
                   }
 
                   return CustomScrollView(
@@ -138,23 +210,14 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
                             : [
                               SliverList.builder(
                                 itemBuilder: (context, index) {
-                                  ActivityModel activityData = data[index];
-
-                                  if (widget.transactionID != null) {
-                                    if (widget.transactionID ==
-                                        activityData.entityId) {
-                                      return ActivityCard(data: activityData);
-                                    } else {
-                                      return SizedBox.shrink();
-                                    }
-                                  } else {
-                                    return ActivityCard(data: activityData);
-                                  }
+                                  return ActivityCard(data: data[index]);
                                 },
                                 itemCount: data.length,
                               ),
                               genericFooterForDashboard(
-                                ValueNotifier<bool>(false),
+                                ValueNotifier<bool>(
+                                  widget.transactionID != null,
+                                ),
                                 _builderFooter,
                                 context,
                                 state,

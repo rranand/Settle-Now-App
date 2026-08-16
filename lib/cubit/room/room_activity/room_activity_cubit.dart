@@ -50,14 +50,9 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
       allRecords.addAll(data.first);
 
       LinkedHashMap<String, List<ActivityModel>> transactionWiseActivity =
-          LinkedHashMap<String, List<ActivityModel>>.from(
-            oldState?.transactionWiseActivity ??
-                <String, List<ActivityModel>>{},
-          );
+          LinkedHashMap();
 
-      for (int i = 0; i < data.first.length; i++) {
-        ActivityModel eachActivity = data.first[i];
-
+      for (var eachActivity in allRecords) {
         switch (eachActivity.entityType) {
           case ActivityType.transactionAdded:
           case ActivityType.transactionUpdated:
@@ -77,12 +72,57 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
             {}
         }
       }
+
       return emit(
         RoomActivitySuccess(
           id: id,
           data: allRecords,
           transactionWiseActivity: transactionWiseActivity,
           hasMoreData: data.second,
+        ),
+      );
+    } catch (e) {
+      if (oldState == null) {
+        return emit(RoomActivityFailure(id: id, error: e.toString()));
+      } else {
+        return emit(
+          oldState.copyWith(isLoadingMore: false, error: e.toString()),
+        );
+      }
+    }
+  }
+
+  void fetchDataByEntityID(String id, String entityID) async {
+    if (state is RoomActivityLoading &&
+        (state as RoomActivityLoading).id == id) {
+      return;
+    }
+
+    RoomActivitySuccess? oldState;
+
+    if (state is RoomActivitySuccess) {
+      oldState = state as RoomActivitySuccess;
+    }
+
+    emit(RoomActivityLoading(id: id));
+
+    try {
+      final data = await repo.fetchActivityByEntityID(id, entityID);
+
+      LinkedHashMap<String, List<ActivityModel>> transactionWiseActivity =
+          LinkedHashMap<String, List<ActivityModel>>.from(
+            oldState?.transactionWiseActivity ??
+                <String, List<ActivityModel>>{},
+          )..remove(entityID);
+
+      transactionWiseActivity.addAll({entityID: data});
+
+      return emit(
+        RoomActivitySuccess(
+          id: id,
+          data: oldState?.data ?? <ActivityModel>[],
+          transactionWiseActivity: transactionWiseActivity,
+          hasMoreData: oldState?.hasMoreData ?? true,
         ),
       );
     } catch (e) {

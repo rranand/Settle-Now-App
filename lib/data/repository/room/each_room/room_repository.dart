@@ -202,4 +202,15 @@ class RoomRepository {
       rethrow;
     }
   }
+
+  Future<List<ActivityModel>> fetchActivityByEntityID(
+    String id,
+    String entityID,
+  ) async {
+    try {
+      return await _dataProvider.fetchActivityByEntityID(id, entityID);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
