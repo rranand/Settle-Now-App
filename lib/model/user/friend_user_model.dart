@@ -11,6 +11,7 @@ class FriendUserModel extends BaseUserModel {
   });
 
   FriendUserModel.empty() : phoneNo = "", super.empty();
+  FriendUserModel.unknownFriend() : phoneNo = "", super.unknownUser();
 
   @override
   Map<String, dynamic> toMap() {

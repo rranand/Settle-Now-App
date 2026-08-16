@@ -44,14 +44,7 @@ class UserAmountModel extends BaseUserModel {
   }
 
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
-    BaseUserModel baseData = UserResolver.instance.resolve(map['id'] ?? "");
-
-    if (!baseData.hasData) {
-      baseData = baseData.copyWith(
-        id: map['name'] ?? "",
-        name: map['name'] ?? "",
-      );
-    }
+    BaseUserModel baseData = UserResolver.instance.resolve(map['id']);
 
     return UserAmountModel.fromBaseObject(
       baseData,

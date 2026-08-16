@@ -29,14 +29,7 @@ class LendenUserModel extends BaseUserModel {
   }
 
   factory LendenUserModel.fromUserResolver(Map<String, dynamic> map) {
-    BaseUserModel userData = UserResolver.instance.resolve(map['id'] ?? "");
-
-    if (!userData.hasData) {
-      userData = userData.copyWith(
-        id: map['name'] ?? "",
-        name: map['name'] ?? "",
-      );
-    }
+    BaseUserModel userData = UserResolver.instance.resolve(map['id']);
 
     return LendenUserModel(
       id: userData.id,

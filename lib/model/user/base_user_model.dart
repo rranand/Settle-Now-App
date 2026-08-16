@@ -15,6 +15,11 @@ class BaseUserModel {
       name = "",
       profilePic = "";
 
+  BaseUserModel.unknownUser()
+    : id = "UnknownUser",
+      name = "Unknown User",
+      profilePic = "";
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{'id': id, 'name': name, 'profile_pic': profilePic};
   }

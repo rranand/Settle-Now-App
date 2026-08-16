@@ -18,7 +18,7 @@ class UserResolver {
   }
 
   FriendUserModel resolve(String userId) {
-    return _cache[userId] ?? FriendUserModel.empty();
+    return _cache[userId] ?? FriendUserModel.unknownFriend();
   }
 
   FriendUserModel getLoggedInUser() {

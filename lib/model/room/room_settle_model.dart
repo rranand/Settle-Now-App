@@ -1,5 +1,5 @@
 import 'package:settlenow/model/model_core.dart';
-import 'package:settlenow/util/resolver/user_resolver.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomSettleModel {
   bool hasData = true;

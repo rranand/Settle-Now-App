@@ -65,7 +65,14 @@ class QuicksplitUserModel extends UserAmountModel {
   }
 
   factory QuicksplitUserModel.fromMap(Map<String, dynamic> map) {
-    BaseUserModel baseData = UserResolver.instance.resolve(map['id'] ?? "");
+    String name = map['name'] ?? "";
+    BaseUserModel baseData = BaseUserModel.empty();
+
+    if (name.isEmpty) {
+      baseData = UserResolver.instance.resolve(map['id']);
+    } else {
+      baseData = BaseUserModel(id: name, name: name, profilePic: "");
+    }
 
     if (!baseData.hasData) {
       baseData = baseData.copyWith(
