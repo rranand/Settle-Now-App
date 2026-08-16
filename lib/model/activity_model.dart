@@ -131,5 +131,10 @@ class ActivityDetailValue {
   }
 
   @override
+  String toString() {
+    return 'ActivityDetailValue(description: $description, amount: $amount, user: $user)';
+  }
+
+  @override
   int get hashCode => description.hashCode ^ amount.hashCode ^ user.hashCode;
 }

@@ -24,6 +24,7 @@ import 'firebase/firebase_options_dev.dart' as dev;
 
 // TODO: Add proper way to show error message
 // TODO: Add search apis to search api
+// TODO: Fix activity display message
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

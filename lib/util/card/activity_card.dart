@@ -34,7 +34,7 @@ class _ActivityCardState extends State<ActivityCard> {
   }
 
   String getText(BuildContext context) {
-    String userFullName = getName(
+    String userFirstName = getName(
       widget.data.user,
       isCapatilizeFirstLetter: true,
     );
@@ -42,54 +42,54 @@ class _ActivityCardState extends State<ActivityCard> {
     switch (widget.data.entityType) {
       case ActivityType.transactionAdded:
         {
-          return "$userFullName added a transaction of ${formatCurrency(widget.data.newValue!.amount ?? 0, context)}";
+          return "$userFirstName added a transaction of ${formatCurrency(widget.data.newValue!.amount ?? 0, context)}";
         }
       case ActivityType.transactionUpdated:
         {
-          return "$userFullName updated a transaction";
+          return "$userFirstName updated a transaction";
         }
       case ActivityType.transactionDeleted:
         {
-          return "$userFullName deleted a transaction of ${formatCurrency(widget.data.newValue!.amount ?? 0, context)}";
+          return "$userFirstName deleted a transaction of ${formatCurrency(widget.data.newValue!.amount ?? 0, context)}";
         }
       case ActivityType.settlementAdded:
         {
           double amount = widget.data.newValue!.amount ?? 0;
           String newValueFullName = getName(widget.data.newValue!.user);
 
-          return "${getName(widget.data.user)} settled ${formatCurrency(amount.abs(), context)} with $newValueFullName";
+          return "$userFirstName settled ${formatCurrency(amount.abs(), context)} ${amount < 0 ? "for" : "with"} $newValueFullName";
         }
       case ActivityType.settlementUpdated:
         {
           double amount = widget.data.newValue!.amount ?? 0;
           String newValueFullName = getName(widget.data.newValue!.user);
 
-          return "$userFullName updated settlement ${amount < 0 ? "for" : "with"} $newValueFullName";
+          return "$userFirstName updated settlement ${amount < 0 ? "for" : "with"} $newValueFullName";
         }
       case ActivityType.settlementDeleted:
         {
-          return "$userFullName deleted settlement of ${formatCurrency(widget.data.newValue!.amount!.abs(), context)}";
+          return "$userFirstName deleted settlement of ${formatCurrency(widget.data.newValue!.amount!.abs(), context)}";
         }
       case ActivityType.roomRenamed:
         {
-          return "$userFullName renamed room";
+          return "$userFirstName renamed room";
         }
       case ActivityType.memberAdded:
         {
           final baseUserData = UserResolver.instance.resolve(
             widget.data.entityId,
           );
-          return "$userFullName joined room (approved by ${getName(baseUserData)})";
+          return "$userFirstName joined room (approved by ${getName(baseUserData)})";
         }
       case ActivityType.memberRemoved:
         return widget.data.newValue!.description ?? '';
       case ActivityType.roomClosed:
         {
-          return "$userFullName closed room";
+          return "$userFirstName closed room";
         }
       case ActivityType.roomCreated:
         {
-          return "$userFullName created room";
+          return "$userFirstName created room";
         }
     }
   }
