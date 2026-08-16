@@ -28,6 +28,8 @@ class _ActivityCardState extends State<ActivityCard> {
 
     if (userData.id == UserResolver.instance.getLoggedInUser().id) {
       name = "you";
+    } else {
+      return capatilizeFirstLetter(name);
     }
 
     return isCapatilizeFirstLetter ? capatilizeFirstLetter(name) : name;
