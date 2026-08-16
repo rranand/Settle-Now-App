@@ -24,7 +24,6 @@ class RoomExpenseScreen extends StatefulWidget {
   State<RoomExpenseScreen> createState() => _RoomExpenseScreenState();
 }
 
-//FIXME: Add pagination where it is pending
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   final ValueNotifier<bool> isSearchEnabled = ValueNotifier(false);
   final TextEditingController _searchController = TextEditingController();
@@ -36,6 +35,8 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   late final StreamSubscription roomCloseRequestSubscription;
   late final StreamSubscription roomCloseSubscription;
   String currentRoute = "";
+  final ScrollController _gridViewScrollController = ScrollController();
+  final Map<int, double> _scrollOffsets = {};
 
   final List<String> _navBarTitles = [
     "Transactions",
@@ -56,7 +57,21 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     );
   }
 
+  void _restorePreviousScrollPosition(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_gridViewScrollController.hasClients) {
+        return;
+      }
+      final offset = _scrollOffsets[index] ?? 0;
+      _gridViewScrollController.jumpTo(
+        offset.clamp(0.0, _gridViewScrollController.position.maxScrollExtent),
+      );
+    });
+  }
+
   Widget _navBarHandler(int index) {
+    _restorePreviousScrollPosition(index);
+
     switch (index) {
       case 1:
         return RoomUserScreen();
@@ -244,40 +259,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     }
 
     final roomInfoCubit = context.read<RoomInfoCubit>();
-    await roomInfoCubit.fetchData(widget.id, forceRefresh: true);
+    await roomInfoCubit.fetchData(widget.id, true);
   }
 
-  bool notificationPredicateHandler(ScrollNotification notification) {
-    switch (_navbarSelectedIndex.value) {
-      case 0 || 2:
-        {
-          final state = context.read<RoomBloc>().state;
-          if (state is RoomFetchSuccess && state.data.isNotEmpty) {
-            return notification.depth == 0;
-          } else {
-            return notification.depth == 1;
-          }
-        }
-      case 1:
-        {
-          final state = context.read<RoomUserCubit>().state;
-          if (state is RoomUserSuccess && state.data.isNotEmpty) {
-            return notification.depth == 0;
-          } else {
-            return notification.depth == 1;
-          }
-        }
-      case 3:
-        {
-          final state = context.read<RoomSettleCubit>().state;
-          if (state is RoomSettleSuccess && state.data.isNotEmpty) {
-            return notification.depth == 0;
-          } else {
-            return notification.depth == 1;
-          }
-        }
-      default:
-        return notification.depth == 0;
+  void _loadMoreData(int navbarIndex) {
+    if (navbarIndex == 0) {
+      context.read<RoomBloc>().add(
+        RoomFetch(id: widget.id, isFreshFetch: false),
+      );
+    } else if (navbarIndex == 3) {
+      context.read<RoomSettleCubit>().fetchData(widget.id, false);
     }
   }
 
@@ -327,9 +318,20 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       final state = context.read<RoomBloc>().state;
       if (!(state is RoomFetchSuccess && state.id == widget.id)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<RoomInfoCubit>().fetchData(widget.id);
+          context.read<RoomInfoCubit>().fetchData(widget.id, true);
         });
       }
+
+      _gridViewScrollController.addListener(() {
+        final currentNavbarIndex = _navbarSelectedIndex.value;
+        final position = _gridViewScrollController.position;
+        _scrollOffsets[currentNavbarIndex] = position.pixels;
+        final thresholdPixels = position.maxScrollExtent * 0.85;
+
+        if (position.pixels >= thresholdPixels) {
+          _loadMoreData(currentNavbarIndex);
+        }
+      });
     }
 
     roomCloseRequestSubscription = context
@@ -453,6 +455,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     isSearchEnabled.dispose();
     roomCloseRequestSubscription.cancel();
     roomCloseSubscription.cancel();
+    _gridViewScrollController.dispose();
     super.dispose();
   }
 
@@ -486,6 +489,24 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     );
   }
 
+  void _blocListenerHandler(BuildContext context, RoomInfoState state) {
+    if (state is RoomInfoFailure) {
+      showNormalSnackBar(context, state.error);
+
+      if (state.error.contains("Room Not Found")) {
+        while (context.canPop()) {
+          context.pop();
+        }
+      }
+    } else if (state is RoomInfoInitial) {
+      if (context.canPop()) {
+        context.pop();
+      }
+    } else if (state is RoomInfoSuccess && !state.isInternalUpdate) {
+      context.read<RoomUserCubit>().fetchData(widget.id, state.data.users);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
@@ -494,23 +515,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       paddingInsets = EdgeInsets.symmetric(horizontal: 8);
     }
     return BlocConsumer<RoomInfoCubit, RoomInfoState>(
-      listener: (context, state) {
-        if (state is RoomInfoFailure) {
-          showNormalSnackBar(context, state.error);
-
-          if (state.error.contains("Room Not Found")) {
-            while (context.canPop()) {
-              context.pop();
-            }
-          }
-        } else if (state is RoomInfoInitial) {
-          if (context.canPop()) {
-            context.pop();
-          }
-        } else if (state is RoomInfoSuccess && !state.isInternalUpdate) {
-          context.read<RoomUserCubit>().fetchData(widget.id, state.data.users);
-        }
-      },
+      listener: _blocListenerHandler,
       builder: (context, state) {
         bool isRoomActive = false;
         bool isLoaded = false;
@@ -566,11 +571,15 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           ),
           body: RefreshIndicator(
             onRefresh: onRefresh,
-            notificationPredicate: notificationPredicateHandler,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 0;
+            },
             child: CustomGestureDetector(
               navBarIndex: _navbarSelectedIndex,
               totalTitle: _navBarTitles.length,
               child: CustomScrollView(
+                controller: _gridViewScrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   MultiValueListenableBuilder(
                     listenables: [isSearchEnabled, _navbarSelectedIndex],
