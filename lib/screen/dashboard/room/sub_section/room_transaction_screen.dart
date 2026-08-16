@@ -8,11 +8,13 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class RoomTransactionScreen extends StatefulWidget {
+  final ValueNotifier<bool> isSearchEnabled;
   final String roomID;
   final TextEditingController searchController;
 
   const RoomTransactionScreen({
     super.key,
+    required this.isSearchEnabled,
     required this.roomID,
     required this.searchController,
   });
@@ -38,6 +40,14 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
         );
       }
     }
+  }
+
+  Widget _builderFooter(BuildContext context, RoomState state) {
+    if (state is RoomFetchSuccess) {
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget transactionCardDisplay(List<RoomTransactionModel> data) {
@@ -98,7 +108,14 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
     return BlocConsumer<RoomBloc, RoomState>(
       listener: _blocListenerHandler,
       builder: (context, state) {
+        if (state is RoomLoading) {
+          return transactionCardDisplay(
+            List.filled(11, RoomTransactionModel.empty()),
+          );
+        }
+
         List<RoomTransactionModel> data = [];
+
         if (state is RoomFetchSuccess) {
           data = state.dataList;
 
@@ -110,46 +127,53 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
               TransactionType.room,
             );
           }
+        }
 
-          if (data.isEmpty) {
-            return SliverFillRemaining(
-              child: noRecordFoundWidget("No Transaction Found", context),
-            );
-          }
-
-          return BlocBuilder<FilterCubit, FilterState>(
-            builder: (context, filterState) {
-              return ValueListenableBuilder<TextEditingValue>(
-                valueListenable: widget.searchController,
-                builder: (context, _, _) {
-                  List<RoomTransactionModel> searchedData =
-                      filterState.data.cast<RoomTransactionModel>();
-
-                  searchedData = FilterSort.filteredSearchText(
-                    widget.searchController.text,
-                    searchedData,
-                    (transData) =>
-                        "${transData.description} ${transData.amount} ${transData.category} ${getName(transData.createdBy)}",
-                  );
-
-                  if (searchedData.isEmpty) {
-                    return SliverFillRemaining(
-                      child: noRecordFoundWidget(
-                        ApiConstant.noMatchingRecords,
-                        context,
-                      ),
-                    );
-                  }
-                  return transactionCardDisplay(searchedData);
-                },
-              );
-            },
-          );
-        } else {
-          return transactionCardDisplay(
-            List.filled(11, RoomTransactionModel.empty()),
+        if (data.isEmpty) {
+          return SliverFillRemaining(
+            child: noRecordFoundWidget("No Transaction Found", context),
           );
         }
+
+        return BlocBuilder<FilterCubit, FilterState>(
+          builder: (context, filterState) {
+            return ValueListenableBuilder<TextEditingValue>(
+              valueListenable: widget.searchController,
+              builder: (context, _, _) {
+                List<RoomTransactionModel> searchedData =
+                    filterState.data.cast<RoomTransactionModel>();
+
+                searchedData = FilterSort.filteredSearchText(
+                  widget.searchController.text,
+                  searchedData,
+                  (transData) =>
+                      "${transData.description} ${transData.amount} ${transData.category} ${getName(transData.createdBy)}",
+                );
+
+                if (searchedData.isEmpty) {
+                  return SliverFillRemaining(
+                    child: noRecordFoundWidget(
+                      ApiConstant.noMatchingRecords,
+                      context,
+                    ),
+                  );
+                }
+                return SliverMainAxisGroup(
+                  slivers: [
+                    transactionCardDisplay(searchedData),
+                    genericFooterForDashboard(
+                      widget.isSearchEnabled,
+                      _builderFooter,
+                      context,
+                      state,
+                      isFilterApplied: filterState.isFilterApplied,
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
       },
     );
   }

@@ -74,74 +74,96 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
     }
   }
 
+  void _blocListenerHandler(BuildContext context, RoomState state) {
+    if (state is RoomFailure) {
+      showNormalSnackBar(context, state.error);
+    } else if (state is RoomFetchSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RoomBloc, RoomState>(
+    return BlocConsumer<RoomBloc, RoomState>(
+      listener: _blocListenerHandler,
       builder: (context, state) {
-        if (state is RoomFetchSuccess) {
-          List<RoomTransactionModel> data = state.dataList;
+        if (state is RoomLoading) {
+          return SliverFillRemaining(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(strokeWidth: 2.5),
+                Padding(
+                  padding: EdgeInsets.only(top: UiConstant.spaceBetweenCard),
+                  child: Text(
+                    "Loading...",
+                    style: TextStyle(fontSize: 20, color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
 
-          if (data.isEmpty) {
-            return SliverFillRemaining(
-              child: noRecordFoundWidget("No Transaction Found", context),
-            );
-          } else {
-            return ValueListenableBuilder(
-              valueListenable: _selectedGraphIndex,
-              builder: (context, _, _) {
-                return SliverList(
-                  delegate: SliverChildListDelegate([
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Wrap(
-                        spacing: UiConstant.spaceBetweenCard,
-                        children: List.generate(
-                          graphTitle.length,
-                          (index) => InkWell(
-                            borderRadius: BorderRadius.circular(60),
-                            onTap: () => _selectedGraphIndex.value = index,
-                            child: Chip(
-                              label: Text(
-                                graphTitle[index],
-                                style: TextStyle(
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge!.color,
-                                ),
-                              ),
-                              side: BorderSide(
-                                color:
-                                    index == _selectedGraphIndex.value
-                                        ? Theme.of(context).primaryColor
-                                        : Theme.of(context)
-                                            .textSelectionTheme
-                                            .cursorColor!
-                                            .withAlpha(50),
-                              ),
-                              labelStyle:
-                                  index == _selectedGraphIndex.value
-                                      ? TextStyle()
-                                      : null,
-                              backgroundColor:
-                                  Theme.of(context).scaffoldBackgroundColor,
+        List<RoomTransactionModel> data = [];
+        if (state is RoomFetchSuccess) {
+          data = state.dataList;
+        }
+
+        if (data.isEmpty) {
+          return SliverFillRemaining(
+            child: noRecordFoundWidget("No Transaction Found", context),
+          );
+        }
+        return ValueListenableBuilder(
+          valueListenable: _selectedGraphIndex,
+          builder: (context, _, _) {
+            return SliverList(
+              delegate: SliverChildListDelegate([
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: UiConstant.spaceBetweenCard,
+                    children: List.generate(
+                      graphTitle.length,
+                      (index) => InkWell(
+                        borderRadius: BorderRadius.circular(60),
+                        onTap: () => _selectedGraphIndex.value = index,
+                        child: Chip(
+                          label: Text(
+                            graphTitle[index],
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge!.color,
                             ),
                           ),
+                          side: BorderSide(
+                            color:
+                                index == _selectedGraphIndex.value
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context)
+                                        .textSelectionTheme
+                                        .cursorColor!
+                                        .withAlpha(50),
+                          ),
+                          labelStyle:
+                              index == _selectedGraphIndex.value
+                                  ? TextStyle()
+                                  : null,
+                          backgroundColor:
+                              Theme.of(context).scaffoldBackgroundColor,
                         ),
                       ),
                     ),
-                    SizedBox(height: UiConstant.spaceBetweenSection),
-                    _graphController(_selectedGraphIndex.value, data),
-                  ]),
-                );
-              },
+                  ),
+                ),
+                SizedBox(height: UiConstant.spaceBetweenSection),
+                _graphController(_selectedGraphIndex.value, data),
+              ]),
             );
-          }
-        } else {
-          return SliverToBoxAdapter(
-            child: Center(child: RefreshProgressIndicator()),
-          );
-        }
+          },
+        );
       },
     );
   }

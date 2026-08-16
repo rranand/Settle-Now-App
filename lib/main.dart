@@ -22,7 +22,6 @@ import 'package:settlenow/util/util_core.dart';
 import 'firebase/firebase_options.dart' as prod;
 import 'firebase/firebase_options_dev.dart' as dev;
 
-// TODO: Show better UI to load more data for same room
 // TODO: Add proper way to show error message
 // TODO: Add search apis to search api
 

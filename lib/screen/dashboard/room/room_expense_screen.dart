@@ -81,6 +81,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         return RoomSettleScreen(roomID: widget.id);
       default:
         return RoomTransactionScreen(
+          isSearchEnabled: isSearchEnabled,
           roomID: widget.id,
           searchController: _searchController,
         );
@@ -242,21 +243,18 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       return;
     }
     final activityOldState = context.read<RoomActivityCubit>().state;
-    if (activityOldState is RoomActivitySuccess) {
+    if (activityOldState is RoomActivitySuccess ||
+        activityOldState is RoomActivityFailure) {
       context.read<RoomActivityCubit>().fetchData(widget.id, true);
     }
 
     final roomSettleOldState = context.read<RoomSettleCubit>().state;
-    if (roomSettleOldState is RoomSettleSuccess) {
+    if (roomSettleOldState is RoomSettleSuccess ||
+        roomSettleOldState is RoomSettleFailure) {
       context.read<RoomSettleCubit>().fetchData(widget.id, true);
     }
 
-    final roomTransactionOldState = context.read<RoomBloc>().state;
-    if (roomTransactionOldState is RoomFetchSuccess) {
-      context.read<RoomBloc>().add(
-        RoomFetch(id: widget.id, isFreshFetch: true),
-      );
-    }
+    context.read<RoomBloc>().add(RoomFetch(id: widget.id, isFreshFetch: true));
 
     final roomInfoCubit = context.read<RoomInfoCubit>();
     await roomInfoCubit.fetchData(widget.id, true);

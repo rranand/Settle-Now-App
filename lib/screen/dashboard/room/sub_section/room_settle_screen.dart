@@ -39,6 +39,14 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
     }
   }
 
+  Widget _builderFooter(BuildContext context, RoomSettleState state) {
+    if (state is RoomSettleSuccess) {
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
+    }
+
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SliverLayoutBuilder(
@@ -55,7 +63,7 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
             List<RoomSettleModel> data = [];
             if (state is RoomSettleSuccess) {
               data = state.dataList;
-            } else {
+            } else if (state is RoomSettleLoading) {
               data = List.filled(11, RoomSettleModel.empty());
             }
 
@@ -65,22 +73,32 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
               );
             }
 
-            return SliverGrid.builder(
-              itemCount: data.length,
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: cardSizeInfo[0],
-                mainAxisSpacing: UiConstant.spaceBetweenCard,
-                crossAxisSpacing: UiConstant.spaceBetweenCard,
-                childAspectRatio: cardSizeInfo[1],
-              ),
-              itemBuilder: (BuildContext context, int index) {
-                return SettleCard(
-                  roomID: widget.roomID,
-                  screenWidth: cardSizeInfo[0],
-                  data: data[index],
-                  loggedInUser: _loggedInUser,
-                );
-              },
+            return SliverMainAxisGroup(
+              slivers: [
+                SliverGrid.builder(
+                  itemCount: data.length,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: cardSizeInfo[0],
+                    mainAxisSpacing: UiConstant.spaceBetweenCard,
+                    crossAxisSpacing: UiConstant.spaceBetweenCard,
+                    childAspectRatio: cardSizeInfo[1],
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return SettleCard(
+                      roomID: widget.roomID,
+                      screenWidth: cardSizeInfo[0],
+                      data: data[index],
+                      loggedInUser: _loggedInUser,
+                    );
+                  },
+                ),
+                genericFooterForDashboard(
+                  ValueNotifier<bool>(false),
+                  _builderFooter,
+                  context,
+                  state,
+                ),
+              ],
             );
           },
         );
