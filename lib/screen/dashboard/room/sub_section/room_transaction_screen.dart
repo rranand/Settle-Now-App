@@ -34,7 +34,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
       final oldState = context.read<RoomBloc>().state;
       if (!(oldState is RoomFetchSuccess && oldState.id == widget.roomID)) {
         context.read<RoomBloc>().add(
-          RoomFetch(id: widget.roomID, isFreshFetch: false),
+          RoomFetch(id: widget.roomID, isFreshFetch: true),
         );
       }
     }
@@ -85,9 +85,18 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
     return UserResolver.instance.resolve(createdBy).name;
   }
 
+  void _blocListenerHandler(BuildContext context, RoomState state) {
+    if (state is RoomFailure) {
+      showNormalSnackBar(context, state.error);
+    } else if (state is RoomFetchSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RoomBloc, RoomState>(
+      listener: _blocListenerHandler,
       builder: (context, state) {
         List<RoomTransactionModel> data = [];
         if (state is RoomFetchSuccess) {
@@ -140,11 +149,6 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
           return transactionCardDisplay(
             List.filled(11, RoomTransactionModel.empty()),
           );
-        }
-      },
-      listener: (BuildContext context, RoomState state) {
-        if (state is RoomFailure) {
-          showNormalSnackBar(context, state.error);
         }
       },
     );

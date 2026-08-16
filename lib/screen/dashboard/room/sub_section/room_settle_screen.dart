@@ -26,8 +26,16 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
 
       final oldState = context.read<RoomSettleCubit>().state;
       if (!(oldState is RoomSettleSuccess && oldState.id == widget.roomID)) {
-        context.read<RoomSettleCubit>().fetchData(widget.roomID, false);
+        context.read<RoomSettleCubit>().fetchData(widget.roomID, true);
       }
+    }
+  }
+
+  void _blocListenerHandler(BuildContext context, RoomSettleState state) {
+    if (state is RoomSettleFailure) {
+      showNormalSnackBar(context, state.error);
+    } else if (state is RoomSettleSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -41,7 +49,8 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
           EdgeInsets.zero,
         );
 
-        return BlocBuilder<RoomSettleCubit, RoomSettleState>(
+        return BlocConsumer<RoomSettleCubit, RoomSettleState>(
+          listener: _blocListenerHandler,
           builder: (context, state) {
             List<RoomSettleModel> data = [];
             if (state is RoomSettleSuccess) {
