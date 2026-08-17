@@ -90,7 +90,7 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       ...super.toCreateExpenseJson(),
       "category": category,
       "users": allUsers,
-      "split_type": splitType.label,
+      "split_type": splitType.labelInSmallCase,
     };
   }
 

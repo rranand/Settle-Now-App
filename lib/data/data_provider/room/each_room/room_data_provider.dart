@@ -93,7 +93,7 @@ class RoomDataProvider {
     try {
       List<String> uid = users.map((e) => e.id).toList();
       final response = await createAPICall('room/$id/invite', "put", {
-        "users": uid,
+        "user_ids": uid,
       });
 
       final data = jsonDecode(response.body);

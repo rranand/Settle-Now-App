@@ -12,6 +12,17 @@ extension SplitTypeExtension on SplitType {
     }
   }
 
+  String get labelInSmallCase {
+    switch (this) {
+      case SplitType.partial:
+        return 'partial';
+      case SplitType.self:
+        return 'self';
+      default:
+        return 'equal';
+    }
+  }
+
   static SplitType fromString(String value) {
     switch (value.toLowerCase()) {
       case 'partial':
