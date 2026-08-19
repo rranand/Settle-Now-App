@@ -10,15 +10,6 @@ class RoomCard extends StatelessWidget {
   final RoomInfoModel data;
   const RoomCard({super.key, required this.data});
 
-  String getName(String createdBy) {
-    return data.users
-        .firstWhere(
-          (element) => element.id == createdBy,
-          orElse: () => RoomUserModel.empty(),
-        )
-        .name;
-  }
-
   @override
   Widget build(BuildContext context) {
     final users = data.users;
@@ -93,7 +84,7 @@ class RoomCard extends StatelessWidget {
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
-                    "Created By ${getName(data.createdBy).split(' ').first}",
+                    "Created By ${getName(data.createdBy, data.users).split(' ').first}",
                     context,
                     isLoaded: data.hasData,
                   ),

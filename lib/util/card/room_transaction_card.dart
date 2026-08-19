@@ -31,22 +31,10 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (widget.data.splitType != SplitType.equal) {
-      tags.add(widget.data.splitType.label);
-    }
     if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     return tags;
-  }
-
-  String getName(String createdBy) {
-    return widget.data.users
-        .firstWhere(
-          (element) => element.id == createdBy,
-          orElse: () => UserAmountModel.empty(),
-        )
-        .name;
   }
 
   Widget extendedTransactionWidget() {
@@ -281,7 +269,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   subTextOnCard(
-                    "Created By ${widget.loggedInUser.id == widget.data.createdBy ? "You" : getName(widget.data.createdBy)}",
+                    "Created By ${widget.loggedInUser.id == widget.data.createdBy ? "You" : getName(widget.data.createdBy, widget.data.users)}",
                     context,
                     isLoaded: widget.data.hasData,
                   ),

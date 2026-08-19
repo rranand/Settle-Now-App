@@ -39,15 +39,6 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
     return tags;
   }
 
-  String getName(String createdBy) {
-    return widget.data.users
-        .firstWhere(
-          (element) => element.id == createdBy,
-          orElse: () => QuicksplitUserModel.empty(),
-        )
-        .name;
-  }
-
   bool _isValid() {
     int totalSum = 0;
 
@@ -91,7 +82,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
         subTextOnCard(
-          "Created By ${widget.data.createdBy == _loggedInUser.id ? "You" : getName(widget.data.createdBy).split(' ').first}",
+          "Created By ${widget.data.createdBy == _loggedInUser.id ? "You" : getName(widget.data.createdBy, widget.data.users).split(' ').first}",
           context,
           isLoaded: widget.data.hasData,
         ),

@@ -451,15 +451,6 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     }
   }
 
-  String getName(String createdBy, List<LendenUserModel> users) {
-    return users
-        .firstWhere(
-          (element) => element.id == createdBy,
-          orElse: () => LendenUserModel.empty(),
-        )
-        .name;
-  }
-
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;

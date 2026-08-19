@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
+import 'package:settlenow/model/model_core.dart';
 
 String capatilizeFirstLetter(String inputText) {
   if (inputText.isEmpty) {
@@ -59,4 +60,18 @@ String addCursorInURL(DateTime cursor) {
   return Uri(
     queryParameters: {'cursor': cursor.toUtc().toIso8601String()},
   ).query;
+}
+
+String getName(String userId, List<BaseUserModel> users) {
+  if (users.isEmpty) {
+    return BaseUserModel.unknownUser().name;
+  }
+
+  for (int i = 0; i < users.length; i++) {
+    if (users[i].id == userId) {
+      return users[i].name;
+    }
+  }
+
+  return "";
 }

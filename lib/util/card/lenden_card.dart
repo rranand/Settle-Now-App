@@ -25,15 +25,6 @@ class LendenCard extends StatelessWidget {
     );
   }
 
-  String getName(String createdBy) {
-    return data.users
-        .firstWhere(
-          (element) => element.id == createdBy,
-          orElse: () => LendenUserModel.empty(),
-        )
-        .name;
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -104,7 +95,7 @@ class LendenCard extends StatelessWidget {
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
-                    "Created By ${getName(data.createdBy).split(' ').first}",
+                    "Created By ${getName(data.createdBy, data.users).split(' ').first}",
                     context,
                     isLoaded: data.hasData,
                   ),
