@@ -10,6 +10,13 @@ final class NotificationOnAdd extends NotificationEvent {
   NotificationOnAdd({required this.data});
 }
 
+final class NotificationUpdate extends NotificationEvent {
+  final String roomID;
+  final String roomName;
+
+  NotificationUpdate({required this.roomID, required this.roomName});
+}
+
 final class NotificationOnDelete extends NotificationEvent {
   final String id;
   NotificationOnDelete({required this.id});

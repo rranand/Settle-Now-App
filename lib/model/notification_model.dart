@@ -41,6 +41,26 @@ class NotificationModel {
     };
   }
 
+  NotificationModel copyWith({
+    String? id,
+    String? roomName,
+    RoomType? type,
+    String? roomID,
+    BaseUserModel? invitedBy,
+    BaseUserModel? invitedUser,
+    DateTime? createdOn,
+  }) {
+    return NotificationModel(
+      id: id ?? this.id,
+      roomName: roomName ?? this.roomName,
+      type: type ?? this.type,
+      roomID: roomID ?? this.roomID,
+      invitedBy: invitedBy ?? this.invitedBy,
+      invitedUser: invitedUser ?? this.invitedUser,
+      createdOn: createdOn ?? this.createdOn,
+    );
+  }
+
   factory NotificationModel.fromMap(Map<String, dynamic> map) {
     return NotificationModel(
       id: map['id'],

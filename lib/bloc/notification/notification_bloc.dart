@@ -15,6 +15,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationOnAdd>(_notificationOnAdd, transformer: sequential());
     on<NotificationOnDelete>(_notificationOnDelete, transformer: sequential());
     on<NotificationFetch>(_notificationFetch, transformer: droppable());
+    on<NotificationUpdate>(_notificationUpdate, transformer: sequential());
     on<NotificationReset>(_notificationReset, transformer: droppable());
   }
 
@@ -33,6 +34,32 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     } catch (e) {
       return emit(NotificationFailure(error: e.toString()));
     }
+  }
+
+  void _notificationUpdate(
+    NotificationUpdate event,
+    Emitter<NotificationState> emit,
+  ) {
+    if (state is! NotificationFetchSuccess) {
+      return;
+    }
+
+    final oldState = state as NotificationFetchSuccess;
+
+    final oldData = oldState.dataList;
+
+    LinkedHashMap<String, NotificationModel> updatedData =
+        LinkedHashMap<String, NotificationModel>.fromEntries(
+          oldData.map((t) {
+            if (t.roomID == event.roomID) {
+              return MapEntry(t.id, t.copyWith(roomName: event.roomName));
+            }
+
+            return MapEntry(t.id, t);
+          }),
+        );
+
+    return emit(NotificationFetchSuccess(data: updatedData));
   }
 
   void _notificationOnAdd(

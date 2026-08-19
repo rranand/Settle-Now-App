@@ -73,8 +73,8 @@ class RoomSettleModel {
     return <String, dynamic>{
       'id': id,
       'amount': amount,
-      'sender': sender,
-      'receiver': receiver,
+      'sender': sender.id,
+      'receiver': receiver.id,
     };
   }
 

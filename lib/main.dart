@@ -24,6 +24,9 @@ import 'firebase/firebase_options_dev.dart' as dev;
 
 // TODO: Add proper way to show error message
 // TODO: Add search apis to search api
+// TODO: Check delete logic for rooms (If all entites are not fetched, and user proceed for delete or leave, wrong message is coming up)
+// TODO: Make all room transaction splitable, remove future transaction, use split type only while transaction creation
+// TODO: On settle expense RoomUser cards are not updating
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -190,13 +193,6 @@ class MyApp extends StatelessWidget {
                   context.read<PersonalExpenseDashboardBloc>(),
                 ),
           ),
-          BlocProvider<LendenRoomBloc>(
-            create:
-                (context) => LendenRoomBloc(
-                  context.read<LendenRoomRepository>(),
-                  context.read<LendenDashboardBloc>(),
-                ),
-          ),
           BlocProvider<UserUpdateProfileCubit>(
             create:
                 (context) => UserUpdateProfileCubit(
@@ -208,6 +204,14 @@ class MyApp extends StatelessWidget {
             create:
                 (context) =>
                     NotificationBloc(context.read<NotificationRepository>()),
+          ),
+          BlocProvider<LendenRoomBloc>(
+            create:
+                (context) => LendenRoomBloc(
+                  context.read<LendenRoomRepository>(),
+                  context.read<LendenDashboardBloc>(),
+                  context.read<NotificationBloc>(),
+                ),
           ),
           BlocProvider<CreateJoinRoomCubit>(
             create:
@@ -230,6 +234,7 @@ class MyApp extends StatelessWidget {
                 (context) => RoomInfoCubit(
                   context.read<RoomDashboardBloc>(),
                   context.read<RoomRepository>(),
+                  context.read<NotificationBloc>(),
                 ),
           ),
           BlocProvider<RoomUserCubit>(

@@ -13,9 +13,10 @@ part 'lenden_room_state.dart';
 
 class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
   final LendenRoomRepository repo;
-  final LendenDashboardBloc lendenDashboardBloc;
+  final LendenDashboardBloc _lendenDashboardBloc;
+  final NotificationBloc _notificationBloc;
 
-  LendenRoomBloc(this.repo, this.lendenDashboardBloc)
+  LendenRoomBloc(this.repo, this._lendenDashboardBloc, this._notificationBloc)
     : super(LendenRoomInitial()) {
     on<LendenRoomFetch>(_lendenRoomFetch, transformer: droppable());
     on<LendenCloseRoom>(_lendenCloseRoom, transformer: droppable());
@@ -61,7 +62,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool> data =
           await repo.fetchData(event.id);
 
-      lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
+      _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
 
       final newData = LinkedHashMap<String, LendenTransactionModel>.fromEntries(
         data.second.map((t) => MapEntry(t.id, t)),
@@ -163,7 +164,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       modifiedOn: DateTime.now(),
     );
 
-    lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+    _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
 
     return emit(
       LendenRoomFetchSuccess(
@@ -214,7 +215,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       modifiedOn: DateTime.now(),
     );
 
-    lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+    _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
 
     return emit(
       LendenRoomFetchSuccess(
@@ -260,7 +261,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       modifiedOn: DateTime.now(),
     );
 
-    lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+    _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
 
     return emit(
       LendenRoomFetchSuccess(
@@ -301,7 +302,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         modifiedOn: DateTime.now(),
       );
 
-      lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+      _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
 
       return emit(
         LendenRoomFetchSuccess(
@@ -344,7 +345,10 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         roomName: event.roomName,
       );
 
-      lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: updatedData));
+      _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: updatedData));
+      _notificationBloc.add(
+        NotificationUpdate(roomID: oldState.id, roomName: event.roomName),
+      );
 
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
@@ -392,7 +396,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     try {
       await repo.deleteRoom(oldData.id);
 
-      lendenDashboardBloc.add(LendenDashboardOnDeleteRoom(id: event.id));
+      _lendenDashboardBloc.add(LendenDashboardOnDeleteRoom(id: event.id));
 
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

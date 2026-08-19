@@ -11,8 +11,10 @@ part 'room_info_state.dart';
 class RoomInfoCubit extends Cubit<RoomInfoState> {
   final RoomDashboardBloc _roomDashboardBloc;
   final RoomRepository repo;
+  final NotificationBloc _notificationBloc;
 
-  RoomInfoCubit(this._roomDashboardBloc, this.repo) : super(RoomInfoInitial());
+  RoomInfoCubit(this._roomDashboardBloc, this.repo, this._notificationBloc)
+    : super(RoomInfoInitial());
 
   Future<void> fetchData(String id, bool forceRefresh) async {
     if (state is RoomInfoLoading) return;
@@ -131,6 +133,9 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         modifiedOn: DateTime.now(),
       );
       _roomDashboardBloc.add(RoomDashboardOnUpdateRoom(data: updatedRoomInfo));
+      _notificationBloc.add(
+        NotificationUpdate(roomID: oldData.data.id, roomName: roomName),
+      );
       return emit(
         RoomInfoSuccess(data: updatedRoomInfo, isInternalUpdate: true),
       );
