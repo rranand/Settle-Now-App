@@ -675,7 +675,7 @@ class _AddTransactionState extends State<AddTransaction> {
               category: expenseCategories[max(0, _categoryIndex.value)],
               users: userWithAmount,
               personalExpenseId: oldPersonalExpenseID,
-              activityCount: activityCount + 1,
+              activityCount: activityCount,
             );
             break;
           }

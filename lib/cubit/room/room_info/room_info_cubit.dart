@@ -82,13 +82,14 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     return;
   }
 
-  void updateRoomData(String id) {
+  void updateRoomData(String id, List<RoomUserModel> userData) {
     if (state is RoomInfoSuccess) {
       final oldState = (state as RoomInfoSuccess);
 
       if (oldState.data.id == id) {
         RoomInfoModel updatedRoomInfo = oldState.data.copyWith(
           modifiedOn: DateTime.now(),
+          users: userData,
         );
         _roomDashboardBloc.add(
           RoomDashboardOnUpdateRoom(data: updatedRoomInfo),

@@ -180,7 +180,7 @@ class _SettleExpenseState extends State<SettleExpense> {
           activityCount: widget.transactionData!.activityCount,
         );
 
-        if (widget.transactionData.hashCode != updatedData.hashCode) {
+        if (widget.transactionData != updatedData) {
           context.read<RoomSettleUpsertCubit>().updateSettleExpense(
             widget.roomID,
             updatedData,

@@ -95,10 +95,7 @@ class RoomSettleModel {
         other.id == id &&
         other.receiver.id == receiver.id &&
         other.sender.id == sender.id &&
-        other.amount == amount &&
-        other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn &&
-        other.activityCount == activityCount;
+        other.amount == amount;
   }
 
   @override

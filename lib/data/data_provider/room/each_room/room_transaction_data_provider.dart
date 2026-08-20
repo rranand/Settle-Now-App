@@ -74,6 +74,7 @@ extension RoomTransactionDataProvider on RoomDataProvider {
         List<RoomTransactionModel> newExpense = [...data];
         for (int i = 0; i < data.length; i++) {
           newExpense[i].id = transactionIDs[i];
+          newExpense[i].activityCount = 1;
         }
         return newExpense;
       } else {

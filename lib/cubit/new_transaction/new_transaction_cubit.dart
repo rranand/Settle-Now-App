@@ -75,13 +75,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             }
             final roomID = blocState.id;
             final data = baseTransData as RoomTransactionModel;
-            final RoomTransactionModel newData = await repoRD.createExpense(
-              roomID,
-              data,
-              splitType,
+            final newData = await repoRD.createExpense(roomID, data, splitType);
+            final newUpdatedData = newData.copyWith(
+              activityCount: newData.activityCount + 1,
             );
-            bloc.add(RoomAddNewTransaction(data: [newData]));
-            return emit(NewTransactionSuccess(data: newData));
+            bloc.add(RoomAddNewTransaction(data: [newUpdatedData]));
+            return emit(NewTransactionSuccess(data: newUpdatedData));
           }
       }
     } catch (e) {

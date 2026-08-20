@@ -29,7 +29,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         List<RoomUserModel> userData = [...oldState.data];
         for (int i = 0; i < userData.length; i++) {
           if (userData[i].id == uid) {
-            userData[i].active = active;
+            userData[i] = userData[i].copyWith(active: active);
             break;
           }
         }
@@ -46,7 +46,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
-    List<RoomUserModel> usersData = roomUserState.data;
+    List<RoomUserModel> usersData = [...roomUserState.data];
 
     Map<String, double> userWithAmount = {};
     for (int i = 0; i < data.users.length; i++) {
@@ -57,17 +57,18 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       if (userWithAmount.containsKey(usersData[i].id)) {
         double splitAmount = userWithAmount[usersData[i].id]!;
         if (usersData[i].id == data.createdBy) {
-          usersData[i].contribution += data.amount;
+          usersData[i] = usersData[i].copyWith(
+            contribution: usersData[i].contribution + data.amount,
+          );
         }
-        usersData[i].spent += splitAmount;
+        usersData[i] = usersData[i].copyWith(
+          spent: usersData[i].spent + splitAmount,
+        );
       }
     }
 
-    _roomInfoCubit.updateRoomData(roomUserState.id);
-
-    return emit(
-      RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()),
-    );
+    _roomInfoCubit.updateRoomData(roomUserState.id, usersData);
+    return emit(RoomUserSuccess(id: roomUserState.id, data: usersData));
   }
 
   void onUpdateTransaction(
@@ -78,7 +79,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
-    List<RoomUserModel> usersData = roomUserState.data;
+    List<RoomUserModel> usersData = [...roomUserState.data];
 
     // Removing amount of old transaction. May be nature of Split can be changed so, logics are different from removing old amount and adding new amount
     Map<String, double> userWithAmount = {};
@@ -91,9 +92,13 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       if (userWithAmount.containsKey(usersData[i].id)) {
         double splitAmount = userWithAmount[usersData[i].id]!;
         if (usersData[i].id == oldExpense.createdBy) {
-          usersData[i].contribution -= oldExpense.amount;
+          usersData[i] = usersData[i].copyWith(
+            contribution: usersData[i].contribution - oldExpense.amount,
+          );
         }
-        usersData[i].spent -= splitAmount;
+        usersData[i] = usersData[i].copyWith(
+          spent: usersData[i].spent - splitAmount,
+        );
       }
     }
 
@@ -108,16 +113,18 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       if (userWithAmount.containsKey(usersData[i].id)) {
         double splitAmount = userWithAmount[usersData[i].id]!;
         if (usersData[i].id == data.createdBy) {
-          usersData[i].contribution += data.amount;
+          usersData[i] = usersData[i].copyWith(
+            contribution: usersData[i].contribution + data.amount,
+          );
         }
-        usersData[i].spent += splitAmount;
+        usersData[i] = usersData[i].copyWith(
+          spent: usersData[i].spent + splitAmount,
+        );
       }
     }
 
-    _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(
-      RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()),
-    );
+    _roomInfoCubit.updateRoomData(roomUserState.id, usersData);
+    return emit(RoomUserSuccess(id: roomUserState.id, data: usersData));
   }
 
   void onDeleteTransaction(RoomTransactionModel data) {
@@ -125,7 +132,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
-    List<RoomUserModel> usersData = roomUserState.data;
+    List<RoomUserModel> usersData = [...roomUserState.data];
 
     Map<String, double> userWithAmount = {};
     for (int i = 0; i < data.users.length; i++) {
@@ -135,16 +142,18 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       if (userWithAmount.containsKey(usersData[i].id)) {
         double splitAmount = userWithAmount[usersData[i].id]!;
         if (usersData[i].id == data.createdBy) {
-          usersData[i].contribution -= data.amount;
+          usersData[i] = usersData[i].copyWith(
+            contribution: usersData[i].contribution - data.amount,
+          );
         }
-        usersData[i].spent -= splitAmount;
+        usersData[i] = usersData[i].copyWith(
+          spent: usersData[i].spent - splitAmount,
+        );
       }
     }
 
-    _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(
-      RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()),
-    );
+    _roomInfoCubit.updateRoomData(roomUserState.id, usersData);
+    return emit(RoomUserSuccess(id: roomUserState.id, data: usersData));
   }
 
   void onAddNewSettleExpense(RoomSettleModel data) {
@@ -152,19 +161,21 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
-    List<RoomUserModel> usersData = roomUserState.data;
+    List<RoomUserModel> usersData = [...roomUserState.data];
 
     for (int i = 0; i < usersData.length; i++) {
       if (data.sender.id == usersData[i].id) {
-        usersData[i].settle += data.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle + data.amount,
+        );
       } else if (data.receiver.id == usersData[i].id) {
-        usersData[i].settle -= data.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle - data.amount,
+        );
       }
     }
-    _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(
-      RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()),
-    );
+    _roomInfoCubit.updateRoomData(roomUserState.id, usersData);
+    return emit(RoomUserSuccess(id: roomUserState.id, data: usersData));
   }
 
   void updateSettleExpense(RoomSettleModel oldData, RoomSettleModel data) {
@@ -172,25 +183,31 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
-    List<RoomUserModel> usersData = roomUserState.data;
+    List<RoomUserModel> usersData = [...roomUserState.data];
 
     for (int i = 0; i < usersData.length; i++) {
       if (oldData.sender.id == usersData[i].id) {
-        usersData[i].settle -= oldData.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle - oldData.amount,
+        );
       } else if (oldData.receiver.id == usersData[i].id) {
-        usersData[i].settle += oldData.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle + oldData.amount,
+        );
       }
 
       if (data.sender.id == usersData[i].id) {
-        usersData[i].settle += data.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle + data.amount,
+        );
       } else if (data.receiver.id == usersData[i].id) {
-        usersData[i].settle -= data.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle - data.amount,
+        );
       }
     }
-    _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(
-      RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()),
-    );
+    _roomInfoCubit.updateRoomData(roomUserState.id, usersData);
+    return emit(RoomUserSuccess(id: roomUserState.id, data: usersData));
   }
 
   void deleteSettleExpense(RoomSettleModel data) {
@@ -198,19 +215,21 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
-    List<RoomUserModel> usersData = roomUserState.data;
+    List<RoomUserModel> usersData = [...roomUserState.data];
 
     for (int i = 0; i < usersData.length; i++) {
       if (data.sender.id == usersData[i].id) {
-        usersData[i].settle -= data.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle - data.amount,
+        );
       } else if (data.receiver.id == usersData[i].id) {
-        usersData[i].settle += data.amount;
+        usersData[i] = usersData[i].copyWith(
+          settle: usersData[i].settle + data.amount,
+        );
       }
     }
-    _roomInfoCubit.updateRoomData(roomUserState.id);
-    return emit(
-      RoomUserSuccess(id: roomUserState.id, data: [...usersData].toList()),
-    );
+    _roomInfoCubit.updateRoomData(roomUserState.id, usersData);
+    return emit(RoomUserSuccess(id: roomUserState.id, data: usersData));
   }
 
   void reset() {
