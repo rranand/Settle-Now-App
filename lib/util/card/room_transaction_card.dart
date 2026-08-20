@@ -66,7 +66,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     formatCurrency(user.amount, context),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: user.amount < 0 ? Colors.red : Colors.green,
+                      color: Colors.green,
                     ),
                   ),
                 ],
@@ -158,6 +158,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
         for (int i = 0; i < widget.data.users.length; i++) {
           if (widget.data.users[i].id == widget.loggedInUser.id) {
             userPartOfTransaction.value = true;
+            break;
           }
         }
       }
@@ -168,10 +169,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
   Widget build(BuildContext context) {
     List<String> tags = createTags();
     int categoryIndex = CategoryParser.indexOfCategory(widget.data.category);
-    bool isManualSplit = false;
-    if (widget.data.users.isNotEmpty) {
-      isManualSplit = true;
-    }
+
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
@@ -218,28 +216,25 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                   children: [
                     addToPersonalExpenseWidget(),
                     showTimeline(),
-                    Visibility(
-                      visible: isManualSplit,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(
-                          UiConstant.cardBorderRadius,
-                        ),
-                        child: ValueListenableBuilder(
-                          valueListenable: isExpanded,
-                          builder: (context, _, _) {
-                            return Icon(
-                              isExpanded.value
-                                  ? Icons.keyboard_arrow_up_outlined
-                                  : Icons.keyboard_arrow_down_outlined,
-                              size: 28,
-                              color: Colors.grey,
-                            );
-                          },
-                        ),
-                        onTap: () {
-                          isExpanded.value = !isExpanded.value;
+                    InkWell(
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
+                      child: ValueListenableBuilder(
+                        valueListenable: isExpanded,
+                        builder: (context, _, _) {
+                          return Icon(
+                            isExpanded.value
+                                ? Icons.keyboard_arrow_up_outlined
+                                : Icons.keyboard_arrow_down_outlined,
+                            size: 28,
+                            color: Colors.grey,
+                          );
                         },
                       ),
+                      onTap: () {
+                        isExpanded.value = !isExpanded.value;
+                      },
                     ),
                   ],
                 ),

@@ -42,13 +42,10 @@ class _AddTransactionState extends State<AddTransaction> {
   final TextEditingController _creationDateController = TextEditingController(
     text: convertDateTimeFormat(DateTime.now()),
   );
-  bool _isNewExpense = true;
-  TransactionType expenseType = TransactionType.personal;
   int activityCount = 0;
 
-  final List<SplitType> _splitType = SplitType.values;
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
-  final ValueNotifier<int> _splitTypeIndex = ValueNotifier(0);
+  final ValueNotifier<SplitType> _splitType = ValueNotifier(SplitType.equal);
   final ValueNotifier<LendenType> _lendenTransactionType = ValueNotifier(
     LendenType.gave,
   );
@@ -57,14 +54,13 @@ class _AddTransactionState extends State<AddTransaction> {
   );
   String currentRoute = "";
   final ValueNotifier<Set<String>> _selectedUserIDSet = ValueNotifier({});
-  final ValueNotifier<bool> _futureJoinerBool = ValueNotifier(true);
 
   final List<String> _gotoSplitType = [
     "Split Equally",
     "Split Equally (Exclude You)",
   ];
 
-  void _handleGoToSplitType(int index) {
+  void _handleGoToSplitType(int goToSplitTypeIndex) {
     Decimal? amount = Decimal.tryParse(_amountController.text);
     int userCount = _selectedUserIDs.value.length;
 
@@ -74,7 +70,7 @@ class _AddTransactionState extends State<AddTransaction> {
 
     int amountInPaisa = (amount * Decimal.fromInt(100)).toBigInt().toInt();
 
-    switch (index) {
+    switch (goToSplitTypeIndex) {
       case 0:
         {
           int remaining = amountInPaisa % userCount;
@@ -297,18 +293,18 @@ class _AddTransactionState extends State<AddTransaction> {
         Text("Split Type", style: TextStyle(fontSize: _headerTextSize)),
         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
         ValueListenableBuilder(
-          valueListenable: _splitTypeIndex,
+          valueListenable: _splitType,
           builder: (context, value, _) {
             return Wrap(
               spacing: UiConstant.spaceBetweenCard,
               runSpacing: UiConstant.spaceBetweenCard,
               children: List.generate(
-                _splitType.length,
+                SplitType.values.length,
                 (index) => InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () {
-                    if (_splitTypeIndex.value != index) {
-                      if (_splitType[index] == SplitType.partial) {
+                    if (_splitType.value != SplitType.values[index]) {
+                      if (SplitType.values[index] == SplitType.partial) {
                         _selectedUserIDs.value.clear();
                         _selectedUserIDSet.value.clear();
                         _selectedUserIDs.value.putIfAbsent(
@@ -317,14 +313,14 @@ class _AddTransactionState extends State<AddTransaction> {
                         );
                         _selectedUserIDSet.value.add(_loggedInUser.id);
                       }
-                      _splitTypeIndex.value = index;
+                      _splitType.value = SplitType.values[index];
                     }
                   },
                   child: GradientBorderCard(
                     borderRadius: 100,
                     borderWidth: 1,
                     gradientColors:
-                        index == value
+                        SplitType.values[index] == value
                             ? GradientColorConstant.vibrantGradient
                             : [Colors.grey.shade300, Colors.grey.shade300],
                     child: Container(
@@ -337,7 +333,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: Text(
-                        _splitType[index].label,
+                        SplitType.values[index].label,
                         style: TextStyle(
                           color: Theme.of(context).textTheme.bodyLarge!.color,
                         ),
@@ -373,20 +369,19 @@ class _AddTransactionState extends State<AddTransaction> {
     _selectedUserIDs.value = {};
     _categoryIndex.value = 0;
     activityCount = 0;
-    _splitTypeIndex.value = _splitType.indexOf(SplitType.equal);
 
     if (transactionType == TransactionType.quicksplit) {
-      _splitTypeIndex.value = _splitType.indexOf(SplitType.partial);
+      _splitType.value = SplitType.partial;
       _selectedUserIDs.value.putIfAbsent(
         _loggedInUser,
         () => TextEditingController(),
       );
+    } else {
+      _splitType.value = SplitType.equal;
     }
   }
 
   void _populateEditForm(BaseTransactionModel transactionData) {
-    _isNewExpense = false;
-
     _amountController.text = transactionData.amount.abs().toStringAsFixed(2);
     _descriptionController.text = transactionData.description;
     _createdOn = transactionData.createdOn;
@@ -405,7 +400,6 @@ class _AddTransactionState extends State<AddTransaction> {
         {
           final transTemp = transactionData as RoomTransactionModel;
           users = [...transTemp.users];
-          _splitTypeIndex.value = _splitType.indexOf(transTemp.splitType);
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );
@@ -414,7 +408,6 @@ class _AddTransactionState extends State<AddTransaction> {
       case TransactionType.personal:
         {
           final transTemp = transactionData as PersonalExpenseTransactionModel;
-          expenseType = TransactionType.personal;
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );
@@ -460,21 +453,22 @@ class _AddTransactionState extends State<AddTransaction> {
 
       transactionType = TransactionTypeExtension.fromPath(context);
 
-      switch (transactionType) {
-        case TransactionType.quicksplit:
-          {
-            _splitTypeIndex.value = _splitType.indexOf(SplitType.partial);
-            if (widget.transactionData == null) {
-              _selectedUserIDs.value.putIfAbsent(
-                _loggedInUser,
-                () => TextEditingController(),
-              );
-              _selectedUserIDSet.value.add(_loggedInUser.id);
-            }
-          }
-        default:
-          {}
+      if (transactionType == TransactionType.room &&
+          widget.transactionData != null) {
+        _splitType.value = SplitType.partial;
       }
+
+      if (transactionType == TransactionType.quicksplit) {
+        _splitType.value = SplitType.partial;
+        if (widget.transactionData == null) {
+          _selectedUserIDs.value.putIfAbsent(
+            _loggedInUser,
+            () => TextEditingController(),
+          );
+          _selectedUserIDSet.value.add(_loggedInUser.id);
+        }
+      }
+
       if (widget.transactionData != null) {
         _appBarTitle = "Update Expense";
         _populateEditForm(widget.transactionData!);
@@ -496,29 +490,22 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _submitTransactionHandler() {
-    if (_splitType[_splitTypeIndex.value] == SplitType.partial &&
+    if (_splitType.value == SplitType.partial &&
         !_partialFormKey.currentState!.validate()) {
       return;
     }
     if (_formKey.currentState!.validate()) {
       int sumAmount = 0;
-      int amountInPaisa =
+      final amountInPaisa =
           (Decimal.parse(_amountController.text) * Decimal.fromInt(100))
               .toBigInt()
               .toInt();
-      double totalAmount = double.parse(_amountController.text);
+      final totalAmount = double.parse(_amountController.text);
       List<UserAmountModel> userWithAmount = [];
-      UserAmountModel createdBy = UserAmountModel.fromBaseObject(
-        _loggedInUser,
-        amount:
-            _splitTypeIndex.value == _splitType.indexOf(SplitType.self)
-                ? totalAmount
-                : 0,
-      );
+      final splitValue = _splitType.value;
+      bool isLoggedInUserPartOfTransaction = false;
 
-      SplitType expenseSplitType = _splitType[_splitTypeIndex.value];
-
-      if (_splitType[_splitTypeIndex.value] == SplitType.partial) {
+      if (splitValue == SplitType.partial) {
         _selectedUserIDs.value.forEach((userData, amountTxt) {
           double tempAmount = double.parse(amountTxt.text);
           sumAmount +=
@@ -529,26 +516,22 @@ class _AddTransactionState extends State<AddTransaction> {
           userWithAmount.add(
             UserAmountModel.fromBaseObject(userData, amount: tempAmount),
           );
+
+          if (userData.id == _loggedInUser.id) {
+            isLoggedInUserPartOfTransaction = true;
+          }
         });
-      } else if (transactionType == TransactionType.room &&
-          (_splitType[_splitTypeIndex.value] == SplitType.equal ||
-              !_futureJoinerBool.value)) {
-        if (!_futureJoinerBool.value) {
-          expenseSplitType = SplitType.partial;
-        }
+      } else if (splitValue == SplitType.equal) {
         final roomInfoState = context.read<RoomInfoCubit>().state;
 
         if (roomInfoState is RoomInfoSuccess) {
-          int activeUserCount = 0;
-
-          for (int i = 0; i < roomInfoState.data.users.length; i++) {
-            if (roomInfoState.data.users[i].active) {
-              activeUserCount++;
-            }
-          }
+          final activeUserCount =
+              roomInfoState.data.users
+                  .where((eachUser) => eachUser.active)
+                  .length;
 
           int remaining = amountInPaisa % activeUserCount;
-          int eachAmount = (amountInPaisa / activeUserCount).toInt();
+          final eachAmount = (amountInPaisa / activeUserCount).toInt();
 
           for (int i = 0; i < roomInfoState.data.users.length; i++) {
             if (roomInfoState.data.users[i].active) {
@@ -559,9 +542,37 @@ class _AddTransactionState extends State<AddTransaction> {
                 ),
               );
               remaining--;
+
+              if (roomInfoState.data.users[i].id == _loggedInUser.id) {
+                isLoggedInUserPartOfTransaction = true;
+              }
             }
           }
         }
+      } else if (splitValue == SplitType.self) {
+        isLoggedInUserPartOfTransaction = true;
+        userWithAmount.add(
+          UserAmountModel.fromBaseObject(_loggedInUser, amount: totalAmount),
+        );
+      } else {
+        showNormalSnackBar(context, "Unknown Split Type");
+        return;
+      }
+
+      // Validation
+      if (!isLoggedInUserPartOfTransaction) {
+        showNormalSnackBar(context, "You can't remove yourself");
+        return;
+      }
+
+      if (userWithAmount.isEmpty) {
+        showNormalSnackBar(context, "Add Atleast One Member");
+        return;
+      }
+
+      if (splitValue == SplitType.partial && sumAmount != amountInPaisa) {
+        showNormalSnackBar(context, "Total amount does not match");
+        return;
       }
 
       BaseTransactionModel? data;
@@ -570,8 +581,6 @@ class _AddTransactionState extends State<AddTransaction> {
       if (widget.transactionData != null) {
         oldTransID = widget.transactionData!.id;
       }
-
-      bool flag = false;
 
       switch (transactionType) {
         case TransactionType.lenden:
@@ -585,7 +594,7 @@ class _AddTransactionState extends State<AddTransaction> {
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
               modifiedOn: DateTime.now(),
-              createdBy: createdBy.id,
+              createdBy: _loggedInUser.id,
             );
             break;
           }
@@ -597,7 +606,7 @@ class _AddTransactionState extends State<AddTransaction> {
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
               modifiedOn: DateTime.now(),
-              createdBy: createdBy.id,
+              createdBy: _loggedInUser.id,
               category: expenseCategories[max(0, _categoryIndex.value)],
               roomData: RoomLinkedModel.empty(),
             );
@@ -606,10 +615,12 @@ class _AddTransactionState extends State<AddTransaction> {
         case TransactionType.quicksplit:
           {
             Map<String, bool> isSettledMap = {};
+            String oldPersonalExpenseID = "";
 
             if (widget.transactionData != null) {
               final tempTransData =
                   widget.transactionData as QuicksplitTransactionModel;
+              oldPersonalExpenseID = tempTransData.personalExpenseId;
               for (final qsUser in tempTransData.users) {
                 isSettledMap[qsUser.id] = qsUser.isSettled;
               }
@@ -621,18 +632,21 @@ class _AddTransactionState extends State<AddTransaction> {
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
               modifiedOn: DateTime.now(),
-              createdBy: createdBy.id,
+              createdBy: _loggedInUser.id,
               category: expenseCategories[max(0, _categoryIndex.value)],
               users:
                   userWithAmount
                       .map(
                         (element) => QuicksplitUserModel.fromUserAmountObject(
                           element,
-                          isSettled: isSettledMap[element.id] ?? false,
+                          isSettled:
+                              isSettledMap.containsKey(element.id)
+                                  ? isSettledMap[element.id]
+                                  : false,
                         ),
                       )
                       .toList(),
-              personalExpenseId: '',
+              personalExpenseId: oldPersonalExpenseID,
               active: true,
               isClosedAny: false,
             );
@@ -640,60 +654,45 @@ class _AddTransactionState extends State<AddTransaction> {
           }
         case TransactionType.room:
           {
+            String oldPersonalExpenseID = "";
+            if (widget.transactionData != null) {
+              final tempTransData =
+                  widget.transactionData as RoomTransactionModel;
+              oldPersonalExpenseID = tempTransData.personalExpenseId;
+            }
+
             data = RoomTransactionModel(
               id: oldTransID,
               amount: totalAmount,
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
               modifiedOn: DateTime.now(),
-              createdBy: createdBy.id,
+              createdBy: _loggedInUser.id,
               category: expenseCategories[max(0, _categoryIndex.value)],
               users: userWithAmount,
-              splitType: expenseSplitType,
-              personalExpenseId: '',
-              activityCount: activityCount,
+              personalExpenseId: oldPersonalExpenseID,
+              activityCount: activityCount + 1,
             );
             break;
           }
       }
 
-      switch (_splitType[_splitTypeIndex.value]) {
-        case SplitType.partial:
-          {
-            if (userWithAmount.isEmpty) {
-              showNormalSnackBar(context, "Add Atleast One Member");
-            } else if (amountInPaisa != sumAmount) {
-              showNormalSnackBar(context, "Total Amount does not match");
-            } else if (!createdBy.hasData) {
-              showNormalSnackBar(context, "You can't remove yourself");
-            } else {
-              flag = true;
-            }
-          }
-        default:
-          {
-            flag = true;
-          }
-      }
-
-      if (flag) {
-        if (widget.transactionData == null) {
-          context.read<NewTransactionCubit>().createNewExpense(
+      if (widget.transactionData == null) {
+        context.read<NewTransactionCubit>().createNewExpense(
+          context,
+          data,
+          transactionType,
+          splitType: splitValue,
+        );
+      } else {
+        if (widget.transactionData != data) {
+          context.read<NewTransactionCubit>().updateExpense(
             context,
             data,
             transactionType,
           );
         } else {
-          if (widget.transactionData != data) {
-            context.read<NewTransactionCubit>().updateExpense(
-              context,
-              data,
-              transactionType,
-              expenseType: expenseType,
-            );
-          } else {
-            showNormalSnackBar(context, "No Change Detected");
-          }
+          showNormalSnackBar(context, "No Change Detected");
         }
       }
     }
@@ -833,7 +832,6 @@ class _AddTransactionState extends State<AddTransaction> {
                               context,
                               widget.transactionData!.id,
                               transactionType,
-                              expenseType: expenseType,
                             );
                           }
                         },
@@ -945,54 +943,21 @@ class _AddTransactionState extends State<AddTransaction> {
                   Visibility(
                     visible:
                         TransactionType.room == transactionType &&
-                        _isNewExpense,
+                        widget.transactionData == null,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ValueListenableBuilder(
-                          valueListenable: _splitTypeIndex,
-                          builder: (context, value, child) {
-                            if (_splitType[value] == SplitType.equal) {
-                              return child!;
-                            } else {
-                              return SizedBox(
-                                height: UiConstant.spaceBetweenSection,
-                              );
-                            }
-                          },
-                          child: ValueListenableBuilder(
-                            valueListenable: _futureJoinerBool,
-                            builder: (context, _, _) {
-                              return SwitchListTile(
-                                title: Text(
-                                  "Include Future Participants",
-                                  style: TextStyle(
-                                    fontSize: _headerTextSize - 4,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(
-                                  top: 0.25 * UiConstant.spaceBetweenSection,
-                                ),
-                                inactiveThumbColor: Colors.black38,
-                                inactiveTrackColor: Colors.white,
-                                value: _futureJoinerBool.value,
-                                onChanged: (updatedValue) {
-                                  _futureJoinerBool.value = updatedValue;
-                                },
-                              );
-                            },
-                          ),
-                        ),
+                        SizedBox(height: UiConstant.spaceBetweenSection),
                         _splitTypeCardWidget(),
                       ],
                     ),
                   ),
                   SizedBox(height: .5 * UiConstant.spaceBetweenSection),
                   ValueListenableBuilder(
-                    valueListenable: _splitTypeIndex,
+                    valueListenable: _splitType,
                     builder: (context, value, child) {
-                      if (_splitType[value] == SplitType.partial) {
+                      if (value == SplitType.partial) {
                         return child!;
                       } else {
                         return SizedBox.shrink();

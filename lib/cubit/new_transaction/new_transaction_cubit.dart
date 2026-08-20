@@ -19,8 +19,9 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
   void createNewExpense(
     BuildContext context,
     BaseTransactionModel baseTransData,
-    TransactionType transactionType,
-  ) async {
+    TransactionType transactionType, {
+    SplitType splitType = SplitType.equal,
+  }) async {
     final authLoginState = context.read<AuthBloc>().state;
     if (authLoginState is! AuthLoginSuccess) {
       return;
@@ -77,6 +78,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final RoomTransactionModel newData = await repoRD.createExpense(
               roomID,
               data,
+              splitType,
             );
             bloc.add(RoomAddNewTransaction(data: [newData]));
             return emit(NewTransactionSuccess(data: newData));
@@ -118,9 +120,8 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
   void updateExpense(
     BuildContext context,
     BaseTransactionModel baseTransData,
-    TransactionType transactionType, {
-    TransactionType expenseType = TransactionType.personal,
-  }) async {
+    TransactionType transactionType,
+  ) async {
     final authLoginState = context.read<AuthBloc>().state;
     if (authLoginState is! AuthLoginSuccess) {
       return;
@@ -185,7 +186,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     BuildContext context,
     String expenseID,
     TransactionType transactionType, {
-    TransactionType expenseType = TransactionType.personal,
+    TransactionType personalExpenseSubType = TransactionType.personal,
   }) async {
     final authLoginState = context.read<AuthBloc>().state;
     if (authLoginState is! AuthLoginSuccess) {
@@ -215,7 +216,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
                 expenseID: expenseID,
               ),
             );
-            await repoPS.delete(expenseID, expenseType);
+            await repoPS.delete(expenseID, personalExpenseSubType);
 
             bloc.add(
               PersonalMonthlyExpenseDelete(
@@ -252,7 +253,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            await repoRD.deleteExpense(roomID, expenseID, expenseType);
+            await repoRD.deleteExpense(roomID, expenseID);
 
             bloc.add(RoomDeleteTransaction(expenseID: expenseID));
             return emit(

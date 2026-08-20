@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/model_core.dart';
-import 'package:settlenow/util/util_core.dart';
 
 class MultiUserBaseTransactionModel<T extends UserAmountModel>
     extends BaseTransactionModel {
   String category;
   List<T> users;
-  SplitType splitType;
 
   MultiUserBaseTransactionModel({
     required super.id,
@@ -17,13 +15,11 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
     required super.createdBy,
     required this.category,
     required this.users,
-    required this.splitType,
   }) : super();
 
   MultiUserBaseTransactionModel.empty()
     : users = [],
       category = "",
-      splitType = SplitType.equal,
       super.empty();
 
   @override
@@ -35,7 +31,6 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
     DateTime? modifiedOn,
     String? createdBy,
     List<T>? users,
-    SplitType? splitType,
     String? category,
   }) {
     return MultiUserBaseTransactionModel<T>(
@@ -47,7 +42,6 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       modifiedOn: modifiedOn ?? this.modifiedOn,
       category: category ?? this.category,
       users: users ?? this.users,
-      splitType: splitType ?? this.splitType,
     );
   }
 
@@ -57,7 +51,6 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       ...super.toMap(),
       'category': category,
       'users': users.map((x) => x.toMap()).toList(),
-      'split_type': splitType.label,
     };
   }
 
@@ -78,7 +71,6 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       createdBy: data.createdBy,
       category: map['category'],
       users: allUsers,
-      splitType: SplitTypeExtension.fromString(map['split_type']),
     );
   }
 
@@ -90,7 +82,6 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       ...super.toCreateExpenseJson(),
       "category": category,
       "users": allUsers,
-      "split_type": splitType.labelInSmallCase,
     };
   }
 
@@ -110,13 +101,12 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       ...super.toUpdateExpenseJson(),
       "category": category,
       "users": allUsers,
-      "split_type": splitType.label,
     };
   }
 
   @override
   String toString() {
-    return 'MultiUserBaseTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, splitType: $splitType)';
+    return 'MultiUserBaseTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category)';
   }
 
   @override
@@ -131,15 +121,11 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
         other.modifiedOn == modifiedOn &&
         other.createdBy == createdBy &&
         other.category == category &&
-        other.splitType == splitType &&
         listEquals(other.users, users);
   }
 
   @override
   int get hashCode {
-    return super.hashCode ^
-        category.hashCode ^
-        splitType.hashCode ^
-        Object.hashAll(users);
+    return super.hashCode ^ category.hashCode ^ Object.hashAll(users);
   }
 }

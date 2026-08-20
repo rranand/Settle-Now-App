@@ -36,12 +36,14 @@ extension RoomTransactionDataProvider on RoomDataProvider {
   Future<RoomTransactionModel> createExpense(
     String id,
     RoomTransactionModel data,
+    SplitType splitType,
   ) async {
     try {
       final response = await createAPICall(
         'room/$id/transaction',
         "post",
-        data.toCreateExpenseJson(),
+        data.toCreateExpenseJson()
+          ..addAll({"split_type": splitType.labelInSmallCase}),
       );
 
       final respData = jsonDecode(response.body);
@@ -101,14 +103,9 @@ extension RoomTransactionDataProvider on RoomDataProvider {
     }
   }
 
-  Future<void> deleteExpense(
-    String id,
-    String expenseID,
-    TransactionType expenseType,
-  ) async {
+  Future<void> deleteExpense(String id, String expenseID) async {
     final response = await createAPICall('room/$id/transaction', "delete", {
       "id": expenseID,
-      "split_type": expenseType.label,
     });
 
     final respData = jsonDecode(response.body);

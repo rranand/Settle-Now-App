@@ -1,7 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/model_core.dart';
-import 'package:settlenow/util/util_core.dart';
 
 class RoomTransactionModel
     extends MultiUserBaseTransactionModel<UserAmountModel> {
@@ -17,7 +16,6 @@ class RoomTransactionModel
     required super.modifiedOn,
     required super.createdBy,
     required super.users,
-    required super.splitType,
     required this.personalExpenseId,
     required this.activityCount,
   });
@@ -36,7 +34,6 @@ class RoomTransactionModel
     DateTime? modifiedOn,
     String? createdBy,
     List<UserAmountModel>? users,
-    SplitType? splitType,
     String? category,
     String? personalExpenseId,
     int? activityCount,
@@ -50,7 +47,6 @@ class RoomTransactionModel
       modifiedOn: modifiedOn ?? this.modifiedOn,
       category: category ?? this.category,
       users: users ?? this.users,
-      splitType: splitType ?? this.splitType,
       personalExpenseId: personalExpenseId ?? this.personalExpenseId,
       activityCount: activityCount ?? this.activityCount,
     );
@@ -80,7 +76,6 @@ class RoomTransactionModel
       modifiedOn: data.modifiedOn,
       createdBy: data.createdBy,
       users: data.users,
-      splitType: data.splitType,
       personalExpenseId: map['personal_expense_id'] ?? "",
       activityCount: map['activity_count'] as int,
     );
@@ -119,7 +114,6 @@ class RoomTransactionModel
       modifiedOn: DateTime.now(),
       createdBy: createdByUID,
       users: userWithAmount,
-      splitType: SplitType.equal,
       personalExpenseId: "",
       activityCount: 1,
     );
@@ -127,7 +121,7 @@ class RoomTransactionModel
 
   @override
   String toString() {
-    return 'RoomTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, splitType: $splitType)';
+    return 'RoomTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category)';
   }
 
   @override
@@ -141,7 +135,6 @@ class RoomTransactionModel
         other.createdOn == createdOn &&
         other.createdBy == createdBy &&
         other.category == category &&
-        other.splitType == splitType &&
         other.activityCount == activityCount &&
         listEquals(other.users, users);
   }
@@ -156,7 +149,6 @@ class RoomTransactionModel
         modifiedOn.hashCode ^
         createdBy.hashCode ^
         category.hashCode ^
-        splitType.hashCode ^
         users.hashCode ^
         activityCount.hashCode ^
         personalExpenseId.hashCode;

@@ -86,11 +86,13 @@ class RoomRepository {
   Future<RoomTransactionModel> createExpense(
     String id,
     RoomTransactionModel data,
+    SplitType splitType,
   ) async {
     try {
       RoomTransactionModel newExpense = await _dataProvider.createExpense(
         id,
         data,
+        splitType
       );
       return newExpense;
     } catch (e) {
@@ -120,13 +122,9 @@ class RoomRepository {
     }
   }
 
-  Future<void> deleteExpense(
-    String id,
-    String expenseID,
-    TransactionType expenseType,
-  ) async {
+  Future<void> deleteExpense(String id, String expenseID) async {
     try {
-      return _dataProvider.deleteExpense(id, expenseID, expenseType);
+      return _dataProvider.deleteExpense(id, expenseID);
     } catch (e) {
       rethrow;
     }

@@ -103,7 +103,8 @@ class _TransactionCardState extends State<TransactionCard> {
                               context,
                               widget.data.id,
                               TransactionType.personal,
-                              expenseType: widget.data.roomData.transactionType,
+                              personalExpenseSubType:
+                                  widget.data.roomData.transactionType,
                             );
                           }
                         } else {

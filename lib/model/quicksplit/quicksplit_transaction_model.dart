@@ -20,7 +20,7 @@ class QuicksplitTransactionModel
     required this.personalExpenseId,
     required this.active,
     required this.isClosedAny,
-  }) : super(splitType: SplitType.partial);
+  }) : super();
 
   QuicksplitTransactionModel.empty()
     : personalExpenseId = '',
@@ -93,7 +93,7 @@ class QuicksplitTransactionModel
 
   @override
   String toString() {
-    return 'QuicksplitTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, splitType: $splitType, active:$active, personalExpenseId:$personalExpenseId, isClosedAny:$isClosedAny)';
+    return 'QuicksplitTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, active:$active, personalExpenseId:$personalExpenseId, isClosedAny:$isClosedAny)';
   }
 
   @override
@@ -107,7 +107,6 @@ class QuicksplitTransactionModel
         other.createdOn == createdOn &&
         other.createdBy == createdBy &&
         other.category == category &&
-        other.splitType == splitType &&
         other.personalExpenseId == personalExpenseId &&
         other.active == active &&
         other.isClosedAny == isClosedAny &&
