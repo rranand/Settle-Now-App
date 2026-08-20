@@ -469,6 +469,10 @@ class _AddTransactionState extends State<AddTransaction> {
         }
       }
 
+      if (transactionType == TransactionType.lenden) {
+        _splitType.value = SplitType.self;
+      }
+
       if (widget.transactionData != null) {
         _appBarTitle = "Update Expense";
         _populateEditForm(widget.transactionData!);

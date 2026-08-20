@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -86,85 +85,58 @@ class _SettingPageState extends State<SettingPage> {
     }
   }
 
-  bool calculateIsLeavableForRoom(
-    LinkedHashMap<String, RoomSettleModel> roomSettleData,
-    LinkedHashMap<String, RoomTransactionModel> transData,
-  ) {
-    for (RoomSettleModel eachTransaction in roomSettleData.values) {
-      if (eachTransaction.sender.id == _loggedInUser.id ||
-          eachTransaction.receiver.id == _loggedInUser.id) {
-        return false;
-      }
-    }
-
-    for (RoomTransactionModel eachTransaction in transData.values) {
-      if (eachTransaction.createdBy == _loggedInUser.id) {
-        return false;
-      }
-
-      final allUsers = eachTransaction.users;
-      for (int i = 0; i < allUsers.length; i++) {
-        if (allUsers[i].id == _loggedInUser.id) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  bool calculateIsLeavableForLendenRoom(
-    LinkedHashMap<String, LendenTransactionModel> transData,
-  ) {
-    for (LendenTransactionModel eachTransaction in transData.values) {
-      if (eachTransaction.createdBy == _loggedInUser.id) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   void populateData() {
     bool dataPopulated = false;
+
     switch (widget.transactionType) {
       case (TransactionType.room):
         {
           final state = context.read<RoomInfoCubit>().state;
+
           if (state is RoomInfoSuccess) {
-            dataPopulated = true;
             _roomNameController.text = state.data.name;
             roomName = state.data.name;
             totalMemberCount = state.data.users.length;
 
-            for (int i = 0; i < totalMemberCount; i++) {
-              if (state.data.users[i].id == state.data.createdBy) {
-                createdBy = state.data.users[i] as BaseUserModel;
-                break;
-              }
-            }
+            createdBy =
+                state.data.users.firstWhere(
+                      (user) => user.id == state.data.createdBy,
+                      orElse: () => RoomUserModel.empty(),
+                    )
+                    as BaseUserModel;
 
             createdOn = state.data.createdOn;
             roomKey = state.data.key;
             roomLink = state.data.link;
 
-            final roomSettleState = context.read<RoomSettleCubit>().state;
-            final roomBlocState = context.read<RoomBloc>().state;
+            final loggedInUserData = state.data.users.firstWhere(
+              (user) => user.id == _loggedInUser.id,
+              orElse: () => RoomUserModel.empty(),
+            );
 
-            if (roomSettleState is RoomSettleSuccess &&
-                roomBlocState is RoomFetchSuccess &&
-                roomSettleState.id == widget.id &&
-                roomBlocState.id == widget.id) {
-              isDeletable =
-                  roomSettleState.data.isEmpty && roomBlocState.data.isEmpty;
+            if (loggedInUserData.hasData) {
+              dataPopulated = true;
+              isDeletable = false;
+              isLeavable = false;
 
               if (state.data.createdBy != _loggedInUser.id) {
-                isLeavable = calculateIsLeavableForRoom(
-                  roomSettleState.data,
-                  roomBlocState.data,
-                );
+                if (loggedInUserData.contribution == 0 &&
+                    loggedInUserData.spent == 0 &&
+                    loggedInUserData.settle == 0) {
+                  isLeavable = true;
+                }
               } else {
-                isLeavable = false;
+                bool isAnyUserHasData = false;
+                for (RoomUserModel user in state.data.users) {
+                  if (!(user.contribution == 0 &&
+                      user.spent == 0 &&
+                      user.settle == 0)) {
+                    isAnyUserHasData = true;
+                    break;
+                  }
+                }
+
+                isDeletable = !isAnyUserHasData;
               }
             }
           }
@@ -185,12 +157,32 @@ class _SettingPageState extends State<SettingPage> {
             }
 
             createdOn = state.roomData.createdOn;
-            isDeletable = state.data.isEmpty;
 
-            if (state.roomData.createdBy != _loggedInUser.id) {
-              isLeavable = calculateIsLeavableForLendenRoom(state.data);
-            } else {
-              isLeavable = false;
+            final loggedInUserData = state.roomData.users.firstWhere(
+              (user) => user.id == _loggedInUser.id,
+              orElse: () => LendenUserModel.empty(),
+            );
+            isDeletable = false;
+            isLeavable = false;
+
+            if (loggedInUserData.hasData) {
+              dataPopulated = true;
+
+              if (state.roomData.createdBy != _loggedInUser.id) {
+                if (loggedInUserData.gave == 0 && loggedInUserData.owe == 0) {
+                  isLeavable = true;
+                }
+              } else {
+                bool isAnyUserHasData = false;
+                for (LendenUserModel user in state.roomData.users) {
+                  if (!(user.gave == 0 && user.owe == 0)) {
+                    isAnyUserHasData = true;
+                    break;
+                  }
+                }
+
+                isDeletable = !isAnyUserHasData;
+              }
             }
           }
         }

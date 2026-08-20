@@ -24,7 +24,6 @@ import 'firebase/firebase_options_dev.dart' as dev;
 
 // TODO: Add proper way to show error message
 // TODO: Add search apis to search api
-// TODO: Check delete logic for rooms (If all entites are not fetched, and user proceed for delete or leave, wrong message is coming up)
 // TODO: On settle expense RoomUser cards are not updating
 
 @pragma('vm:entry-point')
