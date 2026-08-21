@@ -142,7 +142,7 @@ void showNormalSnackBar(
     scaffoldMessenger.showSnackBar(snackBar);
   }
 
-  if (txt == ApiConstant.sessionExpired) {
+  if (txt.toLowerCase() == ApiConstant.sessionExpired.toLowerCase()) {
     context.read<AuthBloc>().add(AuthRevokeSessionRequested());
   }
 }

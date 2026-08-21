@@ -22,9 +22,7 @@ import 'package:settlenow/util/util_core.dart';
 import 'firebase/firebase_options.dart' as prod;
 import 'firebase/firebase_options_dev.dart' as dev;
 
-// TODO: Add proper way to show error message
 // TODO: Add search apis to search api
-// TODO: On settle expense RoomUser cards are not updating
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
