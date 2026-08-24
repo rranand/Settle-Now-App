@@ -111,7 +111,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 if (notificationData.isEmpty) {
                   return SliverFillRemaining(
                     child: noRecordFoundWidget(
-                      "No Notification Found",
+                      FreshScreenMessageConstant.noRequestDashboard,
                       context,
                     ),
                   );

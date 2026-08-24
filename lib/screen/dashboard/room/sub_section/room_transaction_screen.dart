@@ -114,10 +114,12 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
           );
         }
 
+        bool hasNoTransactionFound = false;
         List<RoomTransactionModel> data = [];
 
         if (state is RoomFetchSuccess) {
           data = state.dataList;
+          hasNoTransactionFound = data.isEmpty;
 
           final filterState = context.read<FilterCubit>().state;
           if (!filterState.isFilterApplied) {
@@ -131,7 +133,12 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
 
         if (data.isEmpty) {
           return SliverFillRemaining(
-            child: noRecordFoundWidget("No Transaction Found", context),
+            child: noRecordFoundWidget(
+              hasNoTransactionFound
+                  ? FreshScreenMessageConstant.noRoomTransaction
+                  : ApiConstant.noTransactionFound,
+              context,
+            ),
           );
         }
 

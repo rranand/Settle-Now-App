@@ -265,8 +265,10 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                     >(
                       listener: _blocListenerHandler,
                       builder: (context, state) {
+                        bool hasNoRecordFound = false;
                         List<LendenDashboardModel> lendenData = [];
                         if (state is LendenDashboardFetchSuccess) {
+                          hasNoRecordFound = state.dataList.isEmpty;
                           lendenData = filterDataByPreference(
                             state.dataList,
                             prefData.lendenPref,
@@ -280,7 +282,9 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                         if (lendenData.isEmpty) {
                           return SliverFillRemaining(
                             child: noRecordFoundWidget(
-                              ApiConstant.noRoomFound,
+                              hasNoRecordFound
+                                  ? FreshScreenMessageConstant.noLendenDashboard
+                                  : ApiConstant.noRoomFound,
                               context,
                             ),
                           );

@@ -198,9 +198,11 @@ class _PersonalExpenseDashboardScreenState
                 >(
                   listener: _blocListenerHandler,
                   builder: (context, state) {
+                    bool hasNoRecordFound = false;
                     List<PersonalExpenseInfoModel> transactionData = [];
 
                     if (state is PersonalExpenseDashboardFetchSuccess) {
+                      hasNoRecordFound = state.dataList.isEmpty;
                       transactionData = filterDataByPreference(
                         state.dataList,
                         prefData.personalExpensePref,
@@ -215,7 +217,10 @@ class _PersonalExpenseDashboardScreenState
                     if (transactionData.isEmpty) {
                       return SliverFillRemaining(
                         child: noRecordFoundWidget(
-                          ApiConstant.noPersonalExpenseFound,
+                          hasNoRecordFound
+                              ? FreshScreenMessageConstant
+                                  .noPersonalMonthlyDashboard
+                              : ApiConstant.noPersonalExpenseFound,
                           context,
                         ),
                       );

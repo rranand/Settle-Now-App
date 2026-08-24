@@ -468,12 +468,14 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
         bool isLoaded = false;
         List<LendenUserModel> users = [];
         String roomName = "";
+        bool hasNoRecordFound = false;
 
         if (state is! LendenRoomLoading) {
           isLoaded = true;
         }
 
         if (state is LendenRoomFetchSuccess) {
+          hasNoRecordFound = state.dataList.isEmpty;
           lendenRoomData = state.roomData;
           lendenTransactionData = state.dataList;
           loggedInUserData = state.roomData.users.firstWhere(
@@ -513,7 +515,10 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                           ? [
                             SliverFillRemaining(
                               child: noRecordFoundWidget(
-                                "No Transaction Found",
+                                hasNoRecordFound
+                                    ? FreshScreenMessageConstant
+                                        .noLendenTransaction
+                                    : ApiConstant.noTransactionFound,
                                 context,
                               ),
                             ),

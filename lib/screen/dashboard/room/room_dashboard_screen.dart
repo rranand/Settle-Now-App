@@ -363,7 +363,18 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                         listener: _blocListenerHandler,
                         builder: (context, state) {
                           List<RoomInfoModel> roomInfoData = [];
+                          bool hasNoActiveRoomData = false;
+                          bool hasNoInActiveRoomData = false;
+
                           if (state is RoomDashboardFetchSuccess) {
+                            hasNoActiveRoomData =
+                                state.activeRoomDashboardModel.dataList.isEmpty;
+                            hasNoInActiveRoomData =
+                                state
+                                    .inactiveRoomDashboardModel
+                                    .dataList
+                                    .isEmpty;
+
                             roomInfoData =
                                 _navBarIndex.value == 0
                                     ? filterDataByPreference(
@@ -378,12 +389,31 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                             );
                           }
                           if (roomInfoData.isEmpty) {
-                            return SliverFillRemaining(
-                              child: noRecordFoundWidget(
-                                ApiConstant.noRoomFound,
-                                context,
-                              ),
-                            );
+                            if (_navBarIndex.value == 0 &&
+                                hasNoActiveRoomData) {
+                              return SliverFillRemaining(
+                                child: noRecordFoundWidget(
+                                  FreshScreenMessageConstant.noRoomDashboard,
+                                  context,
+                                ),
+                              );
+                            } else if (_navBarIndex.value == 1 &&
+                                hasNoInActiveRoomData) {
+                              return SliverFillRemaining(
+                                child: noRecordFoundWidget(
+                                  FreshScreenMessageConstant
+                                      .noCloseRoomDashboard,
+                                  context,
+                                ),
+                              );
+                            } else {
+                              return SliverFillRemaining(
+                                child: noRecordFoundWidget(
+                                  ApiConstant.noRoomFound,
+                                  context,
+                                ),
+                              );
+                            }
                           } else {
                             return SliverPadding(
                               padding: _mainScreenPadding

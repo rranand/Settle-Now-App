@@ -140,8 +140,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
             child: BlocConsumer<QuicksplitBloc, QuicksplitState>(
               listener: _blocListenerHandler,
               builder: (context, state) {
+                bool hasNoRecordFound = false;
                 List<QuicksplitTransactionModel> splitData = [];
                 if (state is QuicksplitFetchSuccess) {
+                  hasNoRecordFound = state.dataList.isEmpty;
                   splitData = filterDataByPreference(
                     state.dataList,
                     prefData.quicksplitPref,
@@ -161,7 +163,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                           ? [
                             SliverFillRemaining(
                               child: noRecordFoundWidget(
-                                "No Transaction Found",
+                                hasNoRecordFound
+                                    ? FreshScreenMessageConstant
+                                        .noQuicksplitDashboard
+                                    : ApiConstant.noTransactionFound,
                                 context,
                               ),
                             ),
