@@ -162,13 +162,16 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                       splitData.isEmpty
                           ? [
                             SliverFillRemaining(
-                              child: noRecordFoundWidget(
-                                hasNoRecordFound
-                                    ? FreshScreenMessageConstant
-                                        .noQuicksplitDashboard
-                                    : ApiConstant.noTransactionFound,
-                                context,
-                              ),
+                              child:
+                                  hasNoRecordFound
+                                      ? freshMessageWidget(
+                                        FreshScreenMessageConstant
+                                            .noQuicksplitDashboard,
+                                      )
+                                      : noRecordFoundWidget(
+                                        ApiConstant.noTransactionFound,
+                                        context,
+                                      ),
                             ),
                           ]
                           : [

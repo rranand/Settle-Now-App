@@ -216,13 +216,16 @@ class _PersonalExpenseDashboardScreenState
 
                     if (transactionData.isEmpty) {
                       return SliverFillRemaining(
-                        child: noRecordFoundWidget(
-                          hasNoRecordFound
-                              ? FreshScreenMessageConstant
-                                  .noPersonalMonthlyDashboard
-                              : ApiConstant.noPersonalExpenseFound,
-                          context,
-                        ),
+                        child:
+                            hasNoRecordFound
+                                ? freshMessageWidget(
+                                  FreshScreenMessageConstant
+                                      .noPersonalMonthlyDashboard,
+                                )
+                                : noRecordFoundWidget(
+                                  ApiConstant.noPersonalExpenseFound,
+                                  context,
+                                ),
                       );
                     }
 

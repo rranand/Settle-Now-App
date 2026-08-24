@@ -213,13 +213,16 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                     transactionArr.isEmpty && isLoaded
                         ? [
                           SliverFillRemaining(
-                            child: noRecordFoundWidget(
-                              hasNoRecordFound && _isLivePersonalExpense
-                                  ? FreshScreenMessageConstant
-                                      .noPersonalMonthlyTransaction
-                                  : ApiConstant.noPersonalExpenseFound,
-                              context,
-                            ),
+                            child:
+                                hasNoRecordFound && _isLivePersonalExpense
+                                    ? freshMessageWidget(
+                                      FreshScreenMessageConstant
+                                          .noPersonalMonthlyTransaction,
+                                    )
+                                    : noRecordFoundWidget(
+                                      ApiConstant.noPersonalExpenseFound,
+                                      context,
+                                    ),
                           ),
                         ]
                         : [

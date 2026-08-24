@@ -315,9 +315,8 @@ class _InviteMemberState extends State<InviteMember> {
           ),
           body:
               isLoaded && users.isEmpty
-                  ? noRecordFoundWidget(
+                  ? freshMessageWidget(
                     FreshScreenMessageConstant.noFriendsDashboard,
-                    context,
                   )
                   : SingleChildScrollView(
                     padding: _mainScreenPadding.add(

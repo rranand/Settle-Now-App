@@ -133,12 +133,15 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
 
         if (data.isEmpty) {
           return SliverFillRemaining(
-            child: noRecordFoundWidget(
-              hasNoTransactionFound
-                  ? FreshScreenMessageConstant.noRoomTransaction
-                  : ApiConstant.noTransactionFound,
-              context,
-            ),
+            child:
+                hasNoTransactionFound
+                    ? freshMessageWidget(
+                      FreshScreenMessageConstant.noRoomTransaction,
+                    )
+                    : noRecordFoundWidget(
+                      ApiConstant.noTransactionFound,
+                      context,
+                    ),
           );
         }
 

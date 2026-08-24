@@ -392,18 +392,16 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                             if (_navBarIndex.value == 0 &&
                                 hasNoActiveRoomData) {
                               return SliverFillRemaining(
-                                child: noRecordFoundWidget(
+                                child: freshMessageWidget(
                                   FreshScreenMessageConstant.noRoomDashboard,
-                                  context,
                                 ),
                               );
                             } else if (_navBarIndex.value == 1 &&
                                 hasNoInActiveRoomData) {
                               return SliverFillRemaining(
-                                child: noRecordFoundWidget(
+                                child: freshMessageWidget(
                                   FreshScreenMessageConstant
                                       .noCloseRoomDashboard,
-                                  context,
                                 ),
                               );
                             } else {

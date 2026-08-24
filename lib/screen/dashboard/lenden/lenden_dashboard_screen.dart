@@ -281,12 +281,16 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                         }
                         if (lendenData.isEmpty) {
                           return SliverFillRemaining(
-                            child: noRecordFoundWidget(
-                              hasNoRecordFound
-                                  ? FreshScreenMessageConstant.noLendenDashboard
-                                  : ApiConstant.noRoomFound,
-                              context,
-                            ),
+                            child:
+                                hasNoRecordFound
+                                    ? freshMessageWidget(
+                                      FreshScreenMessageConstant
+                                          .noLendenDashboard,
+                                    )
+                                    : noRecordFoundWidget(
+                                      ApiConstant.noRoomFound,
+                                      context,
+                                    ),
                           );
                         } else {
                           return SliverPadding(

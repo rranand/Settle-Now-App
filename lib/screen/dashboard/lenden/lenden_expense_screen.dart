@@ -514,13 +514,16 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                       ? (lendenTransactionData.isEmpty
                           ? [
                             SliverFillRemaining(
-                              child: noRecordFoundWidget(
-                                hasNoRecordFound
-                                    ? FreshScreenMessageConstant
-                                        .noLendenTransaction
-                                    : ApiConstant.noTransactionFound,
-                                context,
-                              ),
+                              child:
+                                  hasNoRecordFound
+                                      ? freshMessageWidget(
+                                        FreshScreenMessageConstant
+                                            .noLendenTransaction,
+                                      )
+                                      : noRecordFoundWidget(
+                                        ApiConstant.noTransactionFound,
+                                        context,
+                                      ),
                             ),
                           ]
                           : [

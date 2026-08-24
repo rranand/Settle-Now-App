@@ -182,12 +182,36 @@ Future<dynamic> loadingWidget(BuildContext context) {
   );
 }
 
-Widget noRecordFoundWidget(String text, BuildContext context) {
+Widget freshMessageWidget(FreshMessageModel freshMessage) {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            freshMessage.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            freshMessage.description,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, height: 1.4, color: Colors.grey),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget noRecordFoundWidget(String description, BuildContext context) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Text(
-        text,
+        description,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 20,

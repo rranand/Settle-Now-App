@@ -1,34 +1,70 @@
+class FreshMessageModel {
+  final String title;
+  final String description;
+
+  FreshMessageModel({required this.title, required this.description});
+}
+
 class FreshScreenMessageConstant {
-  static const String noRoomDashboard =
-      "Create a room for group expenses, or join a room using an invite code.";
+  static final noRoomDashboard = FreshMessageModel(
+    title: 'Start splitting expenses',
+    description:
+        'Create a room for group expenses, or join a room using an invite code.',
+  );
 
-  static const String noCloseRoomDashboard =
-      "View past expenses and settlements from rooms you close.";
+  static final noCloseRoomDashboard = FreshMessageModel(
+    title: 'No closed rooms yet',
+    description: 'View past expenses and settlements from your closed rooms.',
+  );
 
-  static const String noLendenDashboard =
-      "Keep track of money you lend or borrow and always know who owes whom.";
+  static final noLendenDashboard = FreshMessageModel(
+    title: 'Track money between friends',
+    description:
+        'Keep track of money you lend or borrow and always know who owes whom.',
+  );
 
-  static const String noQuicksplitDashboard =
-      "Split a one-time expense with friends without creating a room.";
+  static final noQuicksplitDashboard = FreshMessageModel(
+    title: 'Split an expense instantly',
+    description:
+        'Split a one-time expense with friends without creating a room.',
+  );
 
-  static const String noPersonalMonthlyDashboard =
-      "Record your everyday expenses and keep track of your monthly spending.";
+  static final noPersonalMonthlyDashboard = FreshMessageModel(
+    title: 'Start tracking your expenses',
+    description:
+        'Record your everyday expenses and keep track of your monthly spending.',
+  );
 
-  static const String noRoomTransaction =
-      "Add your first group expense and we'll keep track of who owes whom.";
+  static final noRoomTransaction = FreshMessageModel(
+    title: 'No expenses yet',
+    description:
+        'Add your first group expense and we’ll keep track of who owes whom.',
+  );
 
-  static const String noRoomSettlement =
-      "Settlements between room members will appear here once someone pays another member.";
+  static final noRoomSettlement = FreshMessageModel(
+    title: 'No settlements yet',
+    description:
+        'Settlements between room members will appear here once someone pays another member.',
+  );
 
-  static const String noLendenTransaction =
-      "Record money you give or receive to keep your Len-Den balance up to date.";
+  static final noLendenTransaction = FreshMessageModel(
+    title: 'No transactions yet',
+    description:
+        'Record money you give or receive to keep your Len-Den balance up to date.',
+  );
 
-  static const String noPersonalMonthlyTransaction =
-      "No transactions are recorded for this month yet.";
+  static final noPersonalMonthlyTransaction = FreshMessageModel(
+    title: 'No expenses this month',
+    description: 'No transactions are recorded for this month yet.',
+  );
 
-  static const String noRequestDashboard =
-      "You don't have any pending requests right now.";
+  static final noRequestDashboard = FreshMessageModel(
+    title: 'You’re all caught up',
+    description: 'You don’t have any pending requests right now.',
+  );
 
-  static const String noFriendsDashboard =
-      "Add friends to easily split expenses.";
+  static final noFriendsDashboard = FreshMessageModel(
+    title: 'No friends yet',
+    description: 'Add friends to easily split expenses.',
+  );
 }
