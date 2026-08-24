@@ -146,8 +146,8 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
 
         if (state is PersonalMonthlyExpenseFetchSuccess) {
           isLoaded = true;
+          hasNoRecordFound = state.dataList.isEmpty;
           if (state.data.isNotEmpty) {
-            hasNoRecordFound = state.data.isEmpty;
             transactionArr = state.dataList;
             context.read<FilterCubit>().updateState(
               FilterState(id: state.id, data: transactionArr),
@@ -214,7 +214,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                         ? [
                           SliverFillRemaining(
                             child: noRecordFoundWidget(
-                              hasNoRecordFound
+                              hasNoRecordFound && _isLivePersonalExpense
                                   ? FreshScreenMessageConstant
                                       .noPersonalMonthlyTransaction
                                   : ApiConstant.noPersonalExpenseFound,

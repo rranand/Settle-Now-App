@@ -21,7 +21,7 @@ class FreshScreenMessageConstant {
       "Settlements between room members will appear here once someone pays another member.";
 
   static const String noLendenTransaction =
-      "Record money you give or receive to keep your LenDen balance up to date.";
+      "Record money you give or receive to keep your Len-Den balance up to date.";
 
   static const String noPersonalMonthlyTransaction =
       "No transactions are recorded for this month yet.";

@@ -315,7 +315,10 @@ class _InviteMemberState extends State<InviteMember> {
           ),
           body:
               isLoaded && users.isEmpty
-                  ? noRecordFoundWidget("No User Found", context)
+                  ? noRecordFoundWidget(
+                    FreshScreenMessageConstant.noFriendsDashboard,
+                    context,
+                  )
                   : SingleChildScrollView(
                     padding: _mainScreenPadding.add(
                       EdgeInsets.only(bottom: UiConstant.spaceAtBottom),

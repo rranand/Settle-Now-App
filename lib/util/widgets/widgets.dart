@@ -182,9 +182,20 @@ Future<dynamic> loadingWidget(BuildContext context) {
   );
 }
 
-Widget noRecordFoundWidget(String txt, BuildContext context) {
+Widget noRecordFoundWidget(String text, BuildContext context) {
   return Center(
-    child: Text(txt, style: const TextStyle(fontSize: 20, color: Colors.grey)),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 20,
+          color: Colors.grey.shade500,
+          height: 1.4,
+        ),
+      ),
+    ),
   );
 }
 
