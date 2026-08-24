@@ -41,6 +41,8 @@ class LendenUserModel extends BaseUserModel {
     );
   }
 
+  double get netBalance => gave - owe;
+
   @override
   String toString() {
     return 'LendenUserModel(id: $id, name: $name, gave: $gave, owe: $owe, active: $active)';

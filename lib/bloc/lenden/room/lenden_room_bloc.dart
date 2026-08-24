@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
@@ -285,6 +286,16 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
 
     List<LendenUserModel> users = [...oldState.roomData.users];
     try {
+      if (users.length == 1) {
+        if (users[0].netBalance != 0) {
+          throw ApiConstant.settleYourSpending;
+        }
+      } else {
+        if ((users[0].netBalance - users[1].netBalance) != 0) {
+          throw ApiConstant.settleYourSpending;
+        }
+      }
+
       await repo.closeRoom(oldState.id);
 
       bool active = false;
