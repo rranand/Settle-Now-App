@@ -41,7 +41,7 @@ class LendenUserModel extends BaseUserModel {
     );
   }
 
-  double get netBalance => gave - owe;
+  double get netBalance => getPrecisedAmount(gave - owe);
 
   @override
   String toString() {
