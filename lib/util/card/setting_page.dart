@@ -114,7 +114,7 @@ class _SettingPageState extends State<SettingPage> {
               orElse: () => RoomUserModel.empty(),
             );
 
-            if (loggedInUserData.hasData) {
+            if (loggedInUserData.hasData && loggedInUserData.active) {
               dataPopulated = true;
               isDeletable = false;
               isLeavable = false;
@@ -164,8 +164,7 @@ class _SettingPageState extends State<SettingPage> {
             );
             isDeletable = false;
             isLeavable = false;
-
-            if (loggedInUserData.hasData) {
+            if (loggedInUserData.hasData && loggedInUserData.active) {
               dataPopulated = true;
 
               if (state.roomData.createdBy != _loggedInUser.id) {
