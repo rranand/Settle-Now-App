@@ -469,7 +469,8 @@ class _AddTransactionState extends State<AddTransaction> {
         }
       }
 
-      if (transactionType == TransactionType.lenden) {
+      if (transactionType == TransactionType.lenden ||
+          transactionType == TransactionType.personal) {
         _splitType.value = SplitType.self;
       }
 

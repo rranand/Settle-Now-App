@@ -104,11 +104,87 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
     );
   }
 
+  Widget showActionButton(bool isLoading) {
+    List<Widget> actionButtons = [];
+
+    actionButtons.add(
+      ValueListenableBuilder(
+        valueListenable: isValidState,
+        builder: (context, _, child) {
+          return ButtonWithShimmerEffect(
+            isLoaded: isLoading,
+            buttonText: "Settle",
+            buttonType: CustomButtonType.customElevatedButton,
+            buttonHeight: 40,
+            buttonWidth: 110,
+            borderRadius: 100,
+            buttonTextColor: Colors.green.shade400,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            borderColor: Colors.green.shade400,
+            onPressed: () {
+              if (isValidState.value) {
+                context.read<SettleCubit>().settleExpense(
+                  widget.data.id,
+                  _loggedInUser.id,
+                  context,
+                );
+              } else {
+                showSnackbarWithChildWidget(
+                  "Transaction is in invalid state",
+                  child: snackbarErrorIcon(),
+                  scaffoldMessenger: ScaffoldMessenger.of(context),
+                );
+              }
+            },
+          );
+        },
+      ),
+    );
+
+    if (!widget.data.isClosedAny) {
+      actionButtons.add(
+        ButtonWithShimmerEffect(
+          isLoaded: isLoading,
+          buttonText:
+              _loggedInUser.id == widget.data.createdBy ? "Delete" : "Opt Out",
+          buttonType: CustomButtonType.customElevatedButton,
+          buttonHeight: 40,
+          buttonWidth: 110,
+          borderRadius: 100,
+          buttonTextColor: Colors.red.shade400,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          borderColor: Colors.red.shade400,
+          onPressed: () {
+            if (_loggedInUser.id == widget.data.createdBy) {
+              context.read<SettleCubit>().delete(
+                widget.data.id,
+                _loggedInUser.id,
+                context,
+              );
+            } else {
+              context.read<SettleCubit>().optout(
+                widget.data.id,
+                _loggedInUser.id,
+                context,
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: actionButtons,
+    );
+  }
+
   Widget extendedTransactionWidget() {
     return Column(
       children: [
         Divider(),
         ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           padding: EdgeInsets.zero,
           itemCount: widget.data.users.length,
@@ -161,76 +237,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   child: Column(
                     children: [
                       Divider(thickness: 0.3),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: isValidState,
-                            builder: (context, _, child) {
-                              return ButtonWithShimmerEffect(
-                                isLoaded: isLoading,
-                                buttonText: "Settle",
-                                buttonType:
-                                    CustomButtonType.customElevatedButton,
-                                buttonHeight: 40,
-                                buttonWidth: 110,
-                                borderRadius: 100,
-                                buttonTextColor: Colors.green.shade400,
-                                backgroundColor:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                borderColor: Colors.green.shade400,
-                                onPressed: () {
-                                  if (isValidState.value) {
-                                    context.read<SettleCubit>().settleExpense(
-                                      widget.data.id,
-                                      _loggedInUser.id,
-                                      context,
-                                    );
-                                  } else {
-                                    showSnackbarWithChildWidget(
-                                      "Transaction is in invalid state",
-                                      child: snackbarErrorIcon(),
-                                      scaffoldMessenger: ScaffoldMessenger.of(
-                                        context,
-                                      ),
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                          ),
-                          ButtonWithShimmerEffect(
-                            isLoaded: isLoading,
-                            buttonText:
-                                _loggedInUser.id == widget.data.createdBy
-                                    ? "Delete"
-                                    : "Opt Out",
-                            buttonType: CustomButtonType.customElevatedButton,
-                            buttonHeight: 40,
-                            buttonWidth: 110,
-                            borderRadius: 100,
-                            buttonTextColor: Colors.red.shade400,
-                            backgroundColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                            borderColor: Colors.red.shade400,
-                            onPressed: () {
-                              if (_loggedInUser.id == widget.data.createdBy) {
-                                context.read<SettleCubit>().delete(
-                                  widget.data.id,
-                                  _loggedInUser.id,
-                                  context,
-                                );
-                              } else {
-                                context.read<SettleCubit>().optout(
-                                  widget.data.id,
-                                  _loggedInUser.id,
-                                  context,
-                                );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
+                      showActionButton(isLoading),
                     ],
                   ),
                 );
