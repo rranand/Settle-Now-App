@@ -67,6 +67,8 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   }
 
   void addNewSettleExpense(RoomSettleModel data) {
+    roomUserCubit.onAddNewSettleExpense(data);
+
     if (state is! RoomSettleSuccess) {
       return;
     }
@@ -75,8 +77,6 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     LinkedHashMap<String, RoomSettleModel> allRecords = LinkedHashMap();
     allRecords.addAll({data.id: data});
     allRecords.addAll(oldState.data);
-
-    roomUserCubit.onAddNewSettleExpense(data);
 
     return emit(
       RoomSettleSuccess(

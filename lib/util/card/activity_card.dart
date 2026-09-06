@@ -59,18 +59,26 @@ class _ActivityCardState extends State<ActivityCard> {
           double amount = widget.data.newValue!.amount ?? 0;
           String newValueFullName = getName(widget.data.newValue!.user);
 
-          return "$userFirstName settled ${formatCurrency(amount.abs(), context)} ${amount < 0 ? "for" : "with"} $newValueFullName";
+          if (amount < 0) {
+            return "$userFirstName settled ${formatCurrency(amount.abs(), context)} on behalf of $newValueFullName";
+          }
+
+          return "$userFirstName added a settled payment of ${formatCurrency(amount.abs(), context)} with $newValueFullName";
         }
       case ActivityType.settlementUpdated:
         {
           double amount = widget.data.newValue!.amount ?? 0;
           String newValueFullName = getName(widget.data.newValue!.user);
 
-          return "$userFirstName updated settlement ${amount < 0 ? "for" : "with"} $newValueFullName";
+          if (amount < 0) {
+            return "$userFirstName updated the settled payment of ${formatCurrency(amount.abs(), context)} on behalf of $newValueFullName";
+          }
+
+          return "$userFirstName updated the settled payment of ${formatCurrency(amount.abs(), context)} with $newValueFullName";
         }
       case ActivityType.settlementDeleted:
         {
-          return "$userFirstName deleted settlement of ${formatCurrency(widget.data.newValue!.amount!.abs(), context)}";
+          return "$userFirstName deleted the settled payment of ${formatCurrency(widget.data.newValue!.amount!.abs(), context)}";
         }
       case ActivityType.roomRenamed:
         {
@@ -207,38 +215,42 @@ class _ActivityCardState extends State<ActivityCard> {
                             shape: BoxShape.circle,
                             radius: 50,
                           ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            widget.data.hasData
-                                ? Text(
-                                  activityText,
-                                  style: TextStyle(fontSize: 17),
-                                )
-                                : CustomShimmerEffect.textWidget(
-                                  context,
-                                  width: 80,
-                                ),
-                            subTextOnCard(
-                              convertDateTimeFormat(widget.data.createdOn),
-                              context,
-                              fontSize: 14,
-                              isLoaded: widget.data.hasData,
-                            ),
-                            ValueListenableBuilder(
-                              valueListenable: isExpanded,
-                              builder: (context, _, child) {
-                                if (isExpanded.value) {
-                                  return child!;
-                                } else {
-                                  return SizedBox.shrink();
-                                }
-                              },
-                              child: extendedChangeWidget,
-                            ),
-                          ],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              widget.data.hasData
+                                  ? Text(
+                                    activityText,
+                                    style: const TextStyle(fontSize: 17),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                  : CustomShimmerEffect.textWidget(
+                                    context,
+                                    width: 80,
+                                  ),
+                              subTextOnCard(
+                                convertDateTimeFormat(widget.data.createdOn),
+                                context,
+                                fontSize: 14,
+                                isLoaded: widget.data.hasData,
+                              ),
+                              ValueListenableBuilder(
+                                valueListenable: isExpanded,
+                                builder: (context, _, child) {
+                                  if (isExpanded.value) {
+                                    return child!;
+                                  } else {
+                                    return SizedBox.shrink();
+                                  }
+                                },
+                                child: extendedChangeWidget,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
