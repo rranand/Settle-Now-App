@@ -24,7 +24,8 @@ import 'firebase/firebase_options_dev.dart' as dev;
 
 // TODO: Add search apis to search api
 // TODO: Add notification page
-// TODO: Improve Icon for Add To Personal Expense and Close Room Request
+// TODO: Design SMS bank transaction parsing
+// TODO: Create an API to fetch categories based amount for all transaction
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

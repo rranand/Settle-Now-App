@@ -744,7 +744,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         },
                       ),
                       SpeedDialChild(
-                        child: const Icon(Iconsax.message_question_copy),
+                        child: const Icon(Icons.campaign_outlined),
                         backgroundColor: UiConstant.colors[5],
                         foregroundColor: Colors.white,
                         visible: isRoomActive && showCloseRoomRequest,

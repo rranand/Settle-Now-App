@@ -67,4 +67,9 @@ class FreshScreenMessageConstant {
     title: 'No friends yet',
     description: 'Add friends to easily split expenses.',
   );
+
+  static final noChartDataForRoom = FreshMessageModel(
+    title: 'No expenses yet',
+    description: 'Add a transaction to see the category breakdown.',
+  );
 }

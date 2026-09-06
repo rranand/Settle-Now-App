@@ -259,7 +259,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
             return Padding(
               padding: const EdgeInsets.only(right: 6.0),
               child: CustomShimmerEffect.loadingShimmerEffect(
-                Icon(Iconsax.profile_add),
+                Icon(Iconsax.receipt_add_copy),
               ),
             );
           } else {
@@ -269,7 +269,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                 borderRadius: BorderRadius.circular(
                   UiConstant.cardBorderRadius,
                 ),
-                child: Icon(Iconsax.profile_add_copy, color: Colors.grey),
+                child: Icon(Iconsax.receipt_add_copy, color: Colors.grey),
                 onTap: () {
                   context.read<AddToPersonalExpenseBloc>().add(
                     AddToPersonalExpenseRequested(

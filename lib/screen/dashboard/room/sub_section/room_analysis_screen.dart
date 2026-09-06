@@ -41,9 +41,7 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
       _categoryHashCode = categoryAmountModel.hashCode;
     }
 
-    return ExpenseByCategoryDataScreen(
-      categoryAmountModel: categoryAmountModel,
-    );
+    return ExpenseByCategoryChart(data: categoryAmountModel);
   }
 
   Widget expenseByUserGraph() {
@@ -57,10 +55,13 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
           data
               .map((user) => UserFinancialData.fromRoomUserModel(user))
               .toList();
+      userFinancialData.sort(
+        (a, b) => b.contribution.compareTo(a.contribution),
+      );
       _roomUserHashCode = userFinancialData.hashCode;
     }
 
-    return ExpenseByUserDataScreen(userFinancialData: userFinancialData);
+    return ExpenseByUserChart(data: userFinancialData);
   }
 
   Widget _graphController(int index, List<RoomTransactionModel> data) {
@@ -113,7 +114,9 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
 
         if (data.isEmpty) {
           return SliverFillRemaining(
-            child: noRecordFoundWidget("No Transaction Found", context),
+            child: freshMessageWidget(
+              FreshScreenMessageConstant.noChartDataForRoom,
+            ),
           );
         }
         return ValueListenableBuilder(
