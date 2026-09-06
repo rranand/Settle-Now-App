@@ -42,6 +42,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
       children: [
         Divider(),
         ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           padding: EdgeInsets.zero,
           itemCount: widget.data.users.length,

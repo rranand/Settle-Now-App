@@ -63,7 +63,7 @@ extension RoomTransactionDataProvider on RoomDataProvider {
   ) async {
     try {
       final response = await createAPICall(
-        'room/$id/bulk-transaction',
+        'room/$id/transaction/bulk',
         "post",
         {"transactions": data.map((e) => e.toBulkExpenseJson()).toList()},
       );
