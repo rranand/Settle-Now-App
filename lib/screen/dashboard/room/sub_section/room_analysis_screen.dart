@@ -7,7 +7,8 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class RoomAnalysisScreen extends StatefulWidget {
-  const RoomAnalysisScreen({super.key});
+  final String roomID;
+  const RoomAnalysisScreen({super.key, required this.roomID});
 
   @override
   State<RoomAnalysisScreen> createState() => _RoomAnalysisScreenState();
@@ -16,55 +17,22 @@ class RoomAnalysisScreen extends StatefulWidget {
 class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
   final List<String> graphTitle = ["Expense By Category", "Expense By User"];
   final ValueNotifier _selectedGraphIndex = ValueNotifier(0);
-  int _categoryHashCode = 0;
-  int _roomUserHashCode = 0;
-  List<CategoryAmountModel> categoryAmountModel = [];
-  List<UserFinancialData> userFinancialData = [];
 
-  Widget expenseByCategoryGraph(List<RoomTransactionModel> data) {
-    if (_categoryHashCode != data.hashCode) {
-      _categoryHashCode = data.hashCode;
-      final Map<String, double> categoryData = {};
-      for (final transaction in data) {
-        categoryData[transaction.category] =
-            (categoryData[transaction.category] ?? 0) + transaction.amount;
-      }
-      categoryAmountModel =
-          categoryData.entries
-              .map(
-                (entry) => CategoryAmountModel(
-                  category: entry.key,
-                  amount: entry.value,
-                ),
-              )
-              .toList();
-      _categoryHashCode = categoryAmountModel.hashCode;
-    }
-
-    return ExpenseByCategoryChart(data: categoryAmountModel);
+  Widget expenseByCategoryGraph(List<CategoryAmountModel> data) {
+    return ExpenseByCategoryChart(data: data);
   }
 
   Widget expenseByUserGraph() {
-    if (_roomUserHashCode != userFinancialData.hashCode) {
-      final state = context.read<RoomUserCubit>().state;
-      List<RoomUserModel> data = [];
-      if (state is RoomUserSuccess) {
-        data = state.data;
-      }
-      userFinancialData =
-          data
-              .map((user) => UserFinancialData.fromRoomUserModel(user))
-              .toList();
-      userFinancialData.sort(
-        (a, b) => b.contribution.compareTo(a.contribution),
-      );
-      _roomUserHashCode = userFinancialData.hashCode;
+    final state = context.read<RoomUserCubit>().state;
+    List<RoomUserModel> data = [];
+    if (state is RoomUserSuccess) {
+      data = state.data;
     }
 
-    return ExpenseByUserChart(data: userFinancialData);
+    return ExpenseByUserChart(data: data);
   }
 
-  Widget _graphController(int index, List<RoomTransactionModel> data) {
+  Widget _graphController(int index, List<CategoryAmountModel> data) {
     switch (index) {
       case 0:
         return expenseByCategoryGraph(data);
@@ -75,20 +43,39 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
     }
   }
 
-  void _blocListenerHandler(BuildContext context, RoomState state) {
-    if (state is RoomFailure) {
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      final oldState = context.read<RoomCategoryWiseTotalAmountCubit>().state;
+      if (!(oldState is RoomCategoryWiseTotalAmountSuccess &&
+          oldState.id == widget.roomID)) {
+        context.read<RoomCategoryWiseTotalAmountCubit>().fetchData(
+          widget.roomID,
+        );
+      }
+    }
+  }
+
+  void _blocListenerHandler(
+    BuildContext context,
+    RoomCategoryWiseTotalAmountState state,
+  ) {
+    if (state is RoomCategoryWiseTotalAmountFailure) {
       showNormalSnackBar(context, state.error);
-    } else if (state is RoomFetchSuccess && state.error != null) {
-      showNormalSnackBar(context, state.error!);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<RoomBloc, RoomState>(
+    return BlocConsumer<
+      RoomCategoryWiseTotalAmountCubit,
+      RoomCategoryWiseTotalAmountState
+    >(
       listener: _blocListenerHandler,
       builder: (context, state) {
-        if (state is RoomLoading) {
+        if (state is RoomCategoryWiseTotalAmountLoading) {
           return SliverFillRemaining(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -107,8 +94,8 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
           );
         }
 
-        List<RoomTransactionModel> data = [];
-        if (state is RoomFetchSuccess) {
+        List<CategoryAmountModel> data = [];
+        if (state is RoomCategoryWiseTotalAmountSuccess) {
           data = state.dataList;
         }
 

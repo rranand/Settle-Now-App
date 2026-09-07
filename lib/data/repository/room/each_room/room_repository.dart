@@ -28,6 +28,16 @@ class RoomRepository {
     }
   }
 
+  Future<List<CategoryAmountModel>> fetchCategoryWiseTotalAmount(
+    String id,
+  ) async {
+    try {
+      return await _dataProvider.fetchCategoryWiseTotalAmount(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateRoom(String id, String newRoomName) async {
     try {
       return _dataProvider.updateRoom(id, newRoomName);
@@ -92,7 +102,7 @@ class RoomRepository {
       RoomTransactionModel newExpense = await _dataProvider.createExpense(
         id,
         data,
-        splitType
+        splitType,
       );
       return newExpense;
     } catch (e) {

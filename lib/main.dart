@@ -25,7 +25,6 @@ import 'firebase/firebase_options_dev.dart' as dev;
 // TODO: Add search apis to search api
 // TODO: Add notification page
 // TODO: Design SMS bank transaction parsing
-// TODO: Create an API to fetch categories based amount for all transaction
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -243,11 +242,18 @@ class MyApp extends StatelessWidget {
                   context.read<RoomInfoCubit>(),
                 ),
           ),
+          BlocProvider<RoomCategoryWiseTotalAmountCubit>(
+            create:
+                (context) => RoomCategoryWiseTotalAmountCubit(
+                  context.read<RoomRepository>(),
+                ),
+          ),
           BlocProvider<RoomBloc>(
             create:
                 (context) => RoomBloc(
                   context.read<RoomRepository>(),
                   context.read<RoomUserCubit>(),
+                  context.read<RoomCategoryWiseTotalAmountCubit>(),
                 ),
           ),
           BlocProvider<RoomSettleCubit>(

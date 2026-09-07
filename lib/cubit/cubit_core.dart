@@ -1,6 +1,7 @@
 export './lenden/create_room/create_room_cubit.dart';
 export './quicksplit/settle/settle_cubit.dart';
 export './room/room_activity/room_activity_cubit.dart';
+export './room/room_category_wise_total_amount/room_category_wise_total_amount_cubit.dart';
 export './room/room_settle/room_settle_cubit.dart';
 export './room/room_close/room_close_cubit.dart';
 export './room/room_user/room_user_cubit.dart';

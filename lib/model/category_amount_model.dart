@@ -4,6 +4,13 @@ class CategoryAmountModel {
 
   CategoryAmountModel({required this.category, required this.amount});
 
+  factory CategoryAmountModel.fromMap(Map<String, dynamic> map) {
+    return CategoryAmountModel(
+      category: map['category'],
+      amount: double.parse(map['amount'].toString()),
+    );
+  }
+
   @override
   bool operator ==(covariant CategoryAmountModel other) {
     if (identical(this, other)) return true;

@@ -4,7 +4,7 @@ import 'package:settlenow/internationalization/currency.dart';
 import 'package:settlenow/model/model_core.dart';
 
 class ExpenseByUserChart extends StatelessWidget {
-  final List<UserFinancialData> data;
+  final List<RoomUserModel> data;
 
   const ExpenseByUserChart({super.key, required this.data});
 
@@ -59,7 +59,7 @@ class _UserChartLegend extends StatelessWidget {
 }
 
 class _UserBarRow extends StatelessWidget {
-  final UserFinancialData user;
+  final RoomUserModel user;
   final double maxValue;
   final double textFontSize = 14.0;
   final double barHeight = 25.0;

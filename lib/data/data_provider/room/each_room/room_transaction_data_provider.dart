@@ -33,6 +33,36 @@ extension RoomTransactionDataProvider on RoomDataProvider {
     }
   }
 
+  Future<List<CategoryAmountModel>> fetchCategoryWiseTotalAmount(
+    String id,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'room/$id/transaction/group/category-wise-total-amount',
+        "get",
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final allTrans = data['data'];
+        List<CategoryAmountModel> arr = [];
+        if (allTrans != null) {
+          for (int i = 0; i < allTrans.length; i++) {
+            arr.add(CategoryAmountModel.fromMap(allTrans[i]));
+          }
+        }
+
+        return arr;
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<RoomTransactionModel> createExpense(
     String id,
     RoomTransactionModel data,

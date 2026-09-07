@@ -76,7 +76,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       case 1:
         return RoomUserScreen();
       case 2:
-        return RoomAnalysisScreen();
+        return RoomAnalysisScreen(roomID: widget.id);
       case 3:
         return RoomSettleScreen(roomID: widget.id);
       default:
@@ -252,6 +252,15 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     if (roomSettleOldState is RoomSettleSuccess ||
         roomSettleOldState is RoomSettleFailure) {
       context.read<RoomSettleCubit>().fetchData(widget.id, true);
+    }
+
+    final roomCategoryWiseTotalAmountOldState =
+        context.read<RoomCategoryWiseTotalAmountCubit>().state;
+    if (roomCategoryWiseTotalAmountOldState
+            is RoomCategoryWiseTotalAmountSuccess ||
+        roomCategoryWiseTotalAmountOldState
+            is RoomCategoryWiseTotalAmountFailure) {
+      context.read<RoomCategoryWiseTotalAmountCubit>().fetchData(widget.id);
     }
 
     context.read<RoomBloc>().add(RoomFetch(id: widget.id, isFreshFetch: true));
