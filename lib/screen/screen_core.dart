@@ -23,3 +23,4 @@ export './dashboard/notification/notification_screen.dart';
 export './profile/profile_edit_screen.dart';
 export './profile/profile_screen.dart';
 export './profile/login_activity_screen.dart';
+export './bank_transaction/bank_transaction_screen.dart';

@@ -27,3 +27,4 @@ export 'user/friend_user_model.dart';
 export 'room/room_transaction_model.dart';
 export 'personal_expense/room_linked_model.dart';
 export 'room/room_dashboard_model.dart';
+export 'bank_transaction_model.dart';

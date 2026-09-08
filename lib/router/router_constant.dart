@@ -56,6 +56,9 @@ class RouterConstants {
   //Preference Page
   static const String preferencePage = '/preference';
 
+  //Bank Transaction Page
+  static const String bankTransactionPage = '/bank-transaction';
+
   //Error Route
   static const String errorPageRouteName = '/404';
 

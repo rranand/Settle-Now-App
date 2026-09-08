@@ -92,6 +92,12 @@ class AppRouterConfig {
             },
           ),
           GoRoute(
+            path: RouterConstants.bankTransactionPage,
+            builder: (context, state) {
+              return AuthGate(child: BankTransactionScreen());
+            },
+          ),
+          GoRoute(
             path: RouterConstants.notificationPage,
             builder: (context, state) {
               return GetNotified();

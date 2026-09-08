@@ -147,9 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _drawerHandler(int index) async {
-    switch (drawerTitle[index]) {
-      case "Get Notified":
+  Future<void> _drawerHandler(DrawingTitle drawingTitle) async {
+    switch (drawingTitle) {
+      case DrawingTitle.getNotified:
         {
           final notificationStatus =
               await context.push(RouterConstants.notificationPage) as bool?;
@@ -159,37 +159,41 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           break;
         }
-      case "Preference":
+      case DrawingTitle.bankTransactions:
+        {
+          context.push(RouterConstants.bankTransactionPage);
+          break;
+        }
+      case DrawingTitle.preference:
         {
           context.push(RouterConstants.preferencePage);
           break;
         }
-      case "Share":
+      case DrawingTitle.share:
         {
           SharePlus.instance.share(ShareParams(text: getShareMessage()));
           break;
         }
-      case "Rate Us":
+      case DrawingTitle.rateUs:
         {
           inAppReview.openStoreListing();
           break;
         }
-      case "About Us":
+      case DrawingTitle.aboutUs:
         {
           context.push(RouterConstants.aboutUsPage);
           break;
         }
-      case "Profile":
+      case DrawingTitle.profile:
         {
           context.push(RouterConstants.profileRouteName);
           break;
         }
-      case "Log Out":
+      case DrawingTitle.logOut:
         {
           context.read<AuthBloc>().add(AuthLogoutRequested());
           break;
         }
-      default:
     }
   }
 
@@ -215,31 +219,31 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(color: Colors.white),
             ),
           ),
-          ...List.generate(drawerTitle.length, (index) {
+          ...List.generate(DrawingTitle.values.length, (index) {
             return ValueListenableBuilder(
               valueListenable: isNotificationAllowed,
               builder: (BuildContext context, _, _) {
-                if (kIsWeb &&
-                    (drawerTitle[index] == "Get Notified" ||
-                        drawerTitle[index] == "Rate Us" ||
-                        drawerTitle[index] == "Share")) {
+                final drawingTitle = DrawingTitle.values[index];
+
+                if (kIsWeb && !drawingTitle.isWebCompatible) {
                   return SizedBox.shrink();
                 }
-                if (drawerTitle[index] == "Get Notified" &&
+                if (drawingTitle == DrawingTitle.getNotified &&
                     isNotificationAllowed.value) {
                   return SizedBox.shrink();
                 }
+
                 return ListTile(
                   onTap: () {
-                    _drawerHandler(index);
+                    _drawerHandler(drawingTitle);
                   },
                   leading: Icon(
-                    drawerIcon[index],
+                    drawingTitle.icon,
                     color: Colors.white,
                     size: 22,
                   ),
                   title: Text(
-                    drawerTitle[index],
+                    drawingTitle.label,
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                   trailing: Visibility(
