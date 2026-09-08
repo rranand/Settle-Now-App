@@ -11,25 +11,11 @@ final class BankTransactionLoading extends BankTransactionState {
 
 final class BankTransactionSuccess extends BankTransactionState {
   final List<BankTransactionModel> data;
-  final List<Bank> banks;
-  final List<PaymentMode> paymentModes;
 
-  BankTransactionSuccess({
-    required this.data,
-    required this.banks,
-    required this.paymentModes,
-  });
+  BankTransactionSuccess({required this.data});
 
-  BankTransactionSuccess copyWith({
-    List<BankTransactionModel>? data,
-    List<Bank>? banks,
-    List<PaymentMode>? paymentModes,
-  }) {
-    return BankTransactionSuccess(
-      data: data ?? this.data,
-      banks: banks ?? this.banks,
-      paymentModes: paymentModes ?? this.paymentModes,
-    );
+  BankTransactionSuccess copyWith({List<BankTransactionModel>? data}) {
+    return BankTransactionSuccess(data: data ?? this.data);
   }
 }
 

@@ -66,6 +66,35 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
     return const SizedBox.shrink();
   }
 
+  List<LendenTransactionModel> generateShimmerData() {
+    return List.generate(11, (i) {
+      LendenTransactionModel tempData = LendenTransactionModel.empty();
+      if (i % 2 == 0) {
+        tempData.createdBy = _loggedInUser.id;
+      }
+      return tempData;
+    });
+  }
+
+  Widget transactionCardDisplay(List<LendenTransactionModel> data) {
+    return SliverList.builder(
+      itemCount: data.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: index == data.length - 1 ? UiConstant.spaceAtBottom : 0,
+          ),
+          child: LendenExpenseCard(
+            lendenID: "",
+            data: data[index],
+            loggedInUser: _loggedInUser,
+            isEditable: false,
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
@@ -75,141 +104,204 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
       cardHeight: UiConstant.cardFixedHeight + 10,
     );
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("Bank Transactions")),
-      body: RefreshIndicator(
-        onRefresh: onRefresh,
-        notificationPredicate: (ScrollNotification notification) {
-          return notification.depth == 0;
-        },
-        child: CustomScrollView(
-          controller: _gridViewScrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            ValueListenableBuilder(
-              valueListenable: isSearchEnabled,
-              builder: (BuildContext context, bool value, Widget? _) {
-                if (!value) {
-                  return SliverToBoxAdapter(child: SizedBox.shrink());
-                }
-                return SliverPadding(
-                  padding: _mainScreenPadding,
-                  sliver: SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    pinned: value,
-                    title: CustomFormField.searchBar(
-                      "Search",
-                      isSearchEnabled,
-                      _searchController,
-                    ),
-                  ),
-                );
-              },
-            ),
-            BlocConsumer<BankTransactionCubit, BankTransactionState>(
-              listener: _blocListenerHandler,
-              builder: (context, state) {
-                List<BankTransactionModel> bankTransactionData = [];
-                List<Bank> bankNameFound = [];
-                List<PaymentMode> transactionMode = [];
+    return BlocConsumer<BankTransactionCubit, BankTransactionState>(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        bool isLoaded = false;
+        List<BankTransactionModel> bankTransactionData = [];
 
-                if (state is BankTransactionSuccess) {
-                  bankTransactionData = state.data;
-                  bankNameFound = state.banks;
-                  transactionMode = state.paymentModes;
-                } else if (state is BankTransactionLoading) {
-                  bankTransactionData = List.generate(
-                    11,
-                    (i) => BankTransactionModel.empty(),
-                  );
-                } else if (state is BankTransactionFailure) {
-                  return SliverFillRemaining(
-                    child: freshMessageWidget(
-                      FreshScreenMessageConstant
-                          .bankTransactionSMSPermissionIssue,
-                    ),
-                  );
-                }
+        if (state is! BankTransactionLoading) {
+          isLoaded = true;
+        }
 
-                if (bankTransactionData.isEmpty) {
-                  return SliverFillRemaining(
-                    child: freshMessageWidget(
-                      FreshScreenMessageConstant.noBankTransactionDashboard,
-                    ),
-                  );
-                } else {
-                  return SliverPadding(
-                    padding: _mainScreenPadding.add(
-                      EdgeInsets.only(
-                        top: UiConstant.spaceBetweenSection,
-                        bottom: UiConstant.spaceAtBottom,
+        if (state is BankTransactionSuccess) {
+          bankTransactionData = state.data;
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("Bank Transactions"),
+            titleSpacing: _mainScreenPadding.left,
+            centerTitle: false,
+            leading: appBarBackButton(context),
+            actions:
+                isLoaded && bankTransactionData.isNotEmpty
+                    ? appBarActionButton(context, [
+                      InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        child: Icon(Icons.search),
+                        onTap: () {
+                          isSearchEnabled.value = !isSearchEnabled.value;
+                        },
                       ),
-                    ),
-                    sliver: ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _searchController,
-                      builder: (context, _, _) {
-                        List<BankTransactionModel> filterData =
-                            bankTransactionData;
-                        if (state is BankTransactionSuccess) {
-                          filterData = FilterSort.filteredSearchText(
-                            _searchController.text,
-                            bankTransactionData,
-                            (transactionData) {
-                              String searchStr =
-                                  "${transactionData.receiver.toLowerCase()} ${transactionData.transactionID} ${transactionData.amount} ${transactionData.bank.label} ${transactionData.mode.label}";
-                              return searchStr;
-                            },
-                          );
-                        }
-
-                        if (filterData.isEmpty) {
-                          return SliverFillRemaining(
-                            child: noRecordFoundWidget(
-                              ApiConstant.noMatchingRecords,
-                              context,
+                    ])
+                    : null,
+          ),
+          body: RefreshIndicator(
+            onRefresh: onRefresh,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 0;
+            },
+            child: CustomScrollView(
+              controller: _gridViewScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers:
+                  isLoaded
+                      ? bankTransactionData.isEmpty
+                          ? [
+                            SliverFillRemaining(
+                              child: freshMessageWidget(
+                                state is BankTransactionFailure
+                                    ? FreshScreenMessageConstant
+                                        .bankTransactionSMSPermissionIssue
+                                    : FreshScreenMessageConstant
+                                        .noBankTransactionDashboard,
+                              ),
                             ),
-                          );
-                        }
-
-                        return SliverMainAxisGroup(
-                          slivers: [
-                            SliverGrid.builder(
-                              itemCount: filterData.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: cardSizeInfo[0],
-                                    mainAxisSpacing:
-                                        UiConstant.spaceBetweenCard,
-                                    crossAxisSpacing:
-                                        UiConstant.spaceBetweenCard,
-                                    childAspectRatio: cardSizeInfo[1],
-                                  ),
-                              itemBuilder:
-                                  (context, index) => SizedBox(
-                                    width: cardSizeInfo[0],
-                                    child: BankTransactionCard(
-                                      data: filterData[index],
-                                      onTap: () {},
+                          ]
+                          : [
+                            ValueListenableBuilder(
+                              valueListenable: isSearchEnabled,
+                              builder: (
+                                BuildContext context,
+                                bool value,
+                                Widget? _,
+                              ) {
+                                if (!value) {
+                                  return SliverToBoxAdapter(
+                                    child: SizedBox.shrink(),
+                                  );
+                                }
+                                return SliverPadding(
+                                  padding: _mainScreenPadding,
+                                  sliver: SliverAppBar(
+                                    automaticallyImplyLeading: false,
+                                    pinned: value,
+                                    title: CustomFormField.searchBar(
+                                      "Search",
+                                      isSearchEnabled,
+                                      _searchController,
                                     ),
                                   ),
+                                );
+                              },
                             ),
-                            genericFooterForDashboard(
-                              isSearchEnabled,
-                              _builderFooter,
-                              context,
-                              state,
+                            BlocConsumer<
+                              BankTransactionCubit,
+                              BankTransactionState
+                            >(
+                              listener: _blocListenerHandler,
+                              builder: (context, state) {
+                                if (state is BankTransactionFailure) {
+                                  return SliverFillRemaining(
+                                    child: freshMessageWidget(
+                                      FreshScreenMessageConstant
+                                          .bankTransactionSMSPermissionIssue,
+                                    ),
+                                  );
+                                }
+
+                                if (bankTransactionData.isEmpty) {
+                                  return SliverFillRemaining(
+                                    child: freshMessageWidget(
+                                      FreshScreenMessageConstant
+                                          .noBankTransactionDashboard,
+                                    ),
+                                  );
+                                }
+
+                                if (bankTransactionData.isEmpty) {
+                                  return SliverFillRemaining(
+                                    child: freshMessageWidget(
+                                      FreshScreenMessageConstant
+                                          .noBankTransactionDashboard,
+                                    ),
+                                  );
+                                } else {
+                                  return SliverPadding(
+                                    padding: _mainScreenPadding.add(
+                                      EdgeInsets.only(
+                                        top: UiConstant.spaceBetweenSection,
+                                        bottom: UiConstant.spaceAtBottom,
+                                      ),
+                                    ),
+                                    sliver: ValueListenableBuilder<
+                                      TextEditingValue
+                                    >(
+                                      valueListenable: _searchController,
+                                      builder: (context, _, _) {
+                                        List<BankTransactionModel> filterData =
+                                            bankTransactionData;
+                                        if (state is BankTransactionSuccess) {
+                                          filterData =
+                                              FilterSort.filteredSearchText(
+                                                _searchController.text,
+                                                bankTransactionData,
+                                                (transactionData) {
+                                                  String searchStr =
+                                                      "${transactionData.receiver.toLowerCase()} ${transactionData.transactionID} ${transactionData.amount} ${transactionData.bank.label} ${transactionData.mode.label}";
+                                                  return searchStr;
+                                                },
+                                              );
+                                        }
+
+                                        if (filterData.isEmpty) {
+                                          return SliverFillRemaining(
+                                            child: noRecordFoundWidget(
+                                              ApiConstant.noMatchingRecords,
+                                              context,
+                                            ),
+                                          );
+                                        }
+
+                                        return SliverMainAxisGroup(
+                                          slivers: [
+                                            SliverGrid.builder(
+                                              itemCount: filterData.length,
+                                              gridDelegate:
+                                                  SliverGridDelegateWithMaxCrossAxisExtent(
+                                                    maxCrossAxisExtent:
+                                                        cardSizeInfo[0],
+                                                    mainAxisSpacing:
+                                                        UiConstant
+                                                            .spaceBetweenCard,
+                                                    crossAxisSpacing:
+                                                        UiConstant
+                                                            .spaceBetweenCard,
+                                                    childAspectRatio:
+                                                        cardSizeInfo[1],
+                                                  ),
+                                              itemBuilder:
+                                                  (context, index) => SizedBox(
+                                                    width: cardSizeInfo[0],
+                                                    child: BankTransactionCard(
+                                                      data: filterData[index],
+                                                      onTap: () {},
+                                                    ),
+                                                  ),
+                                            ),
+                                            genericFooterForDashboard(
+                                              isSearchEnabled,
+                                              _builderFooter,
+                                              context,
+                                              state,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }
+                              },
                             ),
-                          ],
-                        );
-                      },
-                    ),
-                  );
-                }
-              },
+                          ]
+                      : [transactionCardDisplay(generateShimmerData())],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -12,10 +12,8 @@ part 'noise_filtering.dart';
 part 'parser.dart';
 part 'confidence_score.dart';
 
-Future<List<dynamic>> filterSMS(List<SmsMessage> messages) async {
+Future<List<BankTransactionModel>> filterSMS(List<SmsMessage> messages) async {
   final transactions = <BankTransactionModel>[];
-  final bankNameFound = <Bank>{};
-  final paymentModeFound = <PaymentMode>{};
 
   for (final msg in messages) {
     final sender = msg.sender.toString();
@@ -44,9 +42,6 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> messages) async {
     final receiver =
         paymentMode == PaymentMode.atm ? "Self" : getTransferTo(messageBody);
 
-    bankNameFound.add(bankName);
-    paymentModeFound.add(paymentMode);
-
     final confidence = _confidenceScore(
       bank: bankName,
       referenceNo: referenceNo,
@@ -71,5 +66,5 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> messages) async {
     );
   }
 
-  return [transactions, bankNameFound.toList(), paymentModeFound.toList()];
+  return transactions;
 }

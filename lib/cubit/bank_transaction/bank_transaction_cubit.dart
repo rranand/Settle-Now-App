@@ -36,14 +36,8 @@ class BankTransactionCubit extends Cubit<BankTransactionState> {
       kinds: [SmsQueryKind.inbox],
     );
 
-    List<dynamic> temp = await filterSMS(messages);
+    List<BankTransactionModel> allTransactions = await filterSMS(messages);
 
-    emit(
-      BankTransactionSuccess(
-        data: temp[0] as List<BankTransactionModel>,
-        banks: temp[1] as List<Bank>,
-        paymentModes: temp[2] as List<PaymentMode>,
-      ),
-    );
+    emit(BankTransactionSuccess(data: allTransactions));
   }
 }
