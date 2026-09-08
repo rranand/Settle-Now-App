@@ -49,45 +49,63 @@ final List<RegExp> _refNoPatterns = [
 // ---- Receiver / counterparty: ordered, most-specific first --------------
 final List<RegExp> _transferToPatterns = [
   // IDFC debit template: "...on 01/09/26; ROHIT ANAND credited. RRN..."
-  RegExp(r';\s*(?<name>[^.]+?)\s+credited\b', caseSensitive: false),
+  RegExp(
+    r';\s*(?<name>[a-z0-9@._&*\-\/\s]*?)\s+credited\b',
+    caseSensitive: false,
+  ),
 
   // Kiwi template: "@upi_chandu kumar 06-09-2026 06:37:31 PM..."
-  RegExp(r'@upi_(?<name>[^.]+?)\s+\d{2}-\d{2}-\d{4}\b', caseSensitive: false),
+  RegExp(
+    r'@upi_(?<name>[a-z0-9@._&*\-\/\s]*?)\s+\d{2}-\d{2}-\d{4}\b',
+    caseSensitive: false,
+  ),
 
   // IMPS credit with masked mobile + name before parenthesis:
   // "...mobile 9xxxxxx437-Rohit Anan (IMPS Ref# ...)"
-  RegExp(r'[\dx]{6,}-(?<name>[^.]+?)\s*\(', caseSensitive: false),
+  RegExp(
+    r'[\dx]{6,}-(?<name>[a-z0-9@._&*\-\/\s]*?)\s*\(',
+    caseSensitive: false,
+  ),
 
   // Card spend, merchant before a second date: "...ending 6788 at Flipkart on 29/07/26."
-  RegExp(r'\bat\s+(?<name>[^.]+?)\s+on\s+\d', caseSensitive: false),
+  RegExp(
+    r'\bat\s+(?<name>[a-z0-9@._&*\-\/\s]*?)\s+on\s+\d',
+    caseSensitive: false,
+  ),
 
   // Card spend, merchant before "Avl Lmt/Limit": "...at POLICYBAZAAR. Avl Lmt:"
-  RegExp(r'\bat\s+(?<name>[^.]+?)\.\s*avl\b', caseSensitive: false),
+  RegExp(
+    r'\bat\s+(?<name>[a-z0-9@._&*\-\/\s]*?)\.\s*avl\b',
+    caseSensitive: false,
+  ),
 
   // Card spend, merchant after second "on": "...on 16-Jul-26 on AMAZON WEB SERV. Avl Limit:"
-  RegExp(r'\bon\s+(?<name>[^.]+?)\.\s*avl\b', caseSensitive: false),
+  RegExp(
+    r'\b\d{2}-[a-z]{3}-\d{2}\s+on\s+(?<name>[a-z0-9@._&*\-\/\s]*?)\.\s*avl\b',
+    caseSensitive: false,
+  ),
 
   // Card spend, merchant after second "on": "...on 16-Jul-26 AMAZON WEB SERV.Avl Limit:"
   RegExp(
-    r'\b\d{2}-[a-z]{3}-\d{2}\s+(?<name>[^.]+?)\.avl\b',
+    r'\b\d{2}-[a-z]{3}-\d{2}\s+(?<name>[a-z0-9@._&*\-\/\s]*?)\.avl\b',
     caseSensitive: false,
   ),
 
   // NEFT credit tied specifically to a UTR, to avoid colliding with
   // "debited by Rs." elsewhere in the same message.
   RegExp(
-    r'\butr\s+[a-z0-9]+\s+by\s+(?<name>[a-z][a-z\s]*?)(?=,|\.|$)',
+    r'\butr\s+[a-z0-9]+\s+by\s+(?<name>[a-z0-9@._&*\-\/\s]*?)(?=,|\.|$)',
     caseSensitive: false,
   ),
 
   // Generic UPI/SBI transfer: "...transfer from SANJAY KUMAR SINHA Ref No..."
   RegExp(
-    r'\bfrom\s+(?<name>[a-z][a-z\s]*?)(?=\s*(?:on\s+\d|ref|\.|,|;|$))',
+    r'\bfrom\s+(?<name>[a-z0-9@._&*\-\/\s]*?)(?=\s*(?:on\s+\d|ref|\.|,|;|$))',
     caseSensitive: false,
   ),
 
   RegExp(
-    r'\btrf\s+to\s+(?<name>[a-z][a-z\s]*?)(?=\s*(?:on\s+\d|ref|\.|,|;|$))',
+    r'\btrf\s+to\s+(?<name>[a-z0-9@._&*\-\/\s]*?)(?=\s*(?:on\s+\d|ref|\.|,|;|$))',
     caseSensitive: false,
   ),
 ];

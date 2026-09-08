@@ -24,7 +24,7 @@ import 'firebase/firebase_options_dev.dart' as dev;
 
 // TODO: Add search apis to search api
 // TODO: Add notification page
-// TODO: Design SMS bank transaction parsing
+// TODO: Refine SMS and notification permission request UI
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -333,6 +333,9 @@ class MyApp extends StatelessWidget {
                   context.read<AuthRepository>(),
                   context.read<AuthBloc>(),
                 ),
+          ),
+          BlocProvider<BankTransactionCubit>(
+            create: (context) => BankTransactionCubit(),
           ),
         ],
         child: MultiProvider(

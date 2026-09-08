@@ -72,4 +72,15 @@ class FreshScreenMessageConstant {
     title: 'No expenses yet',
     description: 'Add a transaction to see the category breakdown.',
   );
+
+  static final noBankTransactionDashboard = FreshMessageModel(
+    title: 'Track your bank transactions',
+    description: 'We couldn\'t find any recent bank transactions.',
+  );
+
+  static final bankTransactionSMSPermissionIssue = FreshMessageModel(
+    title: 'SMS Permission Required',
+    description:
+        'SettleNow needs access to your SMS to detect bank transactions. Your messages are only used to identify transaction details.',
+  );
 }
