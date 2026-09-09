@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class BankTransactionModel {
@@ -10,8 +14,9 @@ class BankTransactionModel {
   BankTransactionType type;
   Bank bank;
   PaymentMode mode;
-  bool transactionConsumed;
+  BankTransactionConsumedModel? transactionConsumed;
   double confidence;
+  String rawMessage;
 
   BankTransactionModel.empty({this.hasData = false})
     : id = "",
@@ -22,11 +27,11 @@ class BankTransactionModel {
       type = BankTransactionType.debit,
       bank = Bank.unknown,
       mode = PaymentMode.unknown,
-      transactionConsumed = false,
-      confidence = 0.0;
+      transactionConsumed = null,
+      confidence = 0.0,
+      rawMessage = "";
 
   BankTransactionModel({
-    required this.id,
     required this.amount,
     required this.date,
     required this.transactionID,
@@ -36,7 +41,42 @@ class BankTransactionModel {
     required this.mode,
     required this.transactionConsumed,
     required this.confidence,
-  });
+    required this.rawMessage,
+  }) : id = _generateId(
+         amount: amount,
+         date: date,
+         transactionID: transactionID,
+         receiver: receiver,
+         type: type,
+         bank: bank,
+         mode: mode,
+       );
+
+  static String _generateId({
+    required double amount,
+    required DateTime date,
+    required String transactionID,
+    required String receiver,
+    required BankTransactionType type,
+    required Bank bank,
+    required PaymentMode mode,
+  }) {
+    final canonical = [
+      amount.toStringAsFixed(2),
+      date.toIso8601String(),
+      transactionID.trim().toLowerCase(),
+      receiver.trim().toLowerCase(),
+      type.name,
+      bank.name,
+      mode.name,
+    ].join('|');
+
+    final digest = sha256.convert(utf8.encode(canonical));
+    return digest.toString().substring(
+      0,
+      16,
+    ); // 64 bits — plenty at personal-app scale
+  }
 
   @override
   toString() {

@@ -4,6 +4,7 @@ export './handler/platform_service.dart';
 export './handler/local_storage_preference.dart';
 export './handler/filter_sort.dart';
 export './handler/crypto.dart';
+export './handler/database.dart';
 export './card/get_notified.dart';
 export './card/lenden_expense_card.dart';
 export './card/notification_card.dart';

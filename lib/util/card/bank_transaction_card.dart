@@ -92,43 +92,43 @@ class BankTransactionCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Icon(
-                    Icons.schedule_outlined,
-                    size: 15,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              // Row(
+              //   children: [
+              //     Icon(
+              //       Icons.schedule_outlined,
+              //       size: 15,
+              //       color: Theme.of(context).colorScheme.onSurfaceVariant,
+              //     ),
 
-                  const SizedBox(width: 5),
+              //     const SizedBox(width: 5),
 
-                  Text(
-                    DateFormat('dd MMM yyyy, h:mm a').format(data.date),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+              //     Text(
+              //       DateFormat('dd MMM yyyy, h:mm a').format(data.date),
+              //       style: Theme.of(context).textTheme.bodySmall,
+              //     ),
 
-                  const Spacer(),
+              //     const Spacer(),
 
-                  _ConfidenceBadge(confidence: data.confidence),
-                ],
-              ),
+              //     _ConfidenceBadge(confidence: data.confidence),
+              //   ],
+              // ),
 
-              if (data.transactionID.isNotEmpty &&
-                  data.transactionID != 'Unknown') ...[
-                const SizedBox(height: 8),
+              // if (data.transactionID.isNotEmpty &&
+              //     data.transactionID != 'Unknown') ...[
+              //   const SizedBox(height: 8),
 
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Ref: ${data.transactionID}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
+              //   Align(
+              //     alignment: Alignment.centerLeft,
+              //     child: Text(
+              //       'Ref: ${data.transactionID}',
+              //       maxLines: 1,
+              //       overflow: TextOverflow.ellipsis,
+              //       style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              //         color: Theme.of(context).colorScheme.onSurfaceVariant,
+              //       ),
+              //     ),
+              //   ),
+              // ],
             ],
           ),
         ),

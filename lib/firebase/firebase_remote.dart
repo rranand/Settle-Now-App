@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class FirebaseRemote extends ChangeNotifier {
   static final FirebaseRemoteConfig _remoteConfig =
@@ -30,9 +31,16 @@ class FirebaseRemote extends ChangeNotifier {
           RemoteConfigValueConstant.versionInfoValueConstant,
     });
 
-    await _remoteConfig.fetchAndActivate();
+    unawaited(_fetchAndActivateInBackground());
+  }
 
-    _listenForUpdates();
+  Future<void> _fetchAndActivateInBackground() async {
+    try {
+      await _remoteConfig.fetchAndActivate();
+      _listenForUpdates();
+    } catch (e) {
+      logDebug('Remote Config background fetch failed: $e');
+    }
   }
 
   Future<void> refresh() async {

@@ -38,6 +38,16 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
       context.read<BankTransactionCubit>().fetchData();
+
+      addPaginationListener<BankTransactionCubit, BankTransactionState>(
+        scrollController: _gridViewScrollController,
+        context: context,
+        hasMore:
+            (state) => state is BankTransactionSuccess && state.hasMoreData,
+        isLoadingMore:
+            (state) => state is BankTransactionSuccess && state.isLoadingMore,
+        onFetch: () => context.read<BankTransactionCubit>().fetchData(),
+      );
     }
   }
 
@@ -49,7 +59,7 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
       );
       return;
     }
-    context.read<BankTransactionCubit>().fetchData(refresh: true);
+    context.read<BankTransactionCubit>().fetchData(forceRefresh: true);
   }
 
   void _blocListenerHandler(BuildContext context, BankTransactionState state) {
@@ -60,7 +70,7 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
 
   Widget _builderFooter(BuildContext context, BankTransactionState state) {
     if (state is BankTransactionSuccess) {
-      return buildFooter(context, false, false);
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
     }
 
     return const SizedBox.shrink();

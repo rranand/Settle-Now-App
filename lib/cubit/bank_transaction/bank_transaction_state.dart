@@ -11,11 +11,30 @@ final class BankTransactionLoading extends BankTransactionState {
 
 final class BankTransactionSuccess extends BankTransactionState {
   final List<BankTransactionModel> data;
+  final bool hasMoreData;
+  final bool isLoadingMore;
+  final int messagesProcessedCount;
 
-  BankTransactionSuccess({required this.data});
+  BankTransactionSuccess({
+    required this.data,
+    required this.hasMoreData,
+    required this.isLoadingMore,
+    required this.messagesProcessedCount,
+  });
 
-  BankTransactionSuccess copyWith({List<BankTransactionModel>? data}) {
-    return BankTransactionSuccess(data: data ?? this.data);
+  BankTransactionSuccess copyWith({
+    List<BankTransactionModel>? data,
+    bool? hasMoreData,
+    bool? isLoadingMore,
+    int? messagesProcessedCount,
+  }) {
+    return BankTransactionSuccess(
+      data: data ?? this.data,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      messagesProcessedCount:
+          messagesProcessedCount ?? this.messagesProcessedCount,
+    );
   }
 }
 

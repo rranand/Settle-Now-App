@@ -78,12 +78,19 @@ Future<void> main() async {
 
   final remoteConfigService = FirebaseRemote();
 
+  final stopwatch = Stopwatch()..start();
   await Future.wait([
-    remoteConfigService.init(),
-    GoogleOauth.ensureGoogleSignInInitialized(),
-    if (!kIsWeb) NotificationInterfaceHandler.initializeChannels(),
-    SessionManager.instance.initialize(),
+    _timed('remoteConfig', remoteConfigService.init()),
+    _timed('googleOauth', GoogleOauth.ensureGoogleSignInInitialized()),
+    _timed('initDatabase', DatabaseHandler.initialize()),
+    if (!kIsWeb)
+      _timed(
+        'notifChannels',
+        NotificationInterfaceHandler.initializeChannels(),
+      ),
+    _timed('sessionManager', SessionManager.instance.initialize()),
   ]);
+  logDebug('Total initialization time: ${stopwatch.elapsedMilliseconds}ms');
 
   final AuthRepository authRepository = AuthRepository(AuthDataProvider());
   final AuthBloc authBloc = AuthBloc(authRepository);
@@ -91,6 +98,12 @@ Future<void> main() async {
   AppRouterConfig.initializeRouter(authBloc);
 
   runApp(MyApp(authBloc: authBloc, remoteConfigService: remoteConfigService));
+}
+
+Future<void> _timed(String label, Future<void> future) async {
+  final sw = Stopwatch()..start();
+  await future;
+  logDebug('$label: ${sw.elapsedMilliseconds}ms');
 }
 
 class MyApp extends StatelessWidget {
