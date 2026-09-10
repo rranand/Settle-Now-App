@@ -38,17 +38,6 @@ class BankTransactionCubit extends Cubit<BankTransactionState> {
       emit(BankTransactionLoading());
     }
 
-    var permission = await Permission.sms.status;
-
-    if (!permission.isGranted) {
-      final permissionStatus = await Permission.sms.request();
-
-      if (!permissionStatus.isGranted) {
-        emit(BankTransactionFailure(error: "SMS permission denied"));
-        return;
-      }
-    }
-
     final SmsQuery query = SmsQuery();
     final futureData = await Future.wait([
       query.querySms(
