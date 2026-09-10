@@ -31,7 +31,7 @@ class BankTransactionCubit extends Cubit<BankTransactionState> {
 
       oldMessagesProcessedCount = oldState.messagesProcessedCount;
       oldData = [...oldState.data];
-      emit(oldState.copyWith(isLoadingMore: true, error: null));
+      emit(oldState.copyWith(isLoadingMore: true));
     }
 
     if (oldState == null) {

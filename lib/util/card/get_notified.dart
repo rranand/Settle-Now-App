@@ -66,6 +66,8 @@ class _GetNotifiedState extends State<GetNotified> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Get Notified"),
@@ -73,82 +75,103 @@ class _GetNotifiedState extends State<GetNotified> {
         leading: appBarBackButton(context),
         centerTitle: false,
       ),
-      body: SingleChildScrollView(
-        padding: _mainScreenPadding.add(EdgeInsets.all(15.0)),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(
-              child: Image.asset(
+      body: SafeArea(
+        child: Padding(
+          padding: _mainScreenPadding.add(const EdgeInsets.all(15.0)),
+          child: Column(
+            children: [
+              const Spacer(flex: 2),
+
+              Image.asset(
                 'assets/Images/notifications.png',
                 height: 150,
                 width: 150,
               ),
-            ),
-            SizedBox(height: 24),
-            Text(
-              "To enhance your experience with Settle Now, we’d like to send you notifications to keep you updated on bill splits, reminders for pending payments, and updates from your groups. These notifications ensure you never miss an important activity and stay in sync with your friends or flatmates. Enable push notifications to make settling expenses smoother and hassle-free!",
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 29),
-            Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 46,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    side: BorderSide(color: Theme.of(context).primaryColor),
-                  ),
+
+              const SizedBox(height: 32),
+
+              Text(
+                'Stay up to date',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                'Get notified about expenses, payments and group activity.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
+              ),
+
+              const Spacer(flex: 3),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: FilledButton(
                   onPressed: () async {
-                    bool isPermanent =
+                    final isAllowed =
                         await AwesomeNotifications().isNotificationAllowed();
-                    if (!isPermanent) {
+
+                    if (!isAllowed) {
                       await getNotificationPermission();
                     }
+
                     if (context.mounted) {
                       context.pop(true);
                     }
                   },
-                  child: Text(
-                    "Give Permission",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyLarge!.color,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 15),
-            Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 46,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
+                  style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    side: BorderSide(color: Colors.redAccent),
                   ),
-                  onPressed: () async {
-                    context.pop(false);
-                  },
-                  child: Text(
-                    "Cancel",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                  child: const Text(
+                    'Enable Notifications',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: 46,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      side: BorderSide(
+                        color: theme.primaryColor.withAlpha(100),
+                        width: 1.0,
+                      ),
+                    ),
+                    onPressed: () async {
+                      context.pop(false);
+                    },
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge!.color,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );

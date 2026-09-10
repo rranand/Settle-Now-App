@@ -25,6 +25,8 @@ import 'firebase/firebase_options_dev.dart' as dev;
 // TODO: Add search apis to search api
 // TODO: Add notification page
 // TODO: Refine SMS and notification permission request UI
+// TODO: Refine SMS UI
+// TODO: Add functionalty to convert sms to transaction
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
