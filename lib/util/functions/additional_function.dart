@@ -98,6 +98,7 @@ void resetAllBlocs(BuildContext context) {
   context.read<QuicksplitBloc>().add(QuicksplitReset());
   context.read<RoomDashboardBloc>().add(RoomDashboardReset());
   context.read<RoomBloc>().add(RoomBlocReset());
+  context.read<ActivityNotificationBloc>().add(ActivityNotificationReset());
   context.read<CreateRoomCubit>().reset();
   context.read<NewTransactionCubit>().reset();
   context.read<FriendCubit>().reset();
@@ -110,6 +111,7 @@ void resetAllBlocs(BuildContext context) {
   context.read<RoomSettleCubit>().reset();
   context.read<RoomSettleUpsertCubit>().reset();
   context.read<RoomUserCubit>().reset();
+  context.read<UnreadNotificationCountCubit>().reset();
 }
 
 void updateStateListener(BuildContext context, UpdateInfoState updateState) {

@@ -7,19 +7,19 @@ import 'package:settlenow/model/model_core.dart';
 part 'room_settle_upsert_state.dart';
 
 class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
-  final RoomRepository repo;
-  final RoomSettleCubit roomSettleCubit;
-  RoomSettleUpsertCubit(this.repo, this.roomSettleCubit)
+  final RoomRepository _repo;
+  final RoomSettleCubit _roomSettleCubit;
+  RoomSettleUpsertCubit(this._repo, this._roomSettleCubit)
     : super(RoomSettleUpsertInitial());
 
   void addNewSettleExpense(String id, RoomSettleModel data) async {
     emit(RoomSettleUpsertLoading());
     try {
-      final RoomSettleModel newData = await repo.createNewSettleExpense(
+      final RoomSettleModel newData = await _repo.createNewSettleExpense(
         id,
         data,
       );
-      roomSettleCubit.addNewSettleExpense(newData);
+      _roomSettleCubit.addNewSettleExpense(newData);
       return emit(RoomSettleUpsertSuccess(data: newData));
     } catch (e) {
       return emit(RoomSettleUpsertFailure(error: e.toString()));
@@ -29,11 +29,11 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
   void updateSettleExpense(String id, RoomSettleModel data) async {
     emit(RoomSettleUpsertLoading());
     try {
-      final updateData = await repo.updateSettleExpense(id, data);
+      final updateData = await _repo.updateSettleExpense(id, data);
       final newUpdatedCount = updateData.copyWith(
         activityCount: updateData.activityCount + 1,
       );
-      roomSettleCubit.updateSettleExpense(newUpdatedCount);
+      _roomSettleCubit.updateSettleExpense(newUpdatedCount);
       return emit(RoomSettleUpsertSuccess(data: newUpdatedCount));
     } catch (e) {
       return emit(RoomSettleUpsertFailure(error: e.toString()));
@@ -43,8 +43,8 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
   void deleteSettleExpense(String id, String settleExpenseID) async {
     emit(RoomSettleUpsertLoading());
     try {
-      await repo.deleteSettleExpense(id, settleExpenseID);
-      roomSettleCubit.deleteSettleExpense(settleExpenseID);
+      await _repo.deleteSettleExpense(id, settleExpenseID);
+      _roomSettleCubit.deleteSettleExpense(settleExpenseID);
       return emit(RoomSettleUpsertSuccess(data: RoomSettleModel.empty()));
     } catch (e) {
       return emit(RoomSettleUpsertFailure(error: e.toString()));

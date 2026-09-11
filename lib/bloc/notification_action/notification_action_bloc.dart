@@ -8,10 +8,10 @@ part 'notification_action_state.dart';
 
 class NotificationActionBloc
     extends Bloc<NotificationActionEvent, NotificationActionState> {
-  final NotificationBloc notificationBloc;
-  final NotificationRepository notificationRepository;
+  final NotificationBloc _notificationBloc;
+  final NotificationRepository _notificationRepository;
 
-  NotificationActionBloc(this.notificationBloc, this.notificationRepository)
+  NotificationActionBloc(this._notificationBloc, this._notificationRepository)
     : super(NotificationActionState()) {
     on<NotificationActionAcceptRequested>(
       _notificationActionAcceptRequested,
@@ -40,9 +40,9 @@ class NotificationActionBloc
       emit(
         state.copyWith(processingNotification: oldProcessingIDs, error: null),
       );
-      await notificationRepository.acceptInvite(event.id);
+      await _notificationRepository.acceptInvite(event.id);
       oldProcessingIDs.remove(event.id);
-      notificationBloc.add(NotificationOnDelete(id: event.id));
+      _notificationBloc.add(NotificationOnDelete(id: event.id));
       return emit(
         state.copyWith(processingNotification: oldProcessingIDs, error: null),
       );
@@ -70,9 +70,9 @@ class NotificationActionBloc
       emit(
         state.copyWith(processingNotification: oldProcessingIDs, error: null),
       );
-      await notificationRepository.declineInvite(event.id);
+      await _notificationRepository.declineInvite(event.id);
       oldProcessingIDs.remove(event.id);
-      notificationBloc.add(NotificationOnDelete(id: event.id));
+      _notificationBloc.add(NotificationOnDelete(id: event.id));
       return emit(
         state.copyWith(processingNotification: oldProcessingIDs, error: null),
       );

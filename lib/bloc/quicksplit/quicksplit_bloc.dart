@@ -11,9 +11,9 @@ part 'quicksplit_event.dart';
 part 'quicksplit_state.dart';
 
 class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
-  final QuicksplitRepository repo;
+  final QuicksplitRepository _repo;
 
-  QuicksplitBloc(this.repo) : super(QuicksplitInitial()) {
+  QuicksplitBloc(this._repo) : super(QuicksplitInitial()) {
     on<QuicksplitFetch>(_quicksplitFetch, transformer: droppable());
     on<QuicksplitAddNewTransaction>(
       _quicksplitAddNewTransaction,
@@ -56,7 +56,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     }
 
     try {
-      Pair<List<QuicksplitTransactionModel>, bool> data = await repo.fetchData(
+      Pair<List<QuicksplitTransactionModel>, bool> data = await _repo.fetchData(
         oldState == null || oldState.dataList.isEmpty
             ? DateTime.now()
             : oldState.dataList.last.createdOn,

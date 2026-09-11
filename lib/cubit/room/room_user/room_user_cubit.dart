@@ -1,15 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/cubit/cubit_core.dart';
-import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
 
 part 'room_user_state.dart';
 
 class RoomUserCubit extends Cubit<RoomUserState> {
-  final RoomRepository repo;
   final RoomInfoCubit _roomInfoCubit;
-  RoomUserCubit(this.repo, this._roomInfoCubit) : super(RoomUserInitial());
+  RoomUserCubit(this._roomInfoCubit) : super(RoomUserInitial());
 
   void fetchData(String id, List<RoomUserModel> userArr) async {
     if (state is RoomUserLoading) return;

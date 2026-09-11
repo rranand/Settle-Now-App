@@ -27,6 +27,84 @@ class NotificationDataProvider {
     }
   }
 
+  Future<Pair<List<ActivityNotificationModel>, bool>> fetchActivityBasedNotifications(
+    DateTime cursor,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'notification/activity?${addCursorInURL(cursor)}',
+        "get",
+        {},
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        List<ActivityNotificationModel> arr = [];
+        final allNotification = data['data'];
+
+        if (allNotification != null) {
+          for (int i = 0; i < allNotification.length; i++) {
+            arr.add(ActivityNotificationModel.fromMap(allNotification[i]));
+          }
+        }
+
+        return Pair(arr, data['hasMoreData']);
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int> unreadActivityNotificationCount() async {
+    try {
+      final response = await createAPICall(
+        'notification/unread-count',
+        "get",
+        {},
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return data['data'];
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    try {
+      final response = await createAPICall('notification/read/all', "put", {});
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> markAsRead(List<String> ids) async {
+    try {
+      final response = await createAPICall('notification/read', "put", {
+        "ids": ids,
+      });
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> acceptInvite(String id) async {
     try {
       final response = await createAPICall('notification', "put", {"id": id});

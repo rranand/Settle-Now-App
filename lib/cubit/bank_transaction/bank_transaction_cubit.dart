@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 

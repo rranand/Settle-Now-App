@@ -9,9 +9,9 @@ part 'room_category_wise_total_amount_state.dart';
 
 class RoomCategoryWiseTotalAmountCubit
     extends Cubit<RoomCategoryWiseTotalAmountState> {
-  final RoomRepository repo;
+  final RoomRepository _repo;
 
-  RoomCategoryWiseTotalAmountCubit(this.repo)
+  RoomCategoryWiseTotalAmountCubit(this._repo)
     : super(RoomCategoryWiseTotalAmountInitial());
 
   void fetchData(String id) async {
@@ -23,7 +23,7 @@ class RoomCategoryWiseTotalAmountCubit
     emit(RoomCategoryWiseTotalAmountLoading(id: id));
 
     try {
-      final data = await repo.fetchCategoryWiseTotalAmount(id);
+      final data = await _repo.fetchCategoryWiseTotalAmount(id);
 
       LinkedHashMap<String, CategoryAmountModel> categoryWiseAmount =
           LinkedHashMap<String, CategoryAmountModel>.fromEntries(

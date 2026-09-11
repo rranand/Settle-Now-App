@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:settlenow/util/util_core.dart';
 
-import 'model_core.dart';
+import '../model_core.dart';
 
 class NotificationModel {
   bool hasData = true;

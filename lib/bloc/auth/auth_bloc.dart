@@ -14,9 +14,9 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository repo;
+  final AuthRepository _repo;
 
-  AuthBloc(this.repo) : super(AuthInitial()) {
+  AuthBloc(this._repo) : super(AuthInitial()) {
     AuthEventBus.instance.stream.listen((event) {
       if (event == AuthEventEnum.sessionExpired) {
         add(AuthRevokeSessionRequested());
@@ -45,7 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      UserPreferenceBundle userPreferenceBundle = await repo.loginUser(
+      UserPreferenceBundle userPreferenceBundle = await _repo.loginUser(
         event.email,
         event.otp,
       );
@@ -81,7 +81,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(AuthLoginFailure("Google SignIn Failed"));
         }
 
-        UserPreferenceBundle userPreferenceBundle = await repo.loginUsingGoogle(
+        UserPreferenceBundle userPreferenceBundle = await _repo.loginUsingGoogle(
           email,
           idToken,
         );
@@ -123,7 +123,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return emit(AuthLoginFailure("Google SignIn Failed"));
       }
 
-      UserPreferenceBundle userPreferenceBundle = await repo.loginUsingGoogle(
+      UserPreferenceBundle userPreferenceBundle = await _repo.loginUsingGoogle(
         email,
         idToken,
       );
@@ -153,7 +153,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthSignUpLoading());
 
     try {
-      await repo.signUpUser(event.name, event.email);
+      await _repo.signUpUser(event.name, event.email);
       return emit(AuthSignUpSuccess(isSuccess: true));
     } catch (e) {
       return emit(AuthSignUpFailure(e.toString()));
@@ -176,7 +176,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await additionalLogoutAction();
         return emit(AuthSignUpFailure("Google SignUp Failed"));
       }
-      UserPreferenceBundle userPreferenceBundle = await repo.signupUsingGoogle(
+      UserPreferenceBundle userPreferenceBundle = await _repo.signupUsingGoogle(
         email,
         idToken,
       );
@@ -219,7 +219,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await additionalLogoutAction();
           return emit(AuthSignUpFailure("Google Signup Failed"));
         }
-        UserPreferenceBundle userPreferenceBundle = await repo
+        UserPreferenceBundle userPreferenceBundle = await _repo
             .signupUsingGoogle(email, idToken);
         return emit(
           AuthLoginSuccess(
@@ -247,7 +247,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      await repo.sendOTP(event.email);
+      await _repo.sendOTP(event.email);
       return emit(AuthOTPSendSuccess(true));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
@@ -261,7 +261,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      await repo.sendOTP(event.email);
+      await _repo.sendOTP(event.email);
       emit(AuthOTPSendSuccess(true));
       return emit(AuthSignUpSuccess(isSuccess: true));
     } catch (e) {
@@ -276,7 +276,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      UserPreferenceBundle userPreferenceBundle = await repo.loginUser(
+      UserPreferenceBundle userPreferenceBundle = await _repo.loginUser(
         event.email,
         event.otp,
       );
@@ -312,7 +312,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLogoutLoading(userData, preferenceData));
 
     try {
-      await Future.wait([repo.logoutUser(), additionalLogoutAction()]);
+      await Future.wait([_repo.logoutUser(), additionalLogoutAction()]);
 
       return emit(AuthInitial());
     } catch (e) {
@@ -352,7 +352,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLogoutLoading(userData, preferenceData));
 
     try {
-      await repo.deleteAccount();
+      await _repo.deleteAccount();
       event.scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Account Delete Requested",
@@ -371,7 +371,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoginLoading());
     try {
-      UserPreferenceBundle userPreferenceBundle = await repo.getLoggedInUser();
+      UserPreferenceBundle userPreferenceBundle = await _repo.getLoggedInUser();
 
       if (userPreferenceBundle.user.hasData) {
         return emit(

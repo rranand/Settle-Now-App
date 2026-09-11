@@ -13,11 +13,11 @@ part 'lenden_room_event.dart';
 part 'lenden_room_state.dart';
 
 class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
-  final LendenRoomRepository repo;
+  final LendenRoomRepository _repo;
   final LendenDashboardBloc _lendenDashboardBloc;
   final NotificationBloc _notificationBloc;
 
-  LendenRoomBloc(this.repo, this._lendenDashboardBloc, this._notificationBloc)
+  LendenRoomBloc(this._repo, this._lendenDashboardBloc, this._notificationBloc)
     : super(LendenRoomInitial()) {
     on<LendenRoomFetch>(_lendenRoomFetch, transformer: droppable());
     on<LendenCloseRoom>(_lendenCloseRoom, transformer: droppable());
@@ -61,7 +61,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
 
     try {
       Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool> data =
-          await repo.fetchData(event.id);
+          await _repo.fetchData(event.id);
 
       _lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
 
@@ -102,7 +102,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     emit(oldState.copyWith(isLoadingMore: true, error: null));
 
     try {
-      Pair<List<LendenTransactionModel>, bool> data = await repo
+      Pair<List<LendenTransactionModel>, bool> data = await _repo
           .fetchTransaction(
             oldState.id,
             oldState.dataList.isEmpty
@@ -296,7 +296,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         }
       }
 
-      await repo.closeRoom(oldState.id);
+      await _repo.closeRoom(oldState.id);
 
       bool active = false;
       for (int i = 0; i < users.length; i++) {
@@ -350,7 +350,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     );
 
     try {
-      await repo.updateRoom(oldState.id, event.roomName);
+      await _repo.updateRoom(oldState.id, event.roomName);
 
       LendenDashboardModel updatedData = oldState.roomData.copyWith(
         roomName: event.roomName,
@@ -405,7 +405,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     );
 
     try {
-      await repo.deleteRoom(oldData.id);
+      await _repo.deleteRoom(oldData.id);
 
       _lendenDashboardBloc.add(LendenDashboardOnDeleteRoom(id: event.id));
 

@@ -7,15 +7,15 @@ import 'package:settlenow/model/model_core.dart';
 part 'user_login_activity_state.dart';
 
 class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
-  final AuthRepository repo;
-  UserLoginActivityCubit(this.repo) : super(UserLoginActivityState());
+  final AuthRepository _repo;
+  UserLoginActivityCubit(this._repo) : super(UserLoginActivityState());
 
   void fetchLoginData() async {
     if (state.isLoading == true) return;
     emit(UserLoginActivityState(isLoading: true));
 
     try {
-      final List<LoginActivityModel> data = await repo.fetchLoginActivity();
+      final List<LoginActivityModel> data = await _repo.fetchLoginActivity();
 
       return emit(UserLoginActivityState(data: data));
     } catch (e) {
@@ -40,7 +40,7 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
         }
       }
       emit(UserLoginActivityState(data: oldArr));
-      await repo.logoutDifferentDevice(sessionID);
+      await _repo.logoutDifferentDevice(sessionID);
       oldArr.removeWhere((element) => element.id == sessionID);
       return emit(UserLoginActivityState(data: oldArr));
     } catch (e) {

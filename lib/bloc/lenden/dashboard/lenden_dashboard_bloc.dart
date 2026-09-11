@@ -11,9 +11,9 @@ part 'lenden_dashboard_state.dart';
 
 class LendenDashboardBloc
     extends Bloc<LendenDashboardEvent, LendenDashboardState> {
-  final LendenDashboardRepository repo;
+  final LendenDashboardRepository _repo;
 
-  LendenDashboardBloc(this.repo) : super(LendenDashboardInitial()) {
+  LendenDashboardBloc(this._repo) : super(LendenDashboardInitial()) {
     on<LendenDashboardFetch>(_lendenDashboardFetch, transformer: droppable());
     on<LendenDashboardOnAddNewRoom>(
       _lendenDashboardOnAddNewRoom,
@@ -48,7 +48,7 @@ class LendenDashboardBloc
     }
 
     try {
-      final data = await repo.fetchData(
+      final data = await _repo.fetchData(
         oldState == null || oldState.dataList.isEmpty
             ? DateTime.now()
             : oldState.dataList.last.createdOn,

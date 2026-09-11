@@ -250,11 +250,7 @@ class MyApp extends StatelessWidget {
                 ),
           ),
           BlocProvider<RoomUserCubit>(
-            create:
-                (context) => RoomUserCubit(
-                  context.read<RoomRepository>(),
-                  context.read<RoomInfoCubit>(),
-                ),
+            create: (context) => RoomUserCubit(context.read<RoomInfoCubit>()),
           ),
           BlocProvider<RoomCategoryWiseTotalAmountCubit>(
             create:
@@ -350,6 +346,19 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<BankTransactionCubit>(
             create: (context) => BankTransactionCubit(),
+          ),
+          BlocProvider<UnreadNotificationCountCubit>(
+            create:
+                (context) => UnreadNotificationCountCubit(
+                  context.read<NotificationRepository>(),
+                ),
+          ),
+          BlocProvider<ActivityNotificationBloc>(
+            create:
+                (context) => ActivityNotificationBloc(
+                  context.read<NotificationRepository>(),
+                  context.read<UnreadNotificationCountCubit>(),
+                ),
           ),
         ],
         child: MultiProvider(

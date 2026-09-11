@@ -7,15 +7,15 @@ import 'package:settlenow/util/util_core.dart';
 part 'friend_state.dart';
 
 class FriendCubit extends Cubit<FriendState> {
-  final AuthRepository repo;
+  final AuthRepository _repo;
 
-  FriendCubit(this.repo) : super(FriendInitial());
+  FriendCubit(this._repo) : super(FriendInitial());
 
   void fetchData() async {
     emit(FriendLoading());
 
     try {
-      final data = await repo.fetchFriend();
+      final data = await _repo.fetchFriend();
       return emit(FriendSuccess(data: data));
     } catch (e) {
       return emit(FriendFailure(error: e.toString()));

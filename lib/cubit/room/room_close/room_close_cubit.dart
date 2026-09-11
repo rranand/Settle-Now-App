@@ -5,9 +5,9 @@ import 'package:settlenow/data/repository/repository_core.dart';
 part 'room_close_state.dart';
 
 class RoomCloseCubit extends Cubit<RoomCloseState> {
-  final RoomRepository repo;
+  final RoomRepository _repo;
   final RoomUserCubit _roomUserCubit;
-  RoomCloseCubit(this.repo, this._roomUserCubit) : super(RoomCloseInitial());
+  RoomCloseCubit(this._repo, this._roomUserCubit) : super(RoomCloseInitial());
 
   void closeRoom(String id, String uid) async {
     if (state is RoomCloseSuccess && (state as RoomCloseSuccess).roomID == id) {
@@ -20,7 +20,7 @@ class RoomCloseCubit extends Cubit<RoomCloseState> {
     }
     emit(RoomCloseLoading());
     try {
-      await repo.closeRoom(id);
+      await _repo.closeRoom(id);
       _roomUserCubit.updateCloseStatus(id, uid, false);
       return emit(RoomCloseSuccess(roomID: id, retryCount: 1));
     } catch (e) {

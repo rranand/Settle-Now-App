@@ -9,9 +9,9 @@ import 'package:settlenow/util/util_core.dart';
 part 'preference_state.dart';
 
 class PreferenceCubit extends Cubit<PreferenceState> {
-  final AuthRepository repo;
-  final AuthBloc authBloc;
-  PreferenceCubit(this.repo, this.authBloc) : super(PreferenceInitial());
+  final AuthRepository _repo;
+  final AuthBloc _authBloc;
+  PreferenceCubit(this._repo, this._authBloc) : super(PreferenceInitial());
 
   void savePreferenceData(
     PreferenceModel data,
@@ -29,8 +29,8 @@ class PreferenceCubit extends Cubit<PreferenceState> {
     );
 
     try {
-      await repo.savePreference(data);
-      authBloc.add(AuthProfileUpdateRequested(loggedInUser, data));
+      await _repo.savePreference(data);
+      _authBloc.add(AuthProfileUpdateRequested(loggedInUser, data));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Preference Saved",

@@ -9,9 +9,9 @@ import 'package:settlenow/model/model_core.dart';
 part 'room_settle_state.dart';
 
 class RoomSettleCubit extends Cubit<RoomSettleState> {
-  final RoomRepository repo;
-  final RoomUserCubit roomUserCubit;
-  RoomSettleCubit(this.repo, this.roomUserCubit) : super(RoomSettleInitial());
+  final RoomRepository _repo;
+  final RoomUserCubit _roomUserCubit;
+  RoomSettleCubit(this._repo, this._roomUserCubit) : super(RoomSettleInitial());
 
   void fetchData(String id, bool forceRefresh) async {
     if (state is RoomSettleLoading && (state as RoomSettleLoading).id == id) {
@@ -38,7 +38,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     }
 
     try {
-      final data = await repo.fetchSettleData(
+      final data = await _repo.fetchSettleData(
         id,
         oldState == null || oldState.dataList.isEmpty
             ? DateTime.now()
@@ -67,7 +67,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   }
 
   void addNewSettleExpense(RoomSettleModel data) {
-    roomUserCubit.onAddNewSettleExpense(data);
+    _roomUserCubit.onAddNewSettleExpense(data);
 
     if (state is! RoomSettleSuccess) {
       return;
@@ -99,7 +99,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
       oldState.data,
     )..[data.id] = data;
 
-    roomUserCubit.updateSettleExpense(oldData, data);
+    _roomUserCubit.updateSettleExpense(oldData, data);
 
     return emit(
       RoomSettleSuccess(
@@ -122,7 +122,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
       oldState.data,
     )..remove(settleExpenseID);
 
-    roomUserCubit.deleteSettleExpense(oldData);
+    _roomUserCubit.deleteSettleExpense(oldData);
 
     return emit(
       RoomSettleSuccess(

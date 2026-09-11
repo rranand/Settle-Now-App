@@ -11,9 +11,9 @@ part 'personal_expense_dashboard_state.dart';
 
 class PersonalExpenseDashboardBloc
     extends Bloc<PersonalExpenseDashboardEvent, PersonalExpenseDashboardState> {
-  final PersonalExpenseDashboardRepository repo;
+  final PersonalExpenseDashboardRepository _repo;
 
-  PersonalExpenseDashboardBloc(this.repo)
+  PersonalExpenseDashboardBloc(this._repo)
     : super(PersonalExpenseDashboardInitial()) {
     on<PersonalExpenseDashboardFetch>(
       _personalExpenseFetch,
@@ -51,7 +51,7 @@ class PersonalExpenseDashboardBloc
     }
 
     try {
-      final data = await repo.fetchData(
+      final data = await _repo.fetchData(
         oldState?.dataList.isEmpty ?? true
             ? DateTime.now()
             : oldState!.dataList.last.createdOn,

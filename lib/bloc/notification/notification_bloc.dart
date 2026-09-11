@@ -10,8 +10,8 @@ part 'notification_event.dart';
 part 'notification_state.dart';
 
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
-  final NotificationRepository repo;
-  NotificationBloc(this.repo) : super(NotificationInitial()) {
+  final NotificationRepository _repo;
+  NotificationBloc(this._repo) : super(NotificationInitial()) {
     on<NotificationOnAdd>(_notificationOnAdd, transformer: sequential());
     on<NotificationOnDelete>(_notificationOnDelete, transformer: sequential());
     on<NotificationFetch>(_notificationFetch, transformer: droppable());
@@ -26,7 +26,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     emit(NotificationLoading());
 
     try {
-      List<NotificationModel> data = await repo.fetchData();
+      List<NotificationModel> data = await _repo.fetchData();
       final newData = LinkedHashMap<String, NotificationModel>.fromEntries(
         data.map((t) => MapEntry(t.id, t)),
       );

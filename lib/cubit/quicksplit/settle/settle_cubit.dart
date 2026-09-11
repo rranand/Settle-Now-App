@@ -7,9 +7,9 @@ import 'package:settlenow/util/util_core.dart';
 part 'settle_state.dart';
 
 class SettleCubit extends Cubit<SettleState> {
-  final QuicksplitBloc bloc;
-  final QuicksplitRepository repo;
-  SettleCubit(this.bloc, this.repo) : super(SettleState());
+  final QuicksplitBloc _bloc;
+  final QuicksplitRepository _repo;
+  SettleCubit(this._bloc, this._repo) : super(SettleState());
 
   void settleExpense(
     String transactionID,
@@ -26,9 +26,11 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.settleExpense(transactionID);
+      await _repo.settleExpense(transactionID);
       oldProcessingIDs.remove(transactionID);
-      bloc.add(QuicksplitSettleRequest(transactionID: transactionID, uid: uid));
+      _bloc.add(
+        QuicksplitSettleRequest(transactionID: transactionID, uid: uid),
+      );
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     } catch (e) {
       if (context.mounted) {
@@ -49,9 +51,9 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.optout(transactionID);
+      await _repo.optout(transactionID);
       oldProcessingIDs.remove(transactionID);
-      bloc.add(QuicksplitDeleteTransaction(transactionID: transactionID));
+      _bloc.add(QuicksplitDeleteTransaction(transactionID: transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     } catch (e) {
       if (context.mounted) {
@@ -72,9 +74,9 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.delete(transactionID);
+      await _repo.delete(transactionID);
       oldProcessingIDs.remove(transactionID);
-      bloc.add(QuicksplitDeleteTransaction(transactionID: transactionID));
+      _bloc.add(QuicksplitDeleteTransaction(transactionID: transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     } catch (e) {
       if (context.mounted) {

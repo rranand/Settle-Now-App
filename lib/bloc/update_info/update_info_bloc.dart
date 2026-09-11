@@ -10,8 +10,8 @@ part 'update_info_event.dart';
 part 'update_info_state.dart';
 
 class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
-  final UpdateInfoRepository repo;
-  UpdateInfoBloc(this.repo) : super(UpdateInfoInitial()) {
+  final UpdateInfoRepository _repo;
+  UpdateInfoBloc(this._repo) : super(UpdateInfoInitial()) {
     on<UpdateInfoFetchRequested>(_updateInfoFetchRequested);
   }
 
@@ -28,7 +28,7 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
       UpdateInfoModel updateInfo = UpdateInfoModel.empty();
 
       if (kIsWeb) {
-        updateInfo = await repo.fetchUpdateInfo();
+        updateInfo = await _repo.fetchUpdateInfo();
       } else {
         final versionInfoFromRemote = event.remoteConfigService.getJSON(
           RemoteConfigConstant.versionInfoConstant,

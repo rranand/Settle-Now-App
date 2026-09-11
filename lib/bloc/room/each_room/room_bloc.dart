@@ -11,11 +11,11 @@ part 'room_event.dart';
 part 'room_state.dart';
 
 class RoomBloc extends Bloc<RoomEvent, RoomState> {
-  final RoomRepository repo;
-  final RoomUserCubit roomUserCubit;
-  final RoomCategoryWiseTotalAmountCubit roomCategoryWiseTotalAmountCubit;
+  final RoomRepository _repo;
+  final RoomUserCubit _dashboardBloc;
+  final RoomCategoryWiseTotalAmountCubit _roomCategoryWiseTotalAmountCubit;
 
-  RoomBloc(this.repo, this.roomUserCubit, this.roomCategoryWiseTotalAmountCubit)
+  RoomBloc(this._repo, this._dashboardBloc, this._roomCategoryWiseTotalAmountCubit)
     : super(RoomInitial()) {
     on<RoomFetch>(_roomFetch, transformer: droppable());
     on<RoomAddNewTransaction>(_roomAddTransaction, transformer: sequential());
@@ -59,7 +59,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     }
 
     try {
-      final data = await repo.fetchData(
+      final data = await _repo.fetchData(
         event.id,
         oldState?.dataList.isEmpty ?? true
             ? DateTime.now()
@@ -104,9 +104,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     LinkedHashMap<String, RoomTransactionModel> data = LinkedHashMap();
 
     for (int i = 0; i < event.data.length; i++) {
-      roomUserCubit.onAddNewTransaction(event.data[i]);
+      _dashboardBloc.onAddNewTransaction(event.data[i]);
 
-      roomCategoryWiseTotalAmountCubit.onUpdate(
+      _roomCategoryWiseTotalAmountCubit.onUpdate(
         oldState.id,
         event.data[i].category,
         event.data[i].amount,
@@ -141,13 +141,13 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       oldState.data,
     )..[event.data.id] = event.data;
 
-    roomUserCubit.onUpdateTransaction(oldExpense, event.data);
-    roomCategoryWiseTotalAmountCubit.onUpdate(
+    _dashboardBloc.onUpdateTransaction(oldExpense, event.data);
+    _roomCategoryWiseTotalAmountCubit.onUpdate(
       oldState.id,
       oldExpense.category,
       -oldExpense.amount,
     );
-    roomCategoryWiseTotalAmountCubit.onUpdate(
+    _roomCategoryWiseTotalAmountCubit.onUpdate(
       oldState.id,
       event.data.category,
       event.data.amount,
@@ -177,8 +177,8 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       oldState.data,
     )..remove(event.expenseID);
 
-    roomUserCubit.onDeleteTransaction(oldExpense);
-    roomCategoryWiseTotalAmountCubit.onUpdate(
+    _dashboardBloc.onDeleteTransaction(oldExpense);
+    _roomCategoryWiseTotalAmountCubit.onUpdate(
       oldState.id,
       oldExpense.category,
       -oldExpense.amount,

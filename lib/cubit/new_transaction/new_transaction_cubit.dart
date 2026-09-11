@@ -8,12 +8,12 @@ import 'package:settlenow/util/util_core.dart';
 part 'new_transaction_state.dart';
 
 class NewTransactionCubit extends Cubit<NewTransactionState> {
-  final QuicksplitRepository repo;
-  final PersonalMonthlyExpenseRepository repoPS;
-  final LendenRoomRepository repoLD;
-  final RoomRepository repoRD;
+  final QuicksplitRepository _repo;
+  final PersonalMonthlyExpenseRepository _repoPS;
+  final LendenRoomRepository _repoLD;
+  final RoomRepository _repoRD;
 
-  NewTransactionCubit(this.repo, this.repoPS, this.repoLD, this.repoRD)
+  NewTransactionCubit(this._repo, this._repoPS, this._repoLD, this._repoRD)
     : super(NewTransactionInitial());
 
   void createNewExpense(
@@ -34,7 +34,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<QuicksplitBloc>();
             final data = baseTransData as QuicksplitTransactionModel;
-            final newData = await repo.create(data);
+            final newData = await _repo.create(data);
             bloc.add(QuicksplitAddNewTransaction(data: newData));
             return emit(NewTransactionSuccess(data: newData));
           }
@@ -42,7 +42,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final data = baseTransData as PersonalExpenseTransactionModel;
-            final PersonalExpenseTransactionModel newData = await repoPS.add(
+            final PersonalExpenseTransactionModel newData = await _repoPS.add(
               data,
             );
 
@@ -59,7 +59,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final roomID = blocState.id;
             final data = baseTransData as LendenTransactionModel;
 
-            final LendenTransactionModel newData = await repoLD.create(
+            final LendenTransactionModel newData = await _repoLD.create(
               roomID,
               data,
             );
@@ -75,7 +75,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             }
             final roomID = blocState.id;
             final data = baseTransData as RoomTransactionModel;
-            final newData = await repoRD.createExpense(roomID, data, splitType);
+            final newData = await _repoRD.createExpense(roomID, data, splitType);
             final newUpdatedData = newData.copyWith(
               activityCount: newData.activityCount + 1,
             );
@@ -105,7 +105,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         return;
       }
       final roomID = blocState.id;
-      final List<RoomTransactionModel> newData = await repoRD.createBulkExpense(
+      final List<RoomTransactionModel> newData = await _repoRD.createBulkExpense(
         roomID,
         data,
       );
@@ -134,7 +134,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<QuicksplitBloc>();
             final data = baseTransData as QuicksplitTransactionModel;
-            await repo.update(data);
+            await _repo.update(data);
             bloc.add(QuicksplitUpdateTransaction(data: data));
             return emit(NewTransactionSuccess(data: data));
           }
@@ -142,7 +142,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final data = baseTransData as PersonalExpenseTransactionModel;
-            await repoPS.update(data);
+            await _repoPS.update(data);
             bloc.add(PersonalMonthlyExpenseUpdate(data: data));
             return emit(NewTransactionSuccess(data: data));
           }
@@ -155,7 +155,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             }
             final roomID = blocState.id;
             final data = baseTransData as LendenTransactionModel;
-            await repoLD.update(roomID, data);
+            await _repoLD.update(roomID, data);
             bloc.add(LendenUpdateTransaction(data: data));
             return emit(NewTransactionSuccess(data: data));
           }
@@ -168,7 +168,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             }
             final roomID = blocState.id;
             final data = baseTransData as RoomTransactionModel;
-            await repoRD.updateExpense(roomID, data);
+            await _repoRD.updateExpense(roomID, data);
             final newUpdatedData = data.copyWith(
               activityCount: data.activityCount + 1,
             );
@@ -200,7 +200,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             bloc = context.read<QuicksplitBloc>();
-            await repo.delete(expenseID);
+            await _repo.delete(expenseID);
             bloc.add(QuicksplitDeleteTransaction(transactionID: expenseID));
             return emit(
               NewTransactionSuccess(data: QuicksplitTransactionModel.empty()),
@@ -215,7 +215,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
                 expenseID: expenseID,
               ),
             );
-            await repoPS.delete(expenseID, personalExpenseSubType);
+            await _repoPS.delete(expenseID, personalExpenseSubType);
 
             bloc.add(
               PersonalMonthlyExpenseDelete(
@@ -237,7 +237,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            await repoLD.delete(roomID, expenseID);
+            await _repoLD.delete(roomID, expenseID);
 
             bloc.add(LendenDeleteTransaction(expenseID: expenseID));
             return emit(
@@ -252,7 +252,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            await repoRD.deleteExpense(roomID, expenseID);
+            await _repoRD.deleteExpense(roomID, expenseID);
 
             bloc.add(RoomDeleteTransaction(expenseID: expenseID));
             return emit(

@@ -1,6 +1,6 @@
 export 'user/preference_model.dart';
 export 'room/room_info_model.dart';
-export './activity_model.dart';
+export 'room/activity_model.dart';
 export 'lenden/lenden_dashboard_model.dart';
 export 'room/room_user_model.dart';
 export './category_amount_model.dart';
@@ -10,7 +10,8 @@ export 'user/user_model.dart';
 export 'user/base_user_model.dart';
 export 'lenden/lenden_transaction_model.dart';
 export 'personal_expense/personal_expense_transaction_model.dart';
-export './notification_model.dart';
+export 'notification/notification_model.dart';
+export 'notification/activity_notification_model.dart';
 export './bulk_transaction_model.dart';
 export 'user/login_activity_model.dart';
 export './update_info_model.dart';

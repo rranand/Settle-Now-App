@@ -16,3 +16,4 @@ export './user/user_login_activity/user_login_activity_cubit.dart';
 export './new_transaction/new_transaction_cubit.dart';
 export './filter/filter_cubit.dart';
 export './bank_transaction/bank_transaction_cubit.dart';
+export './notification/unread_notification_count/unread_notification_count_cubit.dart';

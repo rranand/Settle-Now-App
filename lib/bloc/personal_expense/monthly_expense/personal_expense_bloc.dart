@@ -12,10 +12,10 @@ part 'personal_expense_state.dart';
 
 class PersonalMonthlyExpenseBloc
     extends Bloc<PersonalMonthlyExpenseEvent, PersonalMonthlyExpenseState> {
-  final PersonalMonthlyExpenseRepository repo;
-  final PersonalExpenseDashboardBloc dashboardBloc;
+  final PersonalMonthlyExpenseRepository _repo;
+  final PersonalExpenseDashboardBloc _dashboardBloc;
 
-  PersonalMonthlyExpenseBloc(this.repo, this.dashboardBloc)
+  PersonalMonthlyExpenseBloc(this._repo, this._dashboardBloc)
     : super(PersonalMonthlyExpenseInitial()) {
     on<PersonalMonthlyExpenseFetch>(
       _personalExpenseFetch,
@@ -43,7 +43,7 @@ class PersonalMonthlyExpenseBloc
     String id,
     List<PersonalExpenseTransactionModel> data,
   ) {
-    dashboardBloc.add(
+    _dashboardBloc.add(
       PersonalExpenseDashboardUpdate(
         id: id,
         totalAmount: data
@@ -62,7 +62,7 @@ class PersonalMonthlyExpenseBloc
 
     try {
       String id = (event.year + event.month).toLowerCase();
-      final data = await repo.fetchData(event.year, event.month);
+      final data = await _repo.fetchData(event.year, event.month);
       _updateDashboardPersonalExpense(id, data);
 
       final allRecords =

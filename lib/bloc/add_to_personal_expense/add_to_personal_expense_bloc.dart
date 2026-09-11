@@ -9,16 +9,16 @@ part 'add_to_personal_expense_state.dart';
 
 class AddToPersonalExpenseBloc
     extends Bloc<AddToPersonalExpenseEvent, AddToPersonalExpenseState> {
-  final QuicksplitRepository quickSplitRepo;
-  final QuicksplitBloc quicksplitBloc;
-  final RoomBloc roomBloc;
-  final RoomRepository roomRepository;
+  final QuicksplitRepository _quickSplitRepo;
+  final QuicksplitBloc _quicksplitBloc;
+  final RoomBloc _roomBloc;
+  final RoomRepository _roomRepository;
 
   AddToPersonalExpenseBloc(
-    this.quicksplitBloc,
-    this.quickSplitRepo,
-    this.roomBloc,
-    this.roomRepository,
+    this._quicksplitBloc,
+    this._quickSplitRepo,
+    this._roomBloc,
+    this._roomRepository,
   ) : super(AddToPersonalExpenseState()) {
     on<AddToPersonalExpenseRequested>(_addToPersonalExpenseRequested);
     on<AddToPersonalExpenseReset>(_addToPersonalExpenseReset);
@@ -43,10 +43,10 @@ class AddToPersonalExpenseBloc
             emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),
             );
-            String personalExpenseID = await quickSplitRepo
+            String personalExpenseID = await _quickSplitRepo
                 .addToPersonalExpense(event.transactionID);
             oldProcessingIDs.remove(event.transactionID);
-            quicksplitBloc.add(
+            _quicksplitBloc.add(
               QuicksplitAddToPersonalExpense(
                 transactionID: event.transactionID,
                 personalExpenseID: personalExpenseID,
@@ -69,10 +69,10 @@ class AddToPersonalExpenseBloc
             emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),
             );
-            String personalExpenseID = await roomRepository
+            String personalExpenseID = await _roomRepository
                 .addToPersonalExpense(event.roomID, event.transactionID);
             oldProcessingIDs.remove(event.transactionID);
-            roomBloc.add(
+            _roomBloc.add(
               RoomAddToPersonalExpense(
                 id: event.roomID,
                 expenseID: event.transactionID,

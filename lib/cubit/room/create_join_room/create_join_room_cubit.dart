@@ -8,10 +8,10 @@ import 'package:settlenow/util/util_core.dart';
 part 'create_join_room_state.dart';
 
 class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
-  final RoomDashboardRepository repo;
-  final RoomRepository roomRepo;
-  final NotificationBloc notificationBloc;
-  CreateJoinRoomCubit(this.repo, this.roomRepo, this.notificationBloc)
+  final RoomDashboardRepository _repo;
+  final RoomRepository _roomRepo;
+  final NotificationBloc _notificationBloc;
+  CreateJoinRoomCubit(this._repo, this._roomRepo, this._notificationBloc)
     : super(CreateJoinRoomInitial());
 
   void createNewRoom(BuildContext context, String roomName) async {
@@ -27,7 +27,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
         RoomDashboardOnAddNewRoom(data: RoomInfoModel.empty(), isLoading: true),
       );
 
-      RoomInfoModel newData = await repo.createRoom(
+      RoomInfoModel newData = await _repo.createRoom(
         roomName,
         authLoginState.userData,
       );
@@ -60,8 +60,8 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     );
     CreateJoinRoomLoading();
     try {
-      NotificationModel notificationData = await repo.joinRoom(roomKey);
-      notificationBloc.add(NotificationOnAdd(data: [notificationData]));
+      NotificationModel notificationData = await _repo.joinRoom(roomKey);
+      _notificationBloc.add(NotificationOnAdd(data: [notificationData]));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Join Requested",
@@ -96,11 +96,11 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     );
     CreateJoinRoomLoading();
     try {
-      List<NotificationModel> notificationData = await roomRepo.inviteNewMember(
+      List<NotificationModel> notificationData = await _roomRepo.inviteNewMember(
         roomID,
         users,
       );
-      notificationBloc.add(NotificationOnAdd(data: notificationData));
+      _notificationBloc.add(NotificationOnAdd(data: notificationData));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "${users.length} Members Invited",

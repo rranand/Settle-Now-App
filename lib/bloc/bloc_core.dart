@@ -10,3 +10,4 @@ export './notification/notification_bloc.dart';
 export './add_to_personal_expense/add_to_personal_expense_bloc.dart';
 export './notification_action/notification_action_bloc.dart';
 export './update_info/update_info_bloc.dart';
+export './activity_notification/activity_notification_bloc.dart';

@@ -10,10 +10,10 @@ part 'room_info_state.dart';
 
 class RoomInfoCubit extends Cubit<RoomInfoState> {
   final RoomDashboardBloc _roomDashboardBloc;
-  final RoomRepository repo;
+  final RoomRepository _repo;
   final NotificationBloc _notificationBloc;
 
-  RoomInfoCubit(this._roomDashboardBloc, this.repo, this._notificationBloc)
+  RoomInfoCubit(this._roomDashboardBloc, this._repo, this._notificationBloc)
     : super(RoomInfoInitial());
 
   Future<void> fetchData(String id, bool forceRefresh) async {
@@ -35,7 +35,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       if (oldData.hasData && !forceRefresh) {
         return emit(RoomInfoSuccess(data: oldData, isInternalUpdate: false));
       } else {
-        RoomInfoModel data = await repo.fetchRoomInfo(id);
+        RoomInfoModel data = await _repo.fetchRoomInfo(id);
         return emit(RoomInfoSuccess(data: data, isInternalUpdate: false));
       }
     } catch (e) {
@@ -122,7 +122,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
-      await repo.updateRoom(oldData.data.id, roomName);
+      await _repo.updateRoom(oldData.data.id, roomName);
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
@@ -168,7 +168,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
-      await repo.deleteRoom(id);
+      await _repo.deleteRoom(id);
       _roomDashboardBloc.add(RoomDashboardOnDeleteRoom(id: id));
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

@@ -88,10 +88,19 @@ class _HomeScreenState extends State<HomeScreen> {
       _loggedInUser = authState.userData;
 
       context.read<FriendCubit>().addFriendFromCache();
-      final state = context.read<NotificationBloc>().state;
 
-      if (state is! NotificationFetchSuccess) {
+      final notificationState = context.read<NotificationBloc>().state;
+      final unreadNotificationCountState =
+          context.read<UnreadNotificationCountCubit>().state;
+
+      if (notificationState is! NotificationFetchSuccess) {
         context.read<NotificationBloc>().add(NotificationFetch());
+      }
+
+      if (unreadNotificationCountState is! UnreadNotificationCountSuccess) {
+        context
+            .read<UnreadNotificationCountCubit>()
+            .fetchUnreadNotificationCount();
       }
     }
   }
@@ -282,21 +291,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _notificationWithDot(int index) {
     if (bottomNavigationButtonText[index] == "Notification") {
-      return Stack(
-        children: [
-          Consumer<NotificationBloc>(
-            builder: (context, notificationBloc, child) {
-              final state = notificationBloc.state;
-              if (state is NotificationFetchSuccess && state.data.isNotEmpty) {
-                return child!;
-              } else {
-                return SizedBox.shrink();
-              }
-            },
-            child: Positioned(top: 0, right: 0, child: dot()),
-          ),
-          Icon(bottomNavigationButtonIcon[index]),
-        ],
+      return NotificationBellNavBarIcon(
+        iconData: bottomNavigationButtonIcon[index],
       );
     } else {
       return Icon(bottomNavigationButtonIcon[index]);

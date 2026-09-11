@@ -1,5 +1,6 @@
 import 'package:settlenow/data/data_provider/data_provider_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class NotificationRepository {
   final NotificationDataProvider _dataProvider;
@@ -9,6 +10,40 @@ class NotificationRepository {
   Future<List<NotificationModel>> fetchData() async {
     try {
       return await _dataProvider.fetchData();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Pair<List<ActivityNotificationModel>, bool>> fetchActivityBasedNotifications(
+    DateTime cursor,
+  ) async {
+    try {
+      return await _dataProvider.fetchActivityBasedNotifications(cursor);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int> unreadActivityNotificationCount() async {
+    try {
+      return await _dataProvider.unreadActivityNotificationCount();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    try {
+      return await _dataProvider.markAllAsRead();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> markAsRead(List<String> ids) async {
+    try {
+      return await _dataProvider.markAsRead(ids);
     } catch (e) {
       rethrow;
     }

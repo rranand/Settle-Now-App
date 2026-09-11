@@ -11,9 +11,9 @@ part 'room_dashboard_event.dart';
 part 'room_dashboard_state.dart';
 
 class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
-  final RoomDashboardRepository repo;
+  final RoomDashboardRepository _repo;
 
-  RoomDashboardBloc(this.repo) : super(RoomDashboardInitial()) {
+  RoomDashboardBloc(this._repo) : super(RoomDashboardInitial()) {
     on<RoomDashboardFetch>(_roomFetch, transformer: droppable());
     on<RoomDashboardOnAddNewRoom>(
       _roomDashboardOnAddNewRoom,
@@ -102,7 +102,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     }
 
     try {
-      Pair<List<RoomInfoModel>, bool> data = await repo.fetchData(
+      Pair<List<RoomInfoModel>, bool> data = await _repo.fetchData(
         event.isActiveRoom,
         _getCursor(event.isFreshFetch, event.isActiveRoom, oldState),
       );

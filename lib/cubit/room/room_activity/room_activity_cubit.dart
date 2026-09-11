@@ -9,8 +9,8 @@ import 'package:settlenow/util/util_core.dart';
 part 'room_activity_state.dart';
 
 class RoomActivityCubit extends Cubit<RoomActivityState> {
-  final RoomRepository repo;
-  RoomActivityCubit(this.repo) : super(RoomActivityInitial());
+  final RoomRepository _repo;
+  RoomActivityCubit(this._repo) : super(RoomActivityInitial());
 
   void fetchData(String id, bool forceRefresh) async {
     if (state is RoomActivityLoading &&
@@ -38,7 +38,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
     }
 
     try {
-      final data = await repo.fetchActivity(
+      final data = await _repo.fetchActivity(
         id,
         oldState?.data.isEmpty ?? true
             ? DateTime.now()
@@ -107,7 +107,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
     emit(RoomActivityLoading(id: id));
 
     try {
-      final data = await repo.fetchActivityByEntityID(id, entityID);
+      final data = await _repo.fetchActivityByEntityID(id, entityID);
 
       LinkedHashMap<String, List<ActivityModel>> transactionWiseActivity =
           LinkedHashMap<String, List<ActivityModel>>.from(
