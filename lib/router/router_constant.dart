@@ -9,6 +9,7 @@ class RouterConstants {
   static const String personalExpenseRouteName = '/personal';
   static const String lendenRouteName = '/lenden';
   static const String analysis = '/analysis';
+  static const String requestNotificationRouteName = '/request-notification';
 
   //Personal Expense Route
   static const String personalExpenseAddExpenseRouteName = '/add';

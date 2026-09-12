@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
 import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/router/router_constant.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -75,27 +77,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
               listener: _blocListenerHandler,
               builder: (context, state) {
                 List<NotificationModel> notificationData = [];
+
                 if (state is NotificationFetchSuccess) {
                   notificationData = state.dataList;
                 } else if (state is NotificationLoading) {
                   notificationData = List.generate(
-                    11,
-                    (i) => NotificationModel.empty(),
-                  );
-                }
-                if (notificationData.isEmpty) {
-                  return SliverFillRemaining(
-                    child: freshMessageWidget(
-                      FreshScreenMessageConstant.noRequestDashboard,
-                    ),
+                    2,
+                    (index) => NotificationModel.empty(),
                   );
                 }
 
-                int noOfCardsToBeShown = notificationData.length;
-                if (isWide) {
-                  noOfCardsToBeShown =
-                      (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+                if (notificationData.isEmpty) {
+                  return SliverToBoxAdapter(child: SizedBox.shrink());
                 }
+
+                final previewData = notificationData.take(3).toList();
 
                 return SliverPadding(
                   padding: _mainScreenPadding.add(
@@ -104,40 +100,72 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       bottom: UiConstant.spaceAtBottom,
                     ),
                   ),
-                  sliver: SliverList.builder(
-                    itemCount: noOfCardsToBeShown,
-                    itemBuilder: (context, index) {
-                      if (isWide) {
-                        NotificationModel eachNotificationData =
-                            notificationData[2 * index];
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        Row(
                           children: [
-                            Expanded(
-                              child: NotificationCard(
-                                data: eachNotificationData,
-                                loggedInUserID: _loggedInUser.id,
+                            Text(
+                              'Requests',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            if (state is NotificationFetchSuccess) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  notificationData.length.toString(),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child:
-                                  (index == noOfCardsToBeShown - 1 &&
-                                          notificationData.length % 2 > 0)
-                                      ? SizedBox()
-                                      : NotificationCard(
-                                        data: notificationData[2 * index + 1],
-                                        loggedInUserID: _loggedInUser.id,
-                                      ),
-                            ),
+                            ],
                           ],
-                        );
-                      } else {
-                        return NotificationCard(
-                          data: notificationData[index],
-                          loggedInUserID: _loggedInUser.id,
-                        );
-                      }
-                    },
+                        ),
+                        const SizedBox(height: 8),
+                        Column(
+                          children: [
+                            for (
+                              int index = 0;
+                              index < previewData.length;
+                              index++
+                            ) ...[
+                              NotificationCard(
+                                data: previewData[index],
+                                loggedInUserID: _loggedInUser.id,
+                                isPreview: true,
+                              ),
+                            ],
+                          ],
+                        ),
+                        if (state is NotificationFetchSuccess) ...[
+                          const SizedBox(height: 8),
+                          Center(
+                            child: CustomButton.customTextButton(
+                              'View all ${notificationData.length} requests',
+                              onPressed: () {
+                                context.push(
+                                  RouterConstants.requestNotificationRouteName,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 );
               },

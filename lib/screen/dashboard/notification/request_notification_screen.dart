@@ -63,89 +63,97 @@ class _RequestNotificationScreenState extends State<RequestNotificationScreen> {
   Widget build(BuildContext context) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
 
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      notificationPredicate: (ScrollNotification notification) {
-        return notification.depth == 0;
-      },
-      child: BlocConsumer<NotificationBloc, NotificationState>(
-        listener: _blocListenerHandler,
-        builder: (context, state) {
-          List<NotificationModel> notificationData = [];
-          if (state is NotificationFetchSuccess) {
-            notificationData = state.dataList;
-          } else if (state is NotificationLoading) {
-            notificationData = List.generate(
-              11,
-              (i) => NotificationModel.empty(),
-            );
-          }
-          if (notificationData.isEmpty) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: freshMessageWidget(
-                      FreshScreenMessageConstant.noRequestDashboard,
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-
-          int noOfCardsToBeShown = notificationData.length;
-          if (isWide) {
-            noOfCardsToBeShown =
-                (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
-          }
-
-          return Padding(
-            padding: _mainScreenPadding.add(
-              EdgeInsets.only(top: UiConstant.spaceBetweenCard),
-            ),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: noOfCardsToBeShown,
-              itemBuilder: (context, index) {
-                if (isWide) {
-                  NotificationModel eachNotificationData =
-                      notificationData[2 * index];
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: NotificationCard(
-                          data: eachNotificationData,
-                          loggedInUserID: _loggedInUser.id,
-                        ),
-                      ),
-                      Expanded(
-                        child:
-                            (index == noOfCardsToBeShown - 1 &&
-                                    notificationData.length % 2 > 0)
-                                ? SizedBox()
-                                : NotificationCard(
-                                  data: notificationData[2 * index + 1],
-                                  loggedInUserID: _loggedInUser.id,
-                                ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return NotificationCard(
-                    data: notificationData[index],
-                    loggedInUserID: _loggedInUser.id,
-                  );
-                }
-              },
-            ),
-          );
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Requests'),
+        leading: appBarBackButton(context),
+        titleSpacing: _mainScreenPadding.left,
+        centerTitle: false,
+      ),
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        notificationPredicate: (ScrollNotification notification) {
+          return notification.depth == 0;
         },
+        child: BlocConsumer<NotificationBloc, NotificationState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            List<NotificationModel> notificationData = [];
+            if (state is NotificationFetchSuccess) {
+              notificationData = state.dataList;
+            } else if (state is NotificationLoading) {
+              notificationData = List.generate(
+                11,
+                (i) => NotificationModel.empty(),
+              );
+            }
+            if (notificationData.isEmpty) {
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: freshMessageWidget(
+                        FreshScreenMessageConstant.noRequestDashboard,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+
+            int noOfCardsToBeShown = notificationData.length;
+            if (isWide) {
+              noOfCardsToBeShown =
+                  (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+            }
+
+            return Padding(
+              padding: _mainScreenPadding.add(
+                EdgeInsets.only(top: UiConstant.spaceBetweenCard),
+              ),
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: noOfCardsToBeShown,
+                itemBuilder: (context, index) {
+                  if (isWide) {
+                    NotificationModel eachNotificationData =
+                        notificationData[2 * index];
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: NotificationCard(
+                            data: eachNotificationData,
+                            loggedInUserID: _loggedInUser.id,
+                          ),
+                        ),
+                        Expanded(
+                          child:
+                              (index == noOfCardsToBeShown - 1 &&
+                                      notificationData.length % 2 > 0)
+                                  ? SizedBox()
+                                  : NotificationCard(
+                                    data: notificationData[2 * index + 1],
+                                    loggedInUserID: _loggedInUser.id,
+                                  ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return NotificationCard(
+                      data: notificationData[index],
+                      loggedInUserID: _loggedInUser.id,
+                    );
+                  }
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

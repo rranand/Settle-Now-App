@@ -8,10 +8,13 @@ import 'package:settlenow/util/util_core.dart';
 class NotificationCard extends StatefulWidget {
   final String loggedInUserID;
   final NotificationModel data;
+  final bool isPreview;
+
   const NotificationCard({
     super.key,
     required this.loggedInUserID,
     required this.data,
+    this.isPreview = false,
   });
 
   @override
@@ -226,7 +229,7 @@ class _NotificationCardState extends State<NotificationCard> {
                       ),
             ),
             Visibility(
-              visible: widget.data.hasData,
+              visible: widget.data.hasData && !widget.isPreview,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
