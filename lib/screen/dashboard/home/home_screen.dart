@@ -32,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
   int _selectedIndex = 0;
+  BottomNavigationType _selectedBottomNavigationType =
+      BottomNavigationType.home;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final ValueNotifier<String> appVersion = ValueNotifier("");
   final ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
@@ -77,10 +79,13 @@ class _HomeScreenState extends State<HomeScreen> {
     InAppUpdateService.checkForUpdate(context);
     NotificationInterfaceHandler.initateListeners(context);
 
-    if (widget.initalScreenIndex != null &&
-        _selectedIndex >= 0 &&
-        _selectedIndex < bottomNavigationButtonText.length) {
-      _selectedIndex = widget.initalScreenIndex!;
+    if (widget.initalScreenIndex != null) {
+      _selectedIndex = widget.initalScreenIndex!.clamp(
+        0,
+        BottomNavigationType.values.length - 1,
+      );
+      _selectedBottomNavigationType =
+          BottomNavigationType.values[_selectedIndex];
     }
 
     final authState = context.read<AuthBloc>().state;
@@ -108,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     if (mounted) {
       _selectedIndex = index;
+      _selectedBottomNavigationType = BottomNavigationType.values[index];
       _isSearchEnabled.value = false;
       setState(() {});
     }
@@ -207,13 +213,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _drawerWidget() {
+    final theme = Theme.of(context);
+
     return Drawer(
       child: ListView(
         children: [
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).drawerTheme.backgroundColor,
-            ),
+            decoration: BoxDecoration(color: theme.drawerTheme.backgroundColor),
             currentAccountPicture: imageWidgetForCachedNetworkImage(
               _loggedInUser.profilePic,
               context,
@@ -256,14 +262,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                   trailing: Visibility(
-                    visible: index == -1,
+                    visible: drawingTitle.isBeta,
                     child: Container(
                       width: 55,
                       height: 30,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
-                        border: Border.all(color: Colors.white60),
+                        border: Border.all(color: theme.primaryColorLight),
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                       child: Padding(
@@ -289,13 +295,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _notificationWithDot(int index) {
-    if (bottomNavigationButtonText[index] == "Notification") {
-      return NotificationBellNavBarIcon(
-        iconData: bottomNavigationButtonIcon[index],
-      );
+  Widget _notificationWithDot(BottomNavigationType bottomNavigationType) {
+    if (bottomNavigationType == BottomNavigationType.notification) {
+      return NotificationBellNavBarIcon(iconData: bottomNavigationType.icon);
     } else {
-      return Icon(bottomNavigationButtonIcon[index]);
+      return Icon(bottomNavigationType.icon);
     }
   }
 
@@ -318,10 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           items: List.generate(
-            bottomNavigationButtonText.length,
+            BottomNavigationType.values.length,
             (index) => BottomNavigationBarItem(
-              icon: _notificationWithDot(index),
-              label: bottomNavigationButtonText[index],
+              icon: _notificationWithDot(BottomNavigationType.values[index]),
+              label: BottomNavigationType.values[index].label,
             ),
           ),
         ),
@@ -329,27 +333,31 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _bottomNavigatorBodyHandler(int index) {
-    switch (index) {
-      case 1:
+  Widget _bottomNavigatorBodyHandler(
+    BottomNavigationType bottomNavigationType,
+  ) {
+    switch (bottomNavigationType) {
+      case BottomNavigationType.quicksplit:
         return QuickSplitDashboardScreen(isSearchEnabled: _isSearchEnabled);
-      case 2:
+      case BottomNavigationType.personal:
         return PersonalExpenseDashboardScreen(
           isSearchEnabled: _isSearchEnabled,
         );
-      case 3:
+      case BottomNavigationType.lenden:
         return LendenDashboardScreen(isSearchEnabled: _isSearchEnabled);
-      case 4:
-        return NotificationScreen(isSearchEnabled: _isSearchEnabled);
+      case BottomNavigationType.notification:
+        return NotificationScreen();
       default:
         return RoomDashboardScreen(isSearchEnabled: _isSearchEnabled);
     }
   }
 
-  PreferredSizeWidget? _bottomNavigatorAppBarHandler(int index) {
+  PreferredSizeWidget? _bottomNavigatorAppBarHandler(
+    BottomNavigationType bottomNavigationType,
+  ) {
     List<Widget> appBarActions = [];
 
-    if (index <= 4) {
+    if (bottomNavigationType.isSearchEnabled) {
       appBarActions = [
         InkWell(
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
@@ -414,8 +422,12 @@ class _HomeScreenState extends State<HomeScreen> {
             } else {
               return Scaffold(
                 key: _homeScreenkey,
-                appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
-                body: _bottomNavigatorBodyHandler(_selectedIndex),
+                appBar: _bottomNavigatorAppBarHandler(
+                  _selectedBottomNavigationType,
+                ),
+                body: _bottomNavigatorBodyHandler(
+                  _selectedBottomNavigationType,
+                ),
                 bottomNavigationBar: _bottomNavigationBarWidget(),
                 drawer: _drawerWidget(),
               );

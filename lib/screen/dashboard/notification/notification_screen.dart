@@ -7,8 +7,7 @@ import 'package:settlenow/provider/provider_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class NotificationScreen extends StatefulWidget {
-  final ValueNotifier<bool> isSearchEnabled;
-  const NotificationScreen({super.key, required this.isSearchEnabled});
+  const NotificationScreen({super.key});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -17,7 +16,6 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   UserModel _loggedInUser = UserModel.empty();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  final TextEditingController _searchController = TextEditingController();
 
   void _blocListenerHandler(BuildContext context, NotificationState state) {
     if (state is NotificationFailure) {
@@ -47,9 +45,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         context.read<NotificationBloc>().add(NotificationFetch());
       }
     }
-    widget.isSearchEnabled.addListener(() {
-      _searchController.text = "";
-    });
   }
 
   Future<void> onRefresh() async {
@@ -76,26 +71,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            ValueListenableBuilder(
-              valueListenable: widget.isSearchEnabled,
-              builder: (BuildContext context, bool value, Widget? _) {
-                if (!value) {
-                  return SliverToBoxAdapter(child: SizedBox.shrink());
-                }
-                return SliverPadding(
-                  padding: _mainScreenPadding,
-                  sliver: SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    pinned: value,
-                    title: CustomFormField.searchBar(
-                      "Search",
-                      widget.isSearchEnabled,
-                      _searchController,
-                    ),
-                  ),
-                );
-              },
-            ),
             BlocConsumer<NotificationBloc, NotificationState>(
               listener: _blocListenerHandler,
               builder: (context, state) {
@@ -116,6 +91,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   );
                 }
 
+                int noOfCardsToBeShown = notificationData.length;
+                if (isWide) {
+                  noOfCardsToBeShown =
+                      (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+                }
+
                 return SliverPadding(
                   padding: _mainScreenPadding.add(
                     EdgeInsets.only(
@@ -123,82 +104,39 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       bottom: UiConstant.spaceAtBottom,
                     ),
                   ),
-                  sliver: ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: _searchController,
-                    builder: (context, _, _) {
-                      List<NotificationModel> filterData = notificationData;
-                      if (state is NotificationFetchSuccess) {
-                        filterData = FilterSort.filteredSearchText(
-                          _searchController.text,
-                          notificationData,
-                          (notificationData) {
-                            String searchStr =
-                                "${notificationData.roomName} ${notificationData.type}";
-                            if (notificationData.invitedBy.id !=
-                                _loggedInUser.id) {
-                              searchStr +=
-                                  " ${notificationData.invitedBy.name}";
-                            }
-                            if (notificationData.invitedUser.id !=
-                                _loggedInUser.id) {
-                              searchStr +=
-                                  " ${notificationData.invitedUser.name}";
-                            }
-                            return searchStr;
-                          },
-                        );
-                      }
-
-                      if (filterData.isEmpty) {
-                        return SliverFillRemaining(
-                          child: noRecordFoundWidget(
-                            ApiConstant.noMatchingRecords,
-                            context,
-                          ),
-                        );
-                      }
-
-                      int noOfCardsToBeShown = filterData.length;
+                  sliver: SliverList.builder(
+                    itemCount: noOfCardsToBeShown,
+                    itemBuilder: (context, index) {
                       if (isWide) {
-                        noOfCardsToBeShown =
-                            (noOfCardsToBeShown / 2).toInt() +
-                            noOfCardsToBeShown % 2;
+                        NotificationModel eachNotificationData =
+                            notificationData[2 * index];
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: NotificationCard(
+                                data: eachNotificationData,
+                                loggedInUserID: _loggedInUser.id,
+                              ),
+                            ),
+                            Expanded(
+                              child:
+                                  (index == noOfCardsToBeShown - 1 &&
+                                          notificationData.length % 2 > 0)
+                                      ? SizedBox()
+                                      : NotificationCard(
+                                        data: notificationData[2 * index + 1],
+                                        loggedInUserID: _loggedInUser.id,
+                                      ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return NotificationCard(
+                          data: notificationData[index],
+                          loggedInUserID: _loggedInUser.id,
+                        );
                       }
-                      return SliverList.builder(
-                        itemCount: noOfCardsToBeShown,
-                        itemBuilder: (context, index) {
-                          if (isWide) {
-                            NotificationModel eachNotificationData =
-                                filterData[2 * index];
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: NotificationCard(
-                                    data: eachNotificationData,
-                                    loggedInUserID: _loggedInUser.id,
-                                  ),
-                                ),
-                                Expanded(
-                                  child:
-                                      (index == noOfCardsToBeShown - 1 &&
-                                              filterData.length % 2 > 0)
-                                          ? SizedBox()
-                                          : NotificationCard(
-                                            data: filterData[2 * index + 1],
-                                            loggedInUserID: _loggedInUser.id,
-                                          ),
-                                ),
-                              ],
-                            );
-                          } else {
-                            return NotificationCard(
-                              data: filterData[index],
-                              loggedInUserID: _loggedInUser.id,
-                            );
-                          }
-                        },
-                      );
                     },
                   ),
                 );

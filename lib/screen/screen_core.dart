@@ -19,7 +19,8 @@ export './dashboard/personal_expense/sub_section/personal_expense_categories_sec
 export './dashboard/personal_expense/sub_section/personal_expense_transaction_screen.dart';
 export './dashboard/personal_expense/personal_expense_screen.dart';
 export './dashboard/personal_expense/personal_expense_dashboard_screen.dart';
-export './dashboard/notification/notification_screen.dart';
+export 'dashboard/notification/notification_screen.dart';
+export 'dashboard/notification/request_notification_screen.dart';
 export './profile/profile_edit_screen.dart';
 export './profile/profile_screen.dart';
 export './profile/login_activity_screen.dart';

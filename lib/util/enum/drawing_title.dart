@@ -45,6 +45,15 @@ extension DrawingTitleExt on DrawingTitle {
         return true;
     }
   }
+
+  bool get isBeta {
+    switch (this) {
+      case DrawingTitle.bankTransactions:
+        return true;
+      default:
+        return false;
+    }
+  }
 }
 
 extension DrawingTitleIcon on DrawingTitle {
