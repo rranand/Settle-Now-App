@@ -27,7 +27,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
     try {
       List<NotificationModel> data = await _repo.fetchData();
-      await Future.delayed(const Duration(milliseconds: 2500));
       final newData = LinkedHashMap<String, NotificationModel>.fromEntries(
         data.map((t) => MapEntry(t.id, t)),
       );

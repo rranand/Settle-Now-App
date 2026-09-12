@@ -85,3 +85,4 @@ export './widgets/stacked_image.dart';
 export './widgets/auth_gate.dart';
 export './resolver/user_resolver.dart';
 export './bank_transaction/filter_sms.dart';
+export './card/activity_notification_card.dart';

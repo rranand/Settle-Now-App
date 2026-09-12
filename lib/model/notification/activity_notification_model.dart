@@ -1,6 +1,7 @@
 import 'package:settlenow/util/util_core.dart';
 
 class ActivityNotificationModel {
+  bool hasData = true;
   final String id;
   final NotificationType type;
   final String entityId;
@@ -11,7 +12,7 @@ class ActivityNotificationModel {
   final DateTime createdOn;
   final DateTime? readOn;
 
-  const ActivityNotificationModel({
+  ActivityNotificationModel({
     required this.id,
     required this.type,
     required this.entityId,
@@ -22,6 +23,17 @@ class ActivityNotificationModel {
     required this.createdOn,
     this.readOn,
   });
+
+  ActivityNotificationModel.empty({this.hasData = false})
+    : id = '',
+      type = NotificationType.unknown,
+      entityId = '',
+      relatedEntityId = null,
+      title = '',
+      body = '',
+      data = const {},
+      createdOn = DateTime.now(),
+      readOn = null;
 
   factory ActivityNotificationModel.fromMap(Map<String, dynamic> json) {
     return ActivityNotificationModel(

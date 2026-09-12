@@ -17,7 +17,9 @@ final class ActivityNotificationMarkAsRead extends ActivityNotificationEvent {
 
 final class ActivityNotificationMarkAllAsRead
     extends ActivityNotificationEvent {
-  ActivityNotificationMarkAllAsRead();
+  final ScaffoldMessengerState scaffoldMessenger;
+
+  ActivityNotificationMarkAllAsRead({required this.scaffoldMessenger});
 }
 
 final class ActivityNotificationReset extends ActivityNotificationEvent {}

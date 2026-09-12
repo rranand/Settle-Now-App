@@ -2,10 +2,11 @@ import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:settlenow/cubit/cubit_core.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/notification/activity_notification_model.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'activity_notification_event.dart';
 part 'activity_notification_state.dart';
@@ -93,21 +94,29 @@ class ActivityNotificationBloc
     Emitter<ActivityNotificationState> emit,
   ) async {
     if (state is ActivityNotificationFetchSuccess) {
-      final oldState = state as ActivityNotificationFetchSuccess;
-      DateTime currentTime = DateTime.now();
+      try {
+        await _repo.markAsRead(event.ids.toList());
 
-      final updatedDataMap =
-          LinkedHashMap<String, ActivityNotificationModel>.fromEntries(
-            oldState.dataList.map(
-              (t) => MapEntry(
-                t.id,
-                event.ids.contains(t.id) ? t.copyWith(readOn: currentTime) : t,
+        final oldState = state as ActivityNotificationFetchSuccess;
+        DateTime currentTime = DateTime.now();
+
+        final updatedDataMap =
+            LinkedHashMap<String, ActivityNotificationModel>.fromEntries(
+              oldState.dataList.map(
+                (t) => MapEntry(
+                  t.id,
+                  event.ids.contains(t.id)
+                      ? t.copyWith(readOn: currentTime)
+                      : t,
+                ),
               ),
-            ),
-          );
+            );
 
-      unreadNotificationCountCubit.updateUnreadNotificationCount(false);
-      return emit(oldState.copyWith(data: updatedDataMap));
+        unreadNotificationCountCubit.updateUnreadNotificationCount(false);
+        return emit(oldState.copyWith(data: updatedDataMap));
+      } catch (e) {
+        logDebug("Failed to mark notifications as read: ${e.toString()}");
+      }
     }
   }
 
@@ -116,18 +125,39 @@ class ActivityNotificationBloc
     Emitter<ActivityNotificationState> emit,
   ) async {
     if (state is ActivityNotificationFetchSuccess) {
-      final oldState = state as ActivityNotificationFetchSuccess;
-      DateTime currentTime = DateTime.now();
+      try {
+        showSnackbarWithChildWidget(
+          "Marking all notifications as read",
+          child:
+              CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
+          duration: Duration(seconds: 10),
+          scaffoldMessenger: event.scaffoldMessenger,
+        );
 
-      final updatedDataMap =
-          LinkedHashMap<String, ActivityNotificationModel>.fromEntries(
-            oldState.dataList.map(
-              (t) => MapEntry(t.id, t.copyWith(readOn: currentTime)),
-            ),
-          );
+        await _repo.markAllAsRead();
 
-      unreadNotificationCountCubit.updateUnreadNotificationCount(true);
-      return emit(oldState.copyWith(data: updatedDataMap));
+        event.scaffoldMessenger.hideCurrentSnackBar();
+        DateTime currentTime = DateTime.now();
+        final oldState = state as ActivityNotificationFetchSuccess;
+
+        final updatedDataMap =
+            LinkedHashMap<String, ActivityNotificationModel>.fromEntries(
+              oldState.dataList.map(
+                (t) => MapEntry(t.id, t.copyWith(readOn: currentTime)),
+              ),
+            );
+
+        unreadNotificationCountCubit.updateUnreadNotificationCount(true);
+        return emit(oldState.copyWith(data: updatedDataMap));
+      } catch (e) {
+        showSnackbarWithChildWidget(
+          "Failed to mark all notifications as read",
+          child:
+              CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
+          duration: Duration(seconds: 10),
+          scaffoldMessenger: event.scaffoldMessenger,
+        );
+      }
     }
   }
 

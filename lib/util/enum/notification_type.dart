@@ -17,7 +17,9 @@ enum NotificationType {
   roomCloseRequest,
 
   loginVerification,
-  loginActivity;
+  loginActivity,
+
+  unknown;
 
   String get value {
     switch (this) {
@@ -55,6 +57,8 @@ enum NotificationType {
         return 'LOGIN_VERIFICATION';
       case NotificationType.loginActivity:
         return 'LOGIN_ACTIVITY';
+      case NotificationType.unknown:
+        return 'UNKNOWN';
     }
   }
 
@@ -94,13 +98,15 @@ enum NotificationType {
         return 'Login Verification';
       case NotificationType.loginActivity:
         return 'Login Activity';
+      case NotificationType.unknown:
+        return 'Unknown';
     }
   }
 
   static NotificationType fromValue(String value) {
     return NotificationType.values.firstWhere(
       (type) => type.value == value,
-      orElse: () => throw ArgumentError('Unknown notification type: $value'),
+      orElse: () => NotificationType.unknown,
     );
   }
 }

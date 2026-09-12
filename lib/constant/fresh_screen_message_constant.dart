@@ -83,4 +83,10 @@ class FreshScreenMessageConstant {
     description:
         'SettleNow needs access to your SMS to detect bank transactions. Your messages are only used to identify transaction details.',
   );
+
+  static final noActivityNotification = FreshMessageModel(
+    title: 'No Activity Yet',
+    description:
+        'You’ll see updates here when there’s new activity in your rooms and expenses.',
+  );
 }

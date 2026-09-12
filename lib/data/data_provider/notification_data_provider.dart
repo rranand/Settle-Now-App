@@ -27,9 +27,8 @@ class NotificationDataProvider {
     }
   }
 
-  Future<Pair<List<ActivityNotificationModel>, bool>> fetchActivityBasedNotifications(
-    DateTime cursor,
-  ) async {
+  Future<Pair<List<ActivityNotificationModel>, bool>>
+  fetchActivityBasedNotifications(DateTime cursor) async {
     try {
       final response = await createAPICall(
         'notification/activity?${addCursorInURL(cursor)}',
@@ -47,7 +46,7 @@ class NotificationDataProvider {
           }
         }
 
-        return Pair(arr, data['hasMoreData']);
+        return Pair(arr, data['has_more']);
       } else {
         throw data['message'];
       }
