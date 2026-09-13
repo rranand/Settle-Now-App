@@ -60,6 +60,9 @@ class _ActivityNotificationCardState extends State<ActivityNotificationCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final bool isUnread = widget.data.readOn == null;
+
     Widget extendedChangeWidget = activityInfoWidget();
     bool showInfoIcon =
         extendedChangeWidget.runtimeType == Column().runtimeType;
@@ -81,6 +84,12 @@ class _ActivityNotificationCardState extends State<ActivityNotificationCard> {
             color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             boxShadow: getContainerBoxShadow(context),
+            border:
+                isUnread
+                    ? Border(
+                      left: BorderSide(color: colorScheme.primary, width: 3),
+                    )
+                    : null,
           ),
           child: ListTile(
             titleAlignment: ListTileTitleAlignment.top,
@@ -105,6 +114,10 @@ class _ActivityNotificationCardState extends State<ActivityNotificationCard> {
                           widget.data.body,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight:
+                                isUnread ? FontWeight.w600 : FontWeight.normal,
+                          ),
                         ),
                         Visibility(
                           visible: showInfoIcon,
