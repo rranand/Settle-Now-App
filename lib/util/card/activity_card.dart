@@ -105,7 +105,12 @@ class _ActivityCardState extends State<ActivityCard> {
   }
 
   Widget activityInfoWidget() {
-    List<Widget> updateAttributes = [Divider()];
+    List<Widget> updateAttributes = [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Divider(),
+      ),
+    ];
 
     switch (widget.data.entityType) {
       case ActivityType.transactionUpdated:
@@ -186,108 +191,99 @@ class _ActivityCardState extends State<ActivityCard> {
       return SizedBox.shrink();
     }
 
-    return Column(
-      children: [
-        Stack(
-          children: [
-            Card(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color,
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: UiConstant.cardPadding),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          boxShadow: getContainerBoxShadow(context),
+        ),
+        child: ListTile(
+          titleAlignment: ListTileTitleAlignment.top,
+          contentPadding: EdgeInsets.zero,
+          leading:
+              widget.data.hasData
+                  ? colouredIcon(
+                    widget.data.entityType.icon,
+                    UiConstant.colors[widget.data.entityType.iconCode],
+                  )
+                  : CustomShimmerEffect.imageWidget(
+                    context,
+                    shape: BoxShape.circle,
+                    radius: 50,
                   ),
-                  boxShadow: getContainerBoxShadow(context),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          title:
+              widget.data.hasData
+                  ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      widget.data.hasData
-                          ? colouredIcon(
-                            widget.data.entityType.icon,
-                            UiConstant.colors[widget.data.entityType.iconCode],
-                          )
-                          : CustomShimmerEffect.imageWidget(
-                            context,
-                            shape: BoxShape.circle,
-                            radius: 50,
+                      Text(
+                        activityText,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Visibility(
+                        visible: showInfoIcon,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(
+                            UiConstant.cardBorderRadius,
                           ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              widget.data.hasData
-                                  ? Text(
-                                    activityText,
-                                    style: const TextStyle(fontSize: 17),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  )
-                                  : CustomShimmerEffect.textWidget(
-                                    context,
-                                    width: 80,
-                                  ),
-                              subTextOnCard(
-                                convertDateTimeFormat(widget.data.createdOn),
-                                context,
-                                fontSize: 14,
-                                isLoaded: widget.data.hasData,
-                              ),
-                              ValueListenableBuilder(
-                                valueListenable: isExpanded,
-                                builder: (context, _, child) {
-                                  if (isExpanded.value) {
-                                    return child!;
-                                  } else {
-                                    return SizedBox.shrink();
-                                  }
-                                },
-                                child: extendedChangeWidget,
-                              ),
-                            ],
+                          child: ValueListenableBuilder(
+                            valueListenable: isExpanded,
+                            builder: (context, _, _) {
+                              return Icon(
+                                isExpanded.value
+                                    ? Icons.keyboard_arrow_up_outlined
+                                    : Icons.keyboard_arrow_down_outlined,
+                                size: 28,
+                                color: Colors.grey,
+                              );
+                            },
                           ),
+                          onTap: () {
+                            isExpanded.value = !isExpanded.value;
+                          },
                         ),
                       ),
                     ],
+                  )
+                  : CustomShimmerEffect.textWidget(context, width: 80),
+          subtitle:
+              widget.data.hasData
+                  ? Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      subTextOnCard(
+                        convertToMoment(widget.data.createdOn),
+                        context,
+                        fontSize: 14,
+                        isLoaded: widget.data.hasData,
+                      ),
+                      ValueListenableBuilder(
+                        valueListenable: isExpanded,
+                        builder: (context, _, child) {
+                          if (isExpanded.value) {
+                            return child!;
+                          } else {
+                            return SizedBox.shrink();
+                          }
+                        },
+                        child: extendedChangeWidget,
+                      ),
+                    ],
+                  )
+                  : Align(
+                    alignment: Alignment.centerLeft,
+                    child: CustomShimmerEffect.textWidget(
+                      context,
+                      fontSize: 10,
+                      width: 80,
+                    ),
                   ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Visibility(
-                visible: showInfoIcon,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
-                  ),
-                  child: ValueListenableBuilder(
-                    valueListenable: isExpanded,
-                    builder: (context, _, _) {
-                      return Icon(
-                        isExpanded.value
-                            ? Icons.keyboard_arrow_up_outlined
-                            : Icons.keyboard_arrow_down_outlined,
-                        size: 28,
-                        color: Colors.grey,
-                      );
-                    },
-                  ),
-                  onTap: () {
-                    isExpanded.value = !isExpanded.value;
-                  },
-                ),
-              ),
-            ),
-          ],
         ),
-      ],
+      ),
     );
   }
 }

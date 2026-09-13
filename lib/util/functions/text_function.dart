@@ -22,10 +22,14 @@ String capatilizeFirstLetter(String inputText) {
 String convertToMoment(DateTime dateTime) {
   String momentStr = dateTime.toMoment().fromNow();
   momentStr = momentStr
-      .replaceAll("seconds", "Secs")
-      .replaceAll("minutes", "Mins")
-      .replaceAll("a few", "Few")
-      .replaceAll("about", "~");
+      .replaceAll('seconds', 'secs')
+      .replaceAll('second', 'sec')
+      .replaceAll('minutes', 'mins')
+      .replaceAll('minute', 'min')
+      .replaceAll('hours', 'hrs')
+      .replaceAll('hour', 'hr')
+      .replaceAll('about', '~')
+      .replaceAll('a few', 'few');
 
   return capatilizeFirstLetter(momentStr);
 }
