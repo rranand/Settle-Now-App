@@ -268,11 +268,13 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     "Created By ${widget.loggedInUser.id == widget.data.createdBy ? "You" : getName(widget.data.createdBy, widget.data.users)}",
                     context,
                     isLoaded: widget.data.hasData,
+                    width: 160,
                   ),
                   subTextOnCard(
                     "Created ${convertDateTimeFormat(widget.data.createdOn)}",
                     context,
                     isLoaded: widget.data.hasData,
+                    width: 140,
                   ),
                   !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)
                       ? subTextOnCard(

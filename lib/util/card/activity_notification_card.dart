@@ -30,18 +30,40 @@ class ActivityNotificationCard extends StatelessWidget {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: null,
-                title: Text(data.id),
-                subtitle:
+                leading:
                     data.hasData
-                        ? Text(
-                          data.type.label,
-                          style: TextStyle(color: Colors.grey[600]),
+                        ? colouredIcon(
+                          data.type.icon,
+                          UiConstant.colors[data.type.iconCode],
                         )
+                        : CustomShimmerEffect.imageWidget(
+                          context,
+                          shape: BoxShape.circle,
+                          radius: 50,
+                        ),
+                title:
+                    data.hasData
+                        ? Text(data.body)
                         : CustomShimmerEffect.textWidget(
                           context,
                           fontSize: 10,
                           width: 80,
+                        ),
+                subtitle:
+                    data.hasData
+                        ? Text(
+                          convertToMoment(data.createdOn) +
+                              "  " +
+                              data.type.label,
+                          style: TextStyle(color: Colors.grey[600]),
+                        )
+                        : Align(
+                          alignment: Alignment.centerLeft,
+                          child: CustomShimmerEffect.textWidget(
+                            context,
+                            fontSize: 10,
+                            width: 80,
+                          ),
                         ),
               ),
             ],

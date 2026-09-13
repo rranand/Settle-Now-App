@@ -57,10 +57,13 @@ class _PersonalExpenseCategoriesSectionScreenState
                       ? Text(
                         "${categoryWiseExpense[index].second} transactions",
                       )
-                      : CustomShimmerEffect.textWidget(
-                        context,
-                        fontSize: 10,
-                        width: 80,
+                      : Align(
+                        alignment: Alignment.centerLeft,
+                        child: CustomShimmerEffect.textWidget(
+                          context,
+                          fontSize: 10,
+                          width: 100,
+                        ),
                       ),
               trailing:
                   isLoaded

@@ -22,6 +22,7 @@ Widget subTextOnCard(
   FontWeight? fontWeight = FontWeight.w400,
   double? fontSize = 12,
   bool isLoaded = true,
+  double width = 120,
 }) {
   return isLoaded
       ? Text(
@@ -37,7 +38,7 @@ Widget subTextOnCard(
         child: CustomShimmerEffect.textWidget(
           context,
           fontSize: 12,
-          width: 120,
+          width: width,
         ),
       );
 }

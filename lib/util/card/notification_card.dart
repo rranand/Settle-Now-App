@@ -215,17 +215,20 @@ class _NotificationCardState extends State<NotificationCard> {
               title:
                   widget.data.hasData
                       ? title()
-                      : CustomShimmerEffect.textWidget(context, width: 80),
+                      : CustomShimmerEffect.textWidget(context),
               subtitle:
                   widget.data.hasData
                       ? Text(
                         widget.data.type.label,
                         style: TextStyle(color: Colors.grey[600]),
                       )
-                      : CustomShimmerEffect.textWidget(
-                        context,
-                        fontSize: 10,
-                        width: 80,
+                      : Align(
+                        alignment: Alignment.centerLeft,
+                        child: CustomShimmerEffect.textWidget(
+                          context,
+                          fontSize: 10,
+                          width: 80,
+                        ),
                       ),
             ),
             Visibility(

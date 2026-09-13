@@ -127,9 +127,7 @@ extension ActivityTypeIcon on ActivityType {
         return Iconsax.home_copy;
     }
   }
-}
 
-extension ActivityTypeIconCode on ActivityType {
   int get iconCode {
     switch (this) {
       case ActivityType.transactionAdded:

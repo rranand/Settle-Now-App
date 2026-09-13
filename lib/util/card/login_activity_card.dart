@@ -34,7 +34,10 @@ class LoginActivityCard extends StatelessWidget {
           title:
               data.hasData
                   ? Text(data.deviceName)
-                  : CustomShimmerEffect.textWidget(context, width: 80),
+                  : Align(
+                    alignment: Alignment.centerLeft,
+                    child: CustomShimmerEffect.textWidget(context),
+                  ),
           subtitle:
               data.hasData
                   ? Text.rich(
@@ -47,10 +50,13 @@ class LoginActivityCard extends StatelessWidget {
                       ],
                     ),
                   )
-                  : CustomShimmerEffect.textWidget(
-                    context,
-                    fontSize: 10,
-                    width: 80,
+                  : Align(
+                    alignment: Alignment.centerLeft,
+                    child: CustomShimmerEffect.textWidget(
+                      context,
+                      fontSize: 10,
+                      width: 80,
+                    ),
                   ),
           trailing:
               data.hasData
