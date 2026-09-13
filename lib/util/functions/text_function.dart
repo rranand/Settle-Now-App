@@ -20,7 +20,8 @@ String capatilizeFirstLetter(String inputText) {
 }
 
 String convertToMoment(DateTime dateTime) {
-  return dateTime.toMoment().fromNow(form: Abbreviation.semi);
+  String momentStr = dateTime.toMoment().fromNow(form: Abbreviation.semi);
+  return capatilizeFirstLetter(momentStr);
 }
 
 String convertDateTimeFormat(DateTime date) {
