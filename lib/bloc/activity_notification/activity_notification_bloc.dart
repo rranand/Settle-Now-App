@@ -93,7 +93,7 @@ class ActivityNotificationBloc
     ActivityNotificationMarkAsRead event,
     Emitter<ActivityNotificationState> emit,
   ) async {
-    if (state is ActivityNotificationFetchSuccess) {
+    if (state is ActivityNotificationFetchSuccess && event.ids.isNotEmpty) {
       try {
         await _repo.markAsRead(event.ids);
 
