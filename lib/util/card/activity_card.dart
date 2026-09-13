@@ -218,10 +218,12 @@ class _ActivityCardState extends State<ActivityCard> {
                   ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        activityText,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
+                      Flexible(
+                        child: Text(
+                          activityText,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Visibility(
                         visible: showInfoIcon,

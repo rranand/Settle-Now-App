@@ -110,13 +110,17 @@ class _ActivityNotificationCardState extends State<ActivityNotificationCard> {
                     ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          widget.data.body,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight:
-                                isUnread ? FontWeight.w600 : FontWeight.normal,
+                        Flexible(
+                          child: Text(
+                            widget.data.body,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight:
+                                  isUnread
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                            ),
                           ),
                         ),
                         Visibility(
@@ -153,8 +157,28 @@ class _ActivityNotificationCardState extends State<ActivityNotificationCard> {
                       children: [
                         Row(
                           children: [
+                            if (widget.data.channelType !=
+                                NotificationChannelType.quicksplit) ...[
+                              subTextOnCard(
+                                widget.data.title,
+                                context,
+                                fontSize: 14,
+                                isLoaded: true,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '•',
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
                             subTextOnCard(
-                              widget.data.title,
+                              widget.data.channelType.label,
                               context,
                               fontSize: 14,
                               isLoaded: true,

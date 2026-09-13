@@ -9,6 +9,7 @@ class ActivityNotificationModel {
   final String title;
   final String body;
   final Map<String, String> data;
+  final NotificationChannelType channelType;
   final DateTime createdOn;
   final DateTime? readOn;
 
@@ -21,6 +22,7 @@ class ActivityNotificationModel {
     required this.body,
     required this.data,
     required this.createdOn,
+    required this.channelType,
     this.readOn,
   });
 
@@ -33,9 +35,14 @@ class ActivityNotificationModel {
       body = '',
       data = const {},
       createdOn = DateTime.now(),
-      readOn = null;
+      readOn = null,
+      channelType = NotificationChannelType.miscellaneous;
 
   factory ActivityNotificationModel.fromMap(Map<String, dynamic> json) {
+    final extraData = (json['data'] as Map<String, dynamic>? ?? {}).map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+
     return ActivityNotificationModel(
       id: json['id'] as String,
       type: NotificationType.fromValue(json['type'] as String),
@@ -43,9 +50,8 @@ class ActivityNotificationModel {
       relatedEntityId: json['related_entity_id'] as String?,
       title: json['title'] as String,
       body: json['body'] as String,
-      data: (json['data'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, value.toString()),
-      ),
+      data: extraData,
+      channelType: notificationChannelTypeFromString(extraData['type'] ?? ""),
       createdOn: DateTime.parse(json['created_on'] as String),
       readOn:
           json['read_on'] != null
@@ -64,6 +70,7 @@ class ActivityNotificationModel {
     Map<String, String>? data,
     DateTime? createdOn,
     DateTime? readOn,
+    NotificationChannelType? channelType,
   }) {
     return ActivityNotificationModel(
       id: id ?? this.id,
@@ -75,6 +82,7 @@ class ActivityNotificationModel {
       data: data ?? this.data,
       createdOn: createdOn ?? this.createdOn,
       readOn: readOn ?? this.readOn,
+      channelType: channelType ?? this.channelType,
     );
   }
 }
