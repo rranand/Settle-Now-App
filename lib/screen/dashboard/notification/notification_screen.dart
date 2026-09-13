@@ -108,6 +108,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     context.read<ActivityNotificationBloc>().add(
       ActivityNotificationFetch(isFreshFetch: true),
     );
+    context.read<UnreadNotificationCountCubit>().fetchUnreadNotificationCount();
   }
 
   Widget _builderFooter(BuildContext context, ActivityNotificationState state) {
@@ -118,7 +119,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return const SizedBox.shrink();
   }
 
-  Widget _showTagsOnActivityNotificationCard() {
+  Widget _showTagsOnActivityNotificationCard(DateTime recentlyReadTimestamp) {
     return Consumer<UnreadNotificationCountCubit>(
       builder: (context, unreadNotificationCountCubit, _) {
         final state = unreadNotificationCountCubit.state;
@@ -143,6 +144,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   onPressed: () {
                     context.read<ActivityNotificationBloc>().add(
                       ActivityNotificationMarkAllAsRead(
+                        recentlyReadTimestamp: recentlyReadTimestamp,
                         scaffoldMessenger: ScaffoldMessenger.of(context),
                       ),
                     );
@@ -304,7 +306,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     ),
                     if (state is ActivityNotificationFetchSuccess &&
                         notificationData.isNotEmpty) ...[
-                      Expanded(child: _showTagsOnActivityNotificationCard()),
+                      Expanded(
+                        child: _showTagsOnActivityNotificationCard(
+                          notificationData.first.createdOn,
+                        ),
+                      ),
                     ],
                   ],
                 ),

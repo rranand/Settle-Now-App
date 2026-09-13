@@ -21,11 +21,11 @@ class UnreadNotificationCountCubit extends Cubit<UnreadNotificationCountState> {
     }
   }
 
-  void updateUnreadNotificationCount(bool resetToZero) {
+  void updateUnreadNotificationCount(int delta, {bool resetToZero = false}) {
     if (state is UnreadNotificationCountSuccess) {
       final oldState = state as UnreadNotificationCountSuccess;
       int newCount =
-          resetToZero || oldState.count <= 1 ? 0 : oldState.count - 1;
+          resetToZero || oldState.count <= delta ? 0 : oldState.count - delta;
       emit(UnreadNotificationCountSuccess(count: newCount));
     }
   }

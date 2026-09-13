@@ -10,16 +10,20 @@ final class ActivityNotificationFetch extends ActivityNotificationEvent {
 }
 
 final class ActivityNotificationMarkAsRead extends ActivityNotificationEvent {
-  final Set<String> ids;
+  final List<String> ids;
 
   ActivityNotificationMarkAsRead({required this.ids});
 }
 
 final class ActivityNotificationMarkAllAsRead
     extends ActivityNotificationEvent {
+  final DateTime recentlyReadTimestamp;
   final ScaffoldMessengerState scaffoldMessenger;
 
-  ActivityNotificationMarkAllAsRead({required this.scaffoldMessenger});
+  ActivityNotificationMarkAllAsRead({
+    required this.scaffoldMessenger,
+    required this.recentlyReadTimestamp,
+  });
 }
 
 final class ActivityNotificationReset extends ActivityNotificationEvent {}

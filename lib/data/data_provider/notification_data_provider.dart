@@ -73,9 +73,11 @@ class NotificationDataProvider {
     }
   }
 
-  Future<void> markAllAsRead() async {
+  Future<void> markAllAsRead(DateTime recentlyReadTimestamp) async {
     try {
-      final response = await createAPICall('notification/read/all', "put", {});
+      final response = await createAPICall('notification/read/all', "put", {
+        "recentlyReadTimestamp": recentlyReadTimestamp.toIso8601String(),
+      });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return;

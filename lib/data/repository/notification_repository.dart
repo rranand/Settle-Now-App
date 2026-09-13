@@ -33,9 +33,9 @@ class NotificationRepository {
     }
   }
 
-  Future<void> markAllAsRead() async {
+  Future<void> markAllAsRead(DateTime recentlyReadTimestamp) async {
     try {
-      return await _dataProvider.markAllAsRead();
+      return await _dataProvider.markAllAsRead(recentlyReadTimestamp);
     } catch (e) {
       rethrow;
     }

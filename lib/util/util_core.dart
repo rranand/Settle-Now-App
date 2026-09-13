@@ -58,6 +58,7 @@ export './functions/in_app_update_service.dart';
 export './functions/text_function.dart';
 export './functions/validator.dart';
 export './functions/additional_function.dart';
+export './functions/notification_read_tracker.dart';
 export './filter/filter_sheet.dart';
 export './filter/filter_widget.dart';
 export './custom/tuple.dart';

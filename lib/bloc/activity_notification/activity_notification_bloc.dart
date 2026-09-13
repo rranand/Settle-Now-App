@@ -95,7 +95,7 @@ class ActivityNotificationBloc
   ) async {
     if (state is ActivityNotificationFetchSuccess) {
       try {
-        await _repo.markAsRead(event.ids.toList());
+        await _repo.markAsRead(event.ids);
 
         final oldState = state as ActivityNotificationFetchSuccess;
         DateTime currentTime = DateTime.now();
@@ -112,10 +112,13 @@ class ActivityNotificationBloc
               ),
             );
 
-        unreadNotificationCountCubit.updateUnreadNotificationCount(false);
+        unreadNotificationCountCubit.updateUnreadNotificationCount(
+          event.ids.length,
+          resetToZero: false,
+        );
         return emit(oldState.copyWith(data: updatedDataMap));
       } catch (e) {
-        logDebug("Failed to mark notifications as read: ${e.toString()}");
+        rethrow;
       }
     }
   }
@@ -134,7 +137,7 @@ class ActivityNotificationBloc
           scaffoldMessenger: event.scaffoldMessenger,
         );
 
-        await _repo.markAllAsRead();
+        await _repo.markAllAsRead(event.recentlyReadTimestamp);
 
         event.scaffoldMessenger.hideCurrentSnackBar();
         DateTime currentTime = DateTime.now();
@@ -147,7 +150,10 @@ class ActivityNotificationBloc
               ),
             );
 
-        unreadNotificationCountCubit.updateUnreadNotificationCount(true);
+        unreadNotificationCountCubit.updateUnreadNotificationCount(
+          0,
+          resetToZero: true,
+        );
         return emit(oldState.copyWith(data: updatedDataMap));
       } catch (e) {
         showSnackbarWithChildWidget(
