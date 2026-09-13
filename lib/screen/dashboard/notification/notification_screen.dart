@@ -369,6 +369,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           return notification.depth == 0;
         },
         child: CustomScrollView(
+          controller: _gridViewScrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             _buildRequestNotificationSection(),

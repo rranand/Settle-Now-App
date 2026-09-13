@@ -23,7 +23,6 @@ import 'firebase/firebase_options.dart' as prod;
 import 'firebase/firebase_options_dev.dart' as dev;
 
 // TODO: Add search apis to search api
-// TODO: Refine SMS UI
 // TODO: Add functionalty to convert sms to transaction
 
 @pragma('vm:entry-point')
