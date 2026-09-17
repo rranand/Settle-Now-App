@@ -37,7 +37,7 @@ class RoomDashboardDataProvider {
     }
   }
 
-  Future<RoomInfoModel> createRoom(String roomName) async {
+  Future<Tuple<String, String, String>> createRoom(String roomName) async {
     try {
       final response = await createAPICall('room/dashboard', 'post', {
         "name": roomName,
@@ -48,20 +48,7 @@ class RoomDashboardDataProvider {
       if (response.statusCode == 200) {
         final roomInfo = data['data'];
 
-        RoomInfoModel newRoomData = RoomInfoModel(
-          id: roomInfo["id"],
-          name: roomName,
-          status: RoomStatus.open,
-          createdBy: "",
-          createdOn: DateTime.now(),
-          modifiedOn: DateTime.now(),
-          users: [],
-          key: roomInfo["key"],
-          link: roomInfo["link"],
-          active: true,
-        );
-
-        return newRoomData;
+        return Tuple(roomInfo["id"], roomInfo["key"], roomInfo["link"]);
       } else {
         throw data['message'];
       }

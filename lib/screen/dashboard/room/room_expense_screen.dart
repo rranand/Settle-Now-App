@@ -514,6 +514,44 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     }
   }
 
+  Future<bool> _isStaleData(int memberCount, int memberArrayLength) async {
+    if (memberCount != memberArrayLength) {
+      showNormalSnackBar(context, "New Member Joined, Pull down to refresh.");
+      return true;
+    }
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    scaffoldMessenger.hideCurrentSnackBar();
+
+    showSnackbarWithChildWidget(
+      "Checking Room Members",
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
+      duration: const Duration(seconds: 10),
+      scaffoldMessenger: scaffoldMessenger,
+    );
+    await context.read<RoomInfoCubit>().fetchMemberCount(widget.id);
+    scaffoldMessenger.hideCurrentSnackBar();
+
+    if (mounted) {
+      if (context.read<RoomInfoCubit>().state is RoomInfoSuccess) {
+        final newMemberCount =
+            (context.read<RoomInfoCubit>().state as RoomInfoSuccess)
+                .data
+                .memberCount;
+        if (newMemberCount != memberArrayLength) {
+          showNormalSnackBar(
+            context,
+            "New Member Joined, Pull down to refresh.",
+          );
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
@@ -531,8 +569,12 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         bool showSettleExpense = false;
         bool showCloseRoomRequest = false;
         bool hasTransactionData = false;
+        int memberCount = 0;
+        int memberArrayLength = 0;
 
         if (state is RoomInfoSuccess) {
+          memberCount = state.data.memberCount;
+          memberArrayLength = state.data.users.length;
           isRoomActive = state.data.active;
           roomName = state.data.name;
           isLoaded = true;
@@ -670,7 +712,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         foregroundColor: Colors.white,
                         label: 'Add Expense',
                         visible: roomUserModel.active,
-                        onTap: () {
+                        onTap: () async {
+                          final isStale = await _isStaleData(
+                            memberCount,
+                            memberArrayLength,
+                          );
+
+                          if (!context.mounted || isStale) {
+                            return;
+                          }
+
                           context.push(
                             "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
                           );
@@ -682,7 +733,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         foregroundColor: Colors.white,
                         label: 'Add Bulk Expense',
                         visible: roomUserModel.active,
-                        onTap: () {
+                        onTap: () async {
+                          final isStale = await _isStaleData(
+                            memberCount,
+                            memberArrayLength,
+                          );
+
+                          if (!context.mounted || isStale) {
+                            return;
+                          }
+
                           context.push(
                             "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddBulkExpenseRouteName}",
                           );

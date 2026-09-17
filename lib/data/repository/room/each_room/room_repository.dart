@@ -17,6 +17,14 @@ class RoomRepository {
     }
   }
 
+  Future<int> fetchMemberCount(String id) async {
+    try {
+      return await _dataProvider.fetchMemberCount(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Pair<List<RoomTransactionModel>, bool>> fetchData(
     String id,
     DateTime cursor,

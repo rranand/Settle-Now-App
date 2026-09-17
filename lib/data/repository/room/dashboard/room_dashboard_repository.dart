@@ -24,9 +24,10 @@ class RoomDashboardRepository {
 
   Future<RoomInfoModel> createRoom(String roomName, UserModel user) async {
     try {
-      RoomInfoModel roomData = await _dataProvider.createRoom(roomName);
-      final baseUser = UserResolver.instance.getLoggedInUser();
+      Tuple<String, String, String> roomMetadata = await _dataProvider
+          .createRoom(roomName);
 
+      final baseUser = UserResolver.instance.getLoggedInUser();
       RoomUserModel roomUserModel = RoomUserModel(
         id: baseUser.id,
         name: baseUser.name,
@@ -37,7 +38,21 @@ class RoomDashboardRepository {
         active: true,
       );
 
-      return roomData.copyWith(createdBy: baseUser.id, users: [roomUserModel]);
+      RoomInfoModel roomData = RoomInfoModel(
+        id: roomMetadata.first,
+        name: roomName,
+        status: RoomStatus.open,
+        createdBy: baseUser.id,
+        createdOn: DateTime.now(),
+        modifiedOn: DateTime.now(),
+        users: [roomUserModel],
+        key: roomMetadata.second,
+        link: roomMetadata.third,
+        active: true,
+        memberCount: 1,
+      );
+
+      return roomData;
     } catch (e) {
       rethrow;
     }

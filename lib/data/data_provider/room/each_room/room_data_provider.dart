@@ -26,6 +26,21 @@ class RoomDataProvider {
     }
   }
 
+  Future<int> fetchMemberCount(String id) async {
+    try {
+      final response = await createAPICall('room/$id/memberCount', "get", {});
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return data['data'];
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> closeRoomRequest(String id) async {
     try {
       final response = await createAPICall('room/$id/close/request', "get", {});

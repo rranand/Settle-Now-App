@@ -12,6 +12,7 @@ class RoomInfoModel {
   String createdBy = "";
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
+  int memberCount = 0;
   List<RoomUserModel> users = [];
   bool active = true;
 
@@ -26,6 +27,7 @@ class RoomInfoModel {
     required this.modifiedOn,
     required this.users,
     required this.active,
+    required this.memberCount,
   });
 
   RoomInfoModel.empty({this.hasData = false});
@@ -41,6 +43,7 @@ class RoomInfoModel {
     DateTime? modifiedOn,
     List<RoomUserModel>? users,
     bool? active,
+    int? memberCount,
   }) {
     return RoomInfoModel(
       id: id ?? this.id,
@@ -53,6 +56,7 @@ class RoomInfoModel {
       key: key ?? this.key,
       link: link ?? this.link,
       active: active ?? this.active,
+      memberCount: memberCount ?? this.memberCount,
     );
   }
 
@@ -87,6 +91,7 @@ class RoomInfoModel {
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
       users: allUsers,
       active: map['active'],
+      memberCount: allUsers.length,
     );
   }
 
@@ -105,6 +110,7 @@ class RoomInfoModel {
         other.key == key &&
         other.link == link &&
         other.status == status &&
+        other.memberCount == memberCount &&
         other.createdBy == createdBy &&
         other.createdOn == createdOn &&
         other.modifiedOn == modifiedOn &&
@@ -117,6 +123,7 @@ class RoomInfoModel {
         active.hashCode ^
         name.hashCode ^
         key.hashCode ^
+        memberCount.hashCode ^
         link.hashCode ^
         createdBy.hashCode ^
         status.hashCode ^

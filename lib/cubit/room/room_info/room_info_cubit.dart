@@ -103,6 +103,28 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     return;
   }
 
+  Future<void> fetchMemberCount(String id) async {
+    if (state is RoomInfoSuccess) {
+      final oldState = (state as RoomInfoSuccess);
+
+      if (oldState.data.id == id) {
+        int memberCount = oldState.data.memberCount;
+        try {
+          memberCount = await _repo.fetchMemberCount(id);
+        } catch (e) {
+          memberCount = 0;
+        }
+
+        return emit(
+          RoomInfoSuccess(
+            data: oldState.data.copyWith(memberCount: memberCount),
+            isInternalUpdate: true,
+          ),
+        );
+      }
+    }
+  }
+
   void reset() {
     return emit(RoomInfoInitial());
   }
