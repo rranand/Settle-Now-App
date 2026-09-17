@@ -1,139 +1,191 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class BankTransactionCard extends StatelessWidget {
   final BankTransactionModel data;
-  final VoidCallback? onTap;
+  final VoidCallback? onAddPressed;
 
-  const BankTransactionCard({
-    super.key,
-    required this.data,
-    required this.onTap,
-  });
+  const BankTransactionCard({super.key, required this.data, this.onAddPressed});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isCredit = data.type == BankTransactionType.credit;
+    final isConsumed = data.transactionConsumed != null;
+
+    final amountColor = isCredit ? Colors.green : Colors.red;
 
     return Card(
-      elevation: 0,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _TransactionIcon(isCredit: isCredit),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isCredit ? 'Received from' : 'Paid to',
-                          style: Theme.of(context).textTheme.bodySmall,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: UiConstant.cardPadding),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          boxShadow: getContainerBoxShadow(context),
+        ),
+        child: Column(
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading:
+                  data.hasData
+                      ? _TransactionIcon(isCredit: isCredit)
+                      : CustomShimmerEffect.imageWidget(
+                        context,
+                        shape: BoxShape.circle,
+                        radius: 50,
+                      ),
+              title:
+                  data.hasData
+                      ? Text(
+                        data.receiver,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
                         ),
-
-                        const SizedBox(height: 3),
-
-                        Text(
-                          data.receiver,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-
-                        const SizedBox(height: 5),
-
-                        Text(
-                          '${data.bank.label} • ${data.mode.label}',
-                          style: Theme.of(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                      : CustomShimmerEffect.textWidget(context),
+              subtitle:
+                  data.hasData
+                      ? Row(
+                        children: [
+                          subTextOnCard(
+                            data.bank.label,
                             context,
-                          ).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 14,
+                            isLoaded: true,
                           ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '•',
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          subTextOnCard(
+                            data.mode.label,
+                            context,
+                            fontSize: 14,
+                            isLoaded: true,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '•',
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          subTextOnCard(
+                            convertToMoment(data.date),
+                            context,
+                            fontSize: 14,
+                            isLoaded: true,
+                          ),
+                        ],
+                      )
+                      : Align(
+                        alignment: Alignment.centerLeft,
+                        child: CustomShimmerEffect.textWidget(
+                          context,
+                          fontSize: 10,
+                          width: 120,
                         ),
-                      ],
+                      ),
+              trailing:
+                  data.hasData
+                      ? Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${isCredit ? '+' : '-'}₹${data.amount.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: amountColor,
+                            ),
+                          ),
+                          _ConfidenceBadge(confidence: data.confidence),
+                        ],
+                      )
+                      : CustomShimmerEffect.textWidget(
+                        context,
+                        fontSize: 16,
+                        width: 50,
+                      ),
+            ),
+            if (data.hasData) ...[
+              const Divider(),
+              !isConsumed
+                  ? _buildConsumedRow(
+                    context,
+                    BankTransactionConsumedModel(
+                      roomType: RoomType.room,
+                      roomId: "dwada",
+                      transactionId: null,
+                      id: "iddd12",
                     ),
+                  )
+                  : CustomButton.customTextButton(
+                    "Add to expense",
+                    buttonTextColor: Theme.of(context).primaryColor,
+                    onPressed: onAddPressed,
                   ),
-
-                  const SizedBox(width: 12),
-
-                  Text(
-                    '${isCredit ? '+' : '-'}₹${data.amount.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 14),
-
-              Divider(
-                height: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-
-              const SizedBox(height: 12),
-
-              // Row(
-              //   children: [
-              //     Icon(
-              //       Icons.schedule_outlined,
-              //       size: 15,
-              //       color: Theme.of(context).colorScheme.onSurfaceVariant,
-              //     ),
-
-              //     const SizedBox(width: 5),
-
-              //     Text(
-              //       DateFormat('dd MMM yyyy, h:mm a').format(data.date),
-              //       style: Theme.of(context).textTheme.bodySmall,
-              //     ),
-
-              //     const Spacer(),
-
-              //     _ConfidenceBadge(confidence: data.confidence),
-              //   ],
-              // ),
-
-              // if (data.transactionID.isNotEmpty &&
-              //     data.transactionID != 'Unknown') ...[
-              //   const SizedBox(height: 8),
-
-              //   Align(
-              //     alignment: Alignment.centerLeft,
-              //     child: Text(
-              //       'Ref: ${data.transactionID}',
-              //       maxLines: 1,
-              //       overflow: TextOverflow.ellipsis,
-              //       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              //         color: Theme.of(context).colorScheme.onSurfaceVariant,
-              //       ),
-              //     ),
-              //   ),
-              // ],
             ],
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildConsumedRow(
+    BuildContext context,
+    BankTransactionConsumedModel consumed,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        CustomButton.customTextButton(
+          'Added to ${consumed.roomType.label}',
+          buttonTextColor: Theme.of(context).primaryColor,
+          onPressed: () {
+            _navigateToConsumedEntity(context, consumed);
+          },
+        ),
+        Icon(
+          Icons.chevron_right,
+          size: 16,
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ],
+    );
+  }
+
+  void _navigateToConsumedEntity(
+    BuildContext context,
+    BankTransactionConsumedModel consumed,
+  ) {
+    switch (consumed.roomType) {
+      case RoomType.room:
+        context.push('/room/${consumed.roomId}');
+      case RoomType.lenden:
+        context.push('/lenden/${consumed.roomId}');
+      case RoomType.quicksplit:
+        context.push('/quicksplit/${consumed.roomId}');
+      case RoomType.personal:
+        context.push('/personal-expense');
+      case RoomType.none:
+        break;
+    }
   }
 }
 
@@ -144,8 +196,7 @@ class _TransactionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isCredit ? Colors.green : Theme.of(context).colorScheme.primary;
+    final color = isCredit ? Colors.green : Colors.red;
 
     return Container(
       width: 44,

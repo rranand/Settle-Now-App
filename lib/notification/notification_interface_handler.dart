@@ -68,7 +68,7 @@ class NotificationInterfaceHandler {
           ),
           NotificationChannel(
             channelKey: "quicksplitID",
-            channelName: "Quick Split",
+            channelName: "Quicksplit",
             channelDescription: 'Notification channel for Quick Split',
             defaultColor: Colors.white,
           ),
@@ -81,22 +81,26 @@ class NotificationInterfaceHandler {
   ) {
     if (!kIsWeb) {
       switch (data["type"]) {
-        case "room":
+        case "roomID":
           {
-            context.go("${RouterConstants.roomRouteName}/${data["id"]!}");
+            context.go(
+              "${RouterConstants.roomRouteName}/${data["entity_id"]!}",
+            );
             break;
           }
-        case "lenden":
+        case "lendenID":
           {
-            context.go("${RouterConstants.lendenRouteName}/${data["id"]!}");
+            context.go(
+              "${RouterConstants.lendenRouteName}/${data["entity_id"]!}",
+            );
             break;
           }
-        case "account":
+        case "accountID":
           {
             context.push(RouterConstants.dashboardRouteName);
             break;
           }
-        case "quicksplit":
+        case "quicksplitID":
           {
             context.push(
               RouterConstants.dashboardRouteName,
@@ -104,7 +108,7 @@ class NotificationInterfaceHandler {
             );
             break;
           }
-        case "roomRequest" || "lendenRequest":
+        case "requestID":
           {
             context.push(
               RouterConstants.dashboardRouteName,
@@ -112,7 +116,7 @@ class NotificationInterfaceHandler {
             );
             break;
           }
-        case "update":
+        case "updateID":
           {
             launchUrl(
               Uri.parse(
@@ -156,42 +160,13 @@ class NotificationInterfaceHandler {
     }
   }
 
-  static String getChannelKey(String notificationType) {
-    switch (notificationType) {
-      case "room":
-        {
-          return 'roomID';
-        }
-      case "lenden":
-        {
-          return 'lendenID';
-        }
-      case "account":
-        {
-          return 'accountID';
-        }
-      case "quicksplit":
-        {
-          return 'quicksplitID';
-        }
-      case "roomRequest" || "lendenRequest":
-        {
-          return 'requestID';
-        }
-      default:
-        {
-          return 'miscellaneousID';
-        }
-    }
-  }
-
   static void createNotification(RemoteMessage message) async {
     if (!kIsWeb) {
       Map<String, String> data = message.data.map(
         (key, value) => MapEntry(key, value.toString()),
       );
 
-      String channelKey = getChannelKey(data['type'] ?? "");
+      String channelKey = data['type'] ?? "miscellaneousID";
 
       AwesomeNotifications().createNotification(
         content: NotificationContent(

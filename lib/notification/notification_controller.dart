@@ -38,9 +38,9 @@ class NotificationController {
     ReceivedAction receivedAction,
   ) async {
     String type = receivedAction.payload!["type"] ?? "";
-    String id = receivedAction.payload!["id"] ?? "";
+    String id = receivedAction.payload!["entity_id"] ?? "";
 
-    if (id.isNotEmpty && (type == "roomRequest" || type == "lendenRequest")) {
+    if (id.isNotEmpty && type == "requestID") {
       switch (receivedAction.buttonKeyPressed) {
         case "JOIN":
           {
@@ -85,9 +85,7 @@ class NotificationController {
           }
       }
     } else {
-      Map<String, dynamic> data = {};
-      data["type"] = type;
-      data["id"] = id;
+      Map<String, dynamic> data = {...receivedAction.payload!};
 
       NotificationInterfaceHandler.notificationProcessor(context, data);
     }
