@@ -53,6 +53,7 @@ Future<ApiResponseModel> createAPICall(
     String host = "https://prod-api.settlenow.in/";
     if (kDebugMode) {
       host = "http://192.168.1.5:9008/";
+      // host = "http://130.210.60.179:9008/";
     }
 
     String? accessToken;

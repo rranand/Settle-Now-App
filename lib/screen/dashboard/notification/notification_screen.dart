@@ -226,10 +226,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       index < previewData.length;
                       index++
                     ) ...[
-                      NotificationCard(
-                        data: previewData[index],
-                        loggedInUserID: _loggedInUser.id,
-                        isPreview: true,
+                      InkWell(
+                        child: NotificationCard(
+                          data: previewData[index],
+                          loggedInUserID: _loggedInUser.id,
+                          isPreview: true,
+                        ),
+                        onTap: () {
+                          if (state is NotificationFetchSuccess) {
+                            context.push(
+                              RouterConstants.requestNotificationRouteName,
+                            );
+                          }
+                        },
                       ),
                     ],
                   ],

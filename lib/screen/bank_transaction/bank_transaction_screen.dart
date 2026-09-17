@@ -101,44 +101,44 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
     return const SizedBox.shrink();
   }
 
-  List<LendenTransactionModel> generateShimmerData() {
-    return List.generate(11, (i) {
-      LendenTransactionModel tempData = LendenTransactionModel.empty();
-      if (i % 2 == 0) {
-        tempData.createdBy = _loggedInUser.id;
-      }
-      return tempData;
-    });
+  List<BankTransactionModel> generateShimmerData() {
+    return List.generate(10, (i) => BankTransactionModel.empty());
   }
 
-  Widget transactionCardDisplay(List<LendenTransactionModel> data) {
+  Widget transactionCardDisplay(List<BankTransactionModel> data) {
+    bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
+    int noOfCardsToBeShown = data.length;
+
+    if (isWide) {
+      noOfCardsToBeShown =
+          (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+    }
     return SliverList.builder(
-      itemCount: data.length,
-      itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: index == data.length - 1 ? UiConstant.spaceAtBottom : 0,
-          ),
-          child: LendenExpenseCard(
-            lendenID: "",
-            data: data[index],
-            loggedInUser: _loggedInUser,
-            isEditable: false,
-          ),
-        );
+      itemCount: noOfCardsToBeShown,
+      itemBuilder: (context, index) {
+        if (isWide) {
+          final eachData = data[2 * index];
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: BankTransactionCard(data: eachData)),
+              Expanded(
+                child:
+                    (index == noOfCardsToBeShown - 1 && data.length % 2 > 0)
+                        ? SizedBox()
+                        : BankTransactionCard(data: data[2 * index + 1]),
+              ),
+            ],
+          );
+        } else {
+          return BankTransactionCard(data: data[index], onAddPressed: () {});
+        }
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final cardSizeInfo = calculateCrossAspectRatio(
-      context,
-      MediaQuery.of(context).size.width,
-      _mainScreenPadding,
-      cardHeight: UiConstant.cardFixedHeight + 10,
-    );
-
     return ValueListenableBuilder(
       valueListenable: isSmsPermissionGranted,
       builder: (context, _, child) {
@@ -253,15 +253,6 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
                                               .noBankTransactionDashboard,
                                         ),
                                       );
-                                    }
-
-                                    if (bankTransactionData.isEmpty) {
-                                      return SliverFillRemaining(
-                                        child: freshMessageWidget(
-                                          FreshScreenMessageConstant
-                                              .noBankTransactionDashboard,
-                                        ),
-                                      );
                                     } else {
                                       return SliverPadding(
                                         padding: _mainScreenPadding.add(
@@ -302,33 +293,8 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
 
                                             return SliverMainAxisGroup(
                                               slivers: [
-                                                SliverGrid.builder(
-                                                  itemCount: filterData.length,
-                                                  gridDelegate:
-                                                      SliverGridDelegateWithMaxCrossAxisExtent(
-                                                        maxCrossAxisExtent:
-                                                            cardSizeInfo[0],
-                                                        mainAxisSpacing:
-                                                            UiConstant
-                                                                .spaceBetweenCard,
-                                                        crossAxisSpacing:
-                                                            UiConstant
-                                                                .spaceBetweenCard,
-                                                        childAspectRatio:
-                                                            cardSizeInfo[1],
-                                                      ),
-                                                  itemBuilder:
-                                                      (
-                                                        context,
-                                                        index,
-                                                      ) => SizedBox(
-                                                        width: cardSizeInfo[0],
-                                                        child: BankTransactionCard(
-                                                          data:
-                                                              filterData[index],
-                                                          onTap: () {},
-                                                        ),
-                                                      ),
+                                                transactionCardDisplay(
+                                                  filterData,
                                                 ),
                                                 genericFooterForDashboard(
                                                   isSearchEnabled,

@@ -1,4 +1,4 @@
-enum RoomType { room, quicksplit, lenden, none }
+enum RoomType { room, quicksplit, lenden, personal, none }
 
 extension RoomTypeExtension on RoomType {
   String get label {
@@ -9,6 +9,8 @@ extension RoomTypeExtension on RoomType {
         return 'Quicksplit';
       case RoomType.lenden:
         return 'Lenden';
+      case RoomType.personal:
+        return 'Personal';
       case RoomType.none:
         return '';
     }
@@ -26,6 +28,8 @@ extension RoomTypeExtension on RoomType {
         return RoomType.quicksplit;
       case 'lenden':
         return RoomType.lenden;
+      case 'personal':
+        return RoomType.personal;
       default:
         return RoomType.none;
     }
