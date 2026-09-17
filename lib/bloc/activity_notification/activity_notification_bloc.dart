@@ -133,7 +133,7 @@ class ActivityNotificationBloc
           "Marking all notifications as read",
           child:
               CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-          duration: Duration(seconds: 10),
+          duration: const Duration(seconds: 10),
           scaffoldMessenger: event.scaffoldMessenger,
         );
 
@@ -160,7 +160,7 @@ class ActivityNotificationBloc
           "Failed to mark all notifications as read",
           child:
               CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-          duration: Duration(seconds: 10),
+          duration: const Duration(seconds: 10),
           scaffoldMessenger: event.scaffoldMessenger,
         );
       }

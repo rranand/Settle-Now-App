@@ -500,7 +500,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     if (state is RoomInfoFailure) {
       showNormalSnackBar(context, state.error);
 
-      if (state.error.contains("Room Not Found")) {
+      if (state.error.toLowerCase().contains("room not found")) {
         while (context.canPop()) {
           context.pop();
         }

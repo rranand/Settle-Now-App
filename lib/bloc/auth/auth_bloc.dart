@@ -81,10 +81,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(AuthLoginFailure("Google SignIn Failed"));
         }
 
-        UserPreferenceBundle userPreferenceBundle = await _repo.loginUsingGoogle(
-          email,
-          idToken,
-        );
+        UserPreferenceBundle userPreferenceBundle = await _repo
+            .loginUsingGoogle(email, idToken);
         return emit(
           AuthLoginSuccess(
             userPreferenceBundle.user,
@@ -344,7 +342,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     showSnackbarWithChildWidget(
       "Requesting Account Delete",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: event.scaffoldMessenger,
     );
     final userData = (state as AuthLoginSuccess).userData;

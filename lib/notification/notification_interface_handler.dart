@@ -11,24 +11,29 @@ class NotificationInterfaceHandler {
   static Future<void> initateListeners(BuildContext context) async {
     await AwesomeNotifications().setListeners(
       onActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onActionReceivedMethod(context, receivedAction);
+        await NotificationController.onActionReceivedMethod(
+          context,
+          receivedAction,
+        );
       },
       onNotificationCreatedMethod: (
         ReceivedNotification receivedNotification,
       ) async {
-        NotificationController.onNotificationCreatedMethod(
+        await NotificationController.onNotificationCreatedMethod(
           receivedNotification,
         );
       },
       onNotificationDisplayedMethod: (
         ReceivedNotification receivedNotification,
       ) async {
-        NotificationController.onNotificationDisplayedMethod(
+        await NotificationController.onNotificationDisplayedMethod(
           receivedNotification,
         );
       },
       onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onDismissActionReceivedMethod(receivedAction);
+        await NotificationController.onDismissActionReceivedMethod(
+          receivedAction,
+        );
       },
     );
   }
@@ -69,7 +74,7 @@ class NotificationInterfaceHandler {
           NotificationChannel(
             channelKey: "quicksplitID",
             channelName: "Quicksplit",
-            channelDescription: 'Notification channel for Quick Split',
+            channelDescription: 'Notification channel for Quicksplit',
             defaultColor: Colors.white,
           ),
         ]);
@@ -79,119 +84,124 @@ class NotificationInterfaceHandler {
     BuildContext context,
     Map<String, dynamic> data,
   ) {
-    if (!kIsWeb) {
-      switch (data["type"]) {
-        case "roomID":
-          {
-            context.go(
-              "${RouterConstants.roomRouteName}/${data["entity_id"]!}",
-            );
-            break;
-          }
-        case "lendenID":
-          {
-            context.go(
-              "${RouterConstants.lendenRouteName}/${data["entity_id"]!}",
-            );
-            break;
-          }
-        case "accountID":
-          {
-            context.push(RouterConstants.dashboardRouteName);
-            break;
-          }
-        case "quicksplitID":
-          {
-            context.push(
-              RouterConstants.dashboardRouteName,
-              extra: {'initalIndex': 1},
-            );
-            break;
-          }
-        case "requestID":
-          {
-            context.push(
-              RouterConstants.dashboardRouteName,
-              extra: {'initalIndex': 4},
-            );
-            break;
-          }
-        case "updateID":
-          {
-            launchUrl(
-              Uri.parse(
-                "https://play.google.com/store/apps/details?id=com.rohit.settlenow&hl=en_IN",
-              ),
-              mode: LaunchMode.externalApplication,
-            );
-            break;
-          }
-        default:
-          {
-            context.push(RouterConstants.dashboardRouteName);
-            break;
-          }
-      }
+    if (kIsWeb) {
+      return;
+    }
+
+    final type = data["type"]?.toString() ?? "";
+    final entityId = data["entity_id"]?.toString() ?? "";
+
+    switch (type) {
+      case "roomID":
+        {
+          context.go("${RouterConstants.roomRouteName}/$entityId");
+          break;
+        }
+      case "lendenID":
+        {
+          context.go("${RouterConstants.lendenRouteName}/$entityId");
+          break;
+        }
+      case "accountID":
+        {
+          context.push(RouterConstants.dashboardRouteName);
+          break;
+        }
+      case "quicksplitID":
+        {
+          context.push(
+            RouterConstants.dashboardRouteName,
+            extra: {'initalIndex': 1},
+          );
+          break;
+        }
+      case "requestID":
+        {
+          context.push(
+            RouterConstants.dashboardRouteName,
+            extra: {'initalIndex': 4},
+          );
+          break;
+        }
+      case "updateID":
+        {
+          launchUrl(
+            Uri.parse(
+              "https://play.google.com/store/apps/details?id=com.rohit.settlenow&hl=en_IN",
+            ),
+            mode: LaunchMode.externalApplication,
+          );
+          break;
+        }
+      default:
+        {
+          context.push(RouterConstants.dashboardRouteName);
+          break;
+        }
     }
   }
 
-  static void fcmConfiguration(
+  static Future<void> fcmConfiguration(
     BuildContext context,
     bool isNotificationAllowed,
   ) async {
-    if (isNotificationAllowed) {
-      FirebaseMessaging.instance.getInitialMessage().then((message) async {
-        if (message != null && context.mounted) {
-          notificationProcessor(context, message.data);
-        }
-      });
-
-      FirebaseMessaging.onMessage.listen((message) async {
-        if (message.notification != null) {
-          createNotification(message);
-        }
-      });
-
-      FirebaseMessaging.onMessageOpenedApp.listen((message) async {
-        if (context.mounted) {
-          notificationProcessor(context, message.data);
-        }
-      });
+    if (!isNotificationAllowed) {
+      return;
     }
+
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+    if (initialMessage != null && context.mounted) {
+      notificationProcessor(context, initialMessage.data);
+    }
+
+    FirebaseMessaging.onMessage.listen((message) async {
+      if (message.notification != null) {
+        await createNotification(message);
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      if (context.mounted) {
+        notificationProcessor(context, message.data);
+      }
+    });
   }
 
-  static void createNotification(RemoteMessage message) async {
-    if (!kIsWeb) {
-      Map<String, String> data = message.data.map(
-        (key, value) => MapEntry(key, value.toString()),
-      );
-
-      String channelKey = data['type'] ?? "miscellaneousID";
-
-      AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: -1,
-          channelKey: channelKey,
-          title: message.notification!.title,
-          body: message.notification!.body,
-          payload: data,
-        ),
-        actionButtons:
-            channelKey == 'requestID'
-                ? [
-                  NotificationActionButton(
-                    key: 'JOIN',
-                    label: 'Join',
-                    isAuthenticationRequired: true,
-                  ),
-                  NotificationActionButton(
-                    key: 'CANCEL',
-                    label: 'Cancel',
-                    isAuthenticationRequired: true,
-                  ),
-                ]
-                : null,
-      );
+  static Future<void> createNotification(RemoteMessage message) async {
+    if (kIsWeb || message.notification == null) {
+      return;
     }
+
+    final data = message.data.map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+
+    final channelKey = data['type'] ?? "miscellaneousID";
+
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: -1,
+        channelKey: channelKey,
+        title: message.notification?.title,
+        body: message.notification?.body,
+        payload: data,
+      ),
+      actionButtons:
+          channelKey == 'requestID'
+              ? [
+                NotificationActionButton(
+                  key: 'JOIN',
+                  label: 'Join',
+                  isAuthenticationRequired: true,
+                ),
+                NotificationActionButton(
+                  key: 'CANCEL',
+                  label: 'Cancel',
+                  isAuthenticationRequired: true,
+                ),
+              ]
+              : null,
+    );
   }
 }

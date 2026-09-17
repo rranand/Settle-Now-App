@@ -24,7 +24,7 @@ class PreferenceCubit extends Cubit<PreferenceState> {
     showSnackbarWithChildWidget(
       "Saving Preference",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: scaffoldMessenger,
     );
 

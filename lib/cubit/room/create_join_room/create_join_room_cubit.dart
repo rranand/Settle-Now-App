@@ -55,7 +55,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     showSnackbarWithChildWidget(
       "Joining Room",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: scaffoldMessenger,
     );
     CreateJoinRoomLoading();
@@ -91,15 +91,13 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     showSnackbarWithChildWidget(
       message,
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: scaffoldMessenger,
     );
     CreateJoinRoomLoading();
     try {
-      List<NotificationModel> notificationData = await _roomRepo.inviteNewMember(
-        roomID,
-        users,
-      );
+      List<NotificationModel> notificationData = await _roomRepo
+          .inviteNewMember(roomID, users);
       _notificationBloc.add(NotificationOnAdd(data: notificationData));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

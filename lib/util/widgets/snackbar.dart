@@ -124,7 +124,7 @@ void showSnackbarForUpdate(ScaffoldMessengerState scaffoldMessenger) {
         ),
       ],
     ),
-    duration: Duration(minutes: 5),
+    duration: const Duration(seconds: 20),
   );
 
   scaffoldMessenger.showSnackBar(snackBar);

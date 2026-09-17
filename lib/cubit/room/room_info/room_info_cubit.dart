@@ -140,7 +140,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     showSnackbarWithChildWidget(
       "Updating Name",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
@@ -186,7 +186,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     showSnackbarWithChildWidget(
       isRemoving ? "Leaving Room" : "Deleting Room",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {

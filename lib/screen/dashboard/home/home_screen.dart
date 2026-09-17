@@ -47,21 +47,21 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void populateData() async {
+  Future<void> initializeNotification() async {
     if (kIsWeb) {
       isNotificationAllowed.value = true;
-      NotificationInterfaceHandler.fcmConfiguration(context, false);
-    } else {
-      isNotificationAllowed.value =
-          await AwesomeNotifications().isNotificationAllowed();
-      if (mounted) {
-        NotificationInterfaceHandler.fcmConfiguration(
-          context,
-          isNotificationAllowed.value,
-        );
-      }
+      await NotificationInterfaceHandler.fcmConfiguration(context, false);
+      return;
     }
 
+    final allowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!mounted) return;
+    isNotificationAllowed.value = allowed;
+
+    await NotificationInterfaceHandler.fcmConfiguration(context, allowed);
+  }
+
+  Future<void> fetchAppVersion() async {
     appVersion.value = await getAppVersion();
   }
 
@@ -75,7 +75,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    populateData();
+
+    initializeNotification();
+    fetchAppVersion();
+
     InAppUpdateService.checkForUpdate(context);
     NotificationInterfaceHandler.initateListeners(context);
 

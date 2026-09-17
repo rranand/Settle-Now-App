@@ -67,7 +67,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
     showSnackbarWithChildWidget(
       "Inviting ${user.name}",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: scaffoldMessenger,
     );
 

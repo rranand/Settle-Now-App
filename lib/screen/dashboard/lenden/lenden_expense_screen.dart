@@ -35,7 +35,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     if (state is LendenRoomFailure) {
       showNormalSnackBar(context, state.error);
 
-      if (state.error.contains("Room Not Found")) {
+      if (state.error.toLowerCase().contains("room not found")) {
         while (context.canPop()) {
           context.pop();
         }

@@ -345,7 +345,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     showSnackbarWithChildWidget(
       "Updating Name",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: event.scaffoldMessengerState,
     );
 
@@ -400,7 +400,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     showSnackbarWithChildWidget(
       event.isRemoving ? "Leaving Room" : "Deleting Room",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
-      duration: Duration(minutes: 2),
+      duration: const Duration(seconds: 10),
       scaffoldMessenger: event.scaffoldMessengerState,
     );
 

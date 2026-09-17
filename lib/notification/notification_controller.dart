@@ -37,57 +37,108 @@ class NotificationController {
     BuildContext context,
     ReceivedAction receivedAction,
   ) async {
-    String type = receivedAction.payload!["type"] ?? "";
-    String id = receivedAction.payload!["entity_id"] ?? "";
+    final payload = receivedAction.payload ?? {};
 
-    if (id.isNotEmpty && type == "requestID") {
-      switch (receivedAction.buttonKeyPressed) {
-        case "JOIN":
-          {
-            if (context.mounted) {
-              AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                  id: receivedAction.id!,
-                  channelKey: receivedAction.channelKey!,
-                  title: receivedAction.title,
-                  body: receivedAction.body,
-                  notificationLayout: NotificationLayout.ProgressBar,
-                  progress: 50,
-                ),
-              );
-              await context.read<NotificationRepository>().acceptInvite(id);
-              await AwesomeNotifications().dismiss(receivedAction.id!);
-            }
-          }
-        case "CANCEL":
-          {
-            if (context.mounted) {
-              AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                  id: receivedAction.id!,
-                  channelKey: receivedAction.channelKey!,
-                  title: receivedAction.title,
-                  body: receivedAction.body,
-                  notificationLayout: NotificationLayout.ProgressBar,
-                  progress: 50,
-                ),
-              );
-              await context.read<NotificationRepository>().declineInvite(id);
-              await AwesomeNotifications().dismiss(receivedAction.id!);
-            }
-          }
-        default:
-          {
-            context.push(
-              RouterConstants.dashboardRouteName,
-              extra: {'initalIndex': 4},
-            );
-          }
+    final type = payload["type"]?.toString() ?? "";
+    final entityId = payload["entity_id"]?.toString() ?? "";
+
+    if (type != "requestID" || entityId.isEmpty) {
+      if (!context.mounted) return;
+
+      NotificationInterfaceHandler.notificationProcessor(
+        context,
+        Map<String, dynamic>.from(payload),
+      );
+
+      return;
+    }
+
+    final notificationId = receivedAction.id;
+    final channelKey = receivedAction.channelKey;
+
+    if (notificationId == null || channelKey == null) {
+      return;
+    }
+
+    switch (receivedAction.buttonKeyPressed) {
+      case "JOIN":
+        await _handleInviteAction(
+          context: context,
+          receivedAction: receivedAction,
+          notificationId: notificationId,
+          channelKey: channelKey,
+          accept: true,
+          entityId: entityId,
+        );
+        return;
+
+      case "CANCEL":
+        await _handleInviteAction(
+          context: context,
+          receivedAction: receivedAction,
+          notificationId: notificationId,
+          channelKey: channelKey,
+          accept: false,
+          entityId: entityId,
+        );
+        return;
+
+      default:
+        if (!context.mounted) return;
+
+        context.push(
+          RouterConstants.dashboardRouteName,
+          extra: {'initalIndex': 4},
+        );
+    }
+  }
+
+  static Future<void> _handleInviteAction({
+    required BuildContext context,
+    required ReceivedAction receivedAction,
+    required int notificationId,
+    required String channelKey,
+    required bool accept,
+    required String entityId,
+  }) async {
+    if (!context.mounted) return;
+
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: notificationId,
+        channelKey: channelKey,
+        title: receivedAction.title,
+        body: receivedAction.body,
+        notificationLayout: NotificationLayout.ProgressBar,
+        progress: 50,
+      ),
+    );
+
+    if (!context.mounted) return;
+
+    try {
+      final repository = context.read<NotificationRepository>();
+
+      if (accept) {
+        await repository.acceptInvite(entityId);
+      } else {
+        await repository.declineInvite(entityId);
       }
-    } else {
-      Map<String, dynamic> data = {...receivedAction.payload!};
 
-      NotificationInterfaceHandler.notificationProcessor(context, data);
+      await AwesomeNotifications().dismiss(notificationId);
+    } catch (error) {
+      // Restore the notification if the action fails.
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: notificationId,
+          channelKey: channelKey,
+          title: receivedAction.title,
+          body: receivedAction.body,
+          payload: receivedAction.payload,
+        ),
+      );
+
+      rethrow;
     }
   }
 }
