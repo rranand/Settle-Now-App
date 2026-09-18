@@ -10,18 +10,20 @@ class FilterWidget {
     BuildContext context,
     ValueNotifier<T> valueNotifier,
   ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(displayValue),
-      leading: Radio<T>(
-        activeColor: Theme.of(context).primaryColor,
-        value: enumValue,
-        groupValue: valueNotifier.value,
-        onChanged: (T? value) {
-          if (value != null) {
-            valueNotifier.value = value;
-          }
-        },
+    return RadioGroup<T>(
+      groupValue: valueNotifier.value,
+      onChanged: (T? value) {
+        if (value != null) {
+          valueNotifier.value = value;
+        }
+      },
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(displayValue),
+        leading: Radio<T>(
+          value: enumValue,
+          activeColor: Theme.of(context).primaryColor,
+        ),
       ),
     );
   }
