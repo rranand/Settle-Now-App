@@ -156,8 +156,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                 searchedData = FilterSort.filteredSearchText(
                   widget.searchController.text,
                   searchedData,
-                  (transData) =>
-                      "${transData.description} ${transData.amount} ${transData.category} ${getName(transData.createdBy)}",
+                  (transData) => transData.searchableString,
                 );
 
                 if (searchedData.isEmpty) {

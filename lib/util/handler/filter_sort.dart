@@ -2,14 +2,12 @@ class FilterSort {
   static List<T> filteredSearchText<T>(
     String searchText,
     List<T> arr,
-    String Function(T) getName,
+    String Function(T) getText,
   ) {
     if (searchText.isEmpty) {
       return arr;
     }
     searchText = searchText.trim().toLowerCase();
-    return arr
-        .where((ele) => getName(ele).toLowerCase().contains(searchText))
-        .toList();
+    return arr.where((ele) => getText(ele).contains(searchText)).toList();
   }
 }

@@ -274,11 +274,9 @@ class _BankTransactionScreenState extends State<BankTransactionScreen> {
                                                   FilterSort.filteredSearchText(
                                                     _searchController.text,
                                                     bankTransactionData,
-                                                    (transactionData) {
-                                                      String searchStr =
-                                                          "${transactionData.receiver.toLowerCase()} ${transactionData.transactionID} ${transactionData.amount} ${transactionData.bank.label} ${transactionData.mode.label}";
-                                                      return searchStr;
-                                                    },
+                                                    (transactionData) =>
+                                                        transactionData
+                                                            .searchableString,
                                                   );
                                             }
 

@@ -70,8 +70,7 @@ class _PersonalExpenseTransactionScreenState
                   searchedData = FilterSort.filteredSearchText(
                     widget.searchController.text,
                     searchedData,
-                    (transData) =>
-                        "${transData.description} ${transData.amount} ${transData.category} ${transData.roomData.roomName}",
+                    (transData) => transData.searchableString,
                   );
 
                   if (searchedData.isEmpty) {

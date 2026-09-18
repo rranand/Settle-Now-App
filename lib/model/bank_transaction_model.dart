@@ -78,6 +78,11 @@ class BankTransactionModel {
     ); // 64 bits — plenty at personal-app scale
   }
 
+  String get searchableString {
+    return "$receiver $transactionID $amount ${bank.label} ${mode.label}"
+        .toLowerCase();
+  }
+
   @override
   toString() {
     return "ID: $id, Amount: $amount, Date: $date, Transaction ID: $transactionID, Receiver: $receiver, Type: ${type.label}, Bank: ${bank.label}, Mode: ${mode.label}, Transaction Consumed: $transactionConsumed, Confidence: $confidence";

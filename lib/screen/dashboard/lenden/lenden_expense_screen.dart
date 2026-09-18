@@ -592,18 +592,13 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                           filterState.data
                                               .cast<LendenTransactionModel>();
 
-                                      searchedData = FilterSort.filteredSearchText(
-                                        _searchController.text,
-                                        searchedData,
-                                        (transData) {
-                                          String searchStr =
-                                              transData.description;
-                                          searchStr +=
-                                              " ${getName(transData.createdBy, users)}";
-                                          searchStr += " ${transData.amount}";
-                                          return searchStr;
-                                        },
-                                      );
+                                      searchedData =
+                                          FilterSort.filteredSearchText(
+                                            _searchController.text,
+                                            searchedData,
+                                            (transData) =>
+                                                transData.searchableString,
+                                          );
 
                                       if (searchedData.isEmpty) {
                                         return SliverFillRemaining(

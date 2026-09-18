@@ -40,6 +40,10 @@ class BaseUserModel {
     );
   }
 
+  String get searchableString {
+    return name.toLowerCase();
+  }
+
   @override
   String toString() {
     return 'BaseUserModel(id: $id, name: $name, profilePic: $profilePic)';

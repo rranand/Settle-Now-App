@@ -1,4 +1,5 @@
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenTransactionModel extends BaseTransactionModel {
   LendenTransactionModel({
@@ -29,6 +30,11 @@ class LendenTransactionModel extends BaseTransactionModel {
       createdBy: createdBy ?? this.createdBy,
       modifiedOn: modifiedOn ?? this.modifiedOn,
     );
+  }
+
+  String get searchableString {
+    return "$description ${UserResolver.instance.resolve(createdBy).name} $amount"
+        .toLowerCase();
   }
 
   factory LendenTransactionModel.fromMap(Map<String, dynamic> map) {

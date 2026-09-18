@@ -358,7 +358,7 @@ class _InviteMemberState extends State<InviteMember> {
                                         FilterSort.filteredSearchText(
                                           _searchController.text,
                                           users,
-                                          (user) => user.name,
+                                          (user) => user.searchableString,
                                         );
 
                                     if (filterData.isEmpty) {

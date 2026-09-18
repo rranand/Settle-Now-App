@@ -217,7 +217,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                                     filterData = FilterSort.filteredSearchText(
                                       _searchController.text,
                                       splitData,
-                                      (roomData) => roomData.description,
+                                      (roomData) => roomData.searchableString,
                                     );
                                   }
 

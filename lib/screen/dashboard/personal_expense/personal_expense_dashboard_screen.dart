@@ -238,9 +238,7 @@ class _PersonalExpenseDashboardScreenState
                           filterData = FilterSort.filteredSearchText(
                             _searchController.text,
                             transactionData,
-                            (roomData) {
-                              return "${roomData.monthName} ${roomData.year}";
-                            },
+                            (roomData) => roomData.searchableString,
                           );
                         }
 

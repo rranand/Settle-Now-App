@@ -75,6 +75,10 @@ class RoomInfoModel {
     };
   }
 
+  String get searchableString {
+    return name.toLowerCase();
+  }
+
   factory RoomInfoModel.fromMap(Map<String, dynamic> map) {
     final allUsers = List<RoomUserModel>.from(
       (map['users']).map((x) => RoomUserModel.fromMap(x)),

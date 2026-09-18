@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class MultiUserBaseTransactionModel<T extends UserAmountModel>
     extends BaseTransactionModel {
@@ -43,6 +44,11 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       category: category ?? this.category,
       users: users ?? this.users,
     );
+  }
+
+  String get searchableString {
+    return "$description $amount $category ${UserResolver.instance.resolve(createdBy).name}"
+        .toLowerCase();
   }
 
   @override

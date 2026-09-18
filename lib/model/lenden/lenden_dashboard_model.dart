@@ -47,6 +47,13 @@ class LendenDashboardModel {
     );
   }
 
+  String get searchableString {
+    final loggedInUserID = UserResolver.instance.getLoggedInUser().id;
+
+    return "$roomName ${users.map((e) => loggedInUserID == e.id ? "" : e.name).join(" ")}"
+        .toLowerCase();
+  }
+
   Pair<double, double> getAmount() {
     final loggedInUser = UserResolver.instance.getLoggedInUser();
     if (users.isEmpty) {

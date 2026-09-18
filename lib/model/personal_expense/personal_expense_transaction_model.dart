@@ -43,6 +43,10 @@ class PersonalExpenseTransactionModel extends BaseTransactionModel {
     );
   }
 
+  String get searchableString {
+    return "$amount $description $category ${roomData.roomName}".toLowerCase();
+  }
+
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{

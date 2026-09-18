@@ -309,21 +309,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                                   filterData = FilterSort.filteredSearchText(
                                     _searchController.text,
                                     lendenData,
-                                    (roomData) {
-                                      String searchStr = roomData.roomName;
-                                      for (
-                                        int i = 0;
-                                        i < roomData.users.length;
-                                        i++
-                                      ) {
-                                        if (roomData.users[i].id !=
-                                            _loggedInUser.id) {
-                                          searchStr +=
-                                              " ${roomData.users[i].name}";
-                                        }
-                                      }
-                                      return searchStr;
-                                    },
+                                    (roomData) => roomData.searchableString,
                                   );
                                 }
 

@@ -36,6 +36,10 @@ class PersonalExpenseInfoModel {
     );
   }
 
+  String get searchableString {
+    return "$amount $monthName $year";
+  }
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'amount': amount,
