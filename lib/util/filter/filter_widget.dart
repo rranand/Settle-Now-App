@@ -68,6 +68,8 @@ class FilterWidget {
     String text, {
     BaseUserModel? user,
   }) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: GradientBorderCard(
@@ -75,28 +77,19 @@ class FilterWidget {
         borderWidth: 1,
         gradientColors:
             eachObject == selected
-                ? [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor,
-                ]
+                ? [theme.primaryColor, theme.primaryColor]
                 : [
-                  Theme.of(
-                    context,
-                  ).textSelectionTheme.cursorColor!.withAlpha(50),
-                  Theme.of(
-                    context,
-                  ).textSelectionTheme.cursorColor!.withAlpha(50),
+                  theme.textSelectionTheme.cursorColor!.withAlpha(50),
+                  theme.textSelectionTheme.cursorColor!.withAlpha(50),
                 ],
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
         child:
             user == null
                 ? Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Text(
                     text,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge!.color,
-                    ),
+                    style: TextStyle(color: theme.textTheme.bodyLarge!.color),
                   ),
                 )
                 : Row(
@@ -119,7 +112,7 @@ class FilterWidget {
                       child: Text(
                         user.name,
                         style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                          color: theme.textTheme.bodyLarge!.color,
                         ),
                       ),
                     ),

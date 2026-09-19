@@ -55,7 +55,6 @@ export './token_manager/token_storage.dart';
 export './graph/expense_by_category_chart.dart';
 export './graph/linear_graph_card.dart';
 export './graph/expense_by_user_chart.dart';
-export './functions/room_function.dart';
 export './functions/in_app_update_service.dart';
 export './functions/text_function.dart';
 export './functions/validator.dart';

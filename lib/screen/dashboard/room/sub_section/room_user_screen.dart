@@ -164,28 +164,11 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
 
           if (data.isEmpty) {
             return SliverFillRemaining(
-              child: noRecordFoundWidget(
-                "Something went wrong, Refresh!",
-                context,
-              ),
+              child: noRecordFoundWidget("No Users Found", context),
             );
           }
 
-          return BlocBuilder<FilterCubit, FilterState>(
-            builder: (context, filterState) {
-              bool haveFilter = filterState.isFilterApplied;
-              if (haveFilter) {
-                data = calculateUserExpenseInfo(
-                  state.data,
-                  filterState.data.cast<RoomTransactionModel>(),
-                  [],
-                );
-              } else {
-                data = state.data;
-              }
-              return showUserExpenseInfo(data);
-            },
-          );
+          return showUserExpenseInfo(data);
         } else {
           return showUserExpenseInfo(List.filled(11, RoomUserModel.empty()));
         }

@@ -122,10 +122,8 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       builder: (context, state) {
         if (state is RoomUserSuccess) {
           RoomUserModel data = RoomUserModel.empty();
-          RoomUserModel ogData = RoomUserModel.empty();
 
           double totalSpent = 0;
-          double ogTotalSpent = 0;
 
           for (int i = 0; i < state.data.length; i++) {
             if (_loggedInUser.id == state.data[i].id) {
@@ -134,87 +132,53 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             totalSpent += state.data[i].contribution;
           }
 
-          ogTotalSpent = totalSpent;
-          ogData = data;
-
           double balance = getPrecisedAmount(
             data.contribution - data.spent + data.settle,
           );
 
-          return BlocBuilder<FilterCubit, FilterState>(
-            builder: (context, filterState) {
-              bool haveFilter = filterState.isFilterApplied;
-              if (haveFilter) {
-                List<RoomUserModel> filteredExpenseInfo =
-                    calculateUserExpenseInfo(
-                      state.data,
-                      filterState.data.cast<RoomTransactionModel>(),
-                      [],
-                    );
-                totalSpent = 0;
-                for (int i = 0; i < filteredExpenseInfo.length; i++) {
-                  if (_loggedInUser.id == filteredExpenseInfo[i].id) {
-                    data = filteredExpenseInfo[i];
-                  }
-                  totalSpent += filteredExpenseInfo[i].contribution;
-                }
-              } else {
-                totalSpent = ogTotalSpent;
-                data = ogData;
-              }
-
-              return Stack(
+          return Card(
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: GradientColorConstant.greenToTeal,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: GradientColorConstant.greenToTeal,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Room Overview",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _summaryBox(
-                                "Total Spent",
-                                formatCurrency(totalSpent, context),
-                              ),
-                              _summaryBox(
-                                "You Gave",
-                                formatCurrency(data.contribution, context),
-                              ),
-                              _summaryBox(
-                                "Balance",
-                                "${balance < 0 ? "" : "+"}${formatCurrency(balance, context)}",
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  Text(
+                    "Room Overview",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  haveFilter
-                      ? Positioned(top: 12, right: 12, child: dot())
-                      : SizedBox.shrink(),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _summaryBox(
+                        "Total Spent",
+                        formatCurrency(totalSpent, context),
+                      ),
+                      _summaryBox(
+                        "You Gave",
+                        formatCurrency(data.contribution, context),
+                      ),
+                      _summaryBox(
+                        "Balance",
+                        "${balance < 0 ? "" : "+"}${formatCurrency(balance, context)}",
+                      ),
+                    ],
+                  ),
                 ],
-              );
-            },
+              ),
+            ),
           );
         } else {
           return CustomShimmerEffect.placeHolderShimmerEffect(
@@ -394,34 +358,30 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           builder: (context, _, _) {
             return Visibility(
               visible: _navbarSelectedIndex.value == 0 && hasTransactionData,
-              child: InkWell(
-                child: Icon(Icons.search),
-                onTap: () {
-                  isSearchEnabled.value = !isSearchEnabled.value;
-                  _searchController.text = "";
-                },
-              ),
-            );
-          },
-        ),
-        ValueListenableBuilder(
-          valueListenable: _navbarSelectedIndex,
-          builder: (context, _, _) {
-            return Visibility(
-              visible: _navbarSelectedIndex.value <= 1 && hasTransactionData,
-              child: IconButton(
-                icon: BlocBuilder<FilterCubit, FilterState>(
-                  builder: (context, state) {
-                    bool haveFilter = state.isFilterApplied;
-                    return Icon(
-                      haveFilter
-                          ? Iconsax.filter_tick_copy
-                          : Iconsax.filter_copy,
-                      color: haveFilter ? Colors.green : null,
-                    );
-                  },
-                ),
-                onPressed: () => filterModelBottomSheet(context),
+              child: Row(
+                children: [
+                  InkWell(
+                    child: Icon(Icons.search),
+                    onTap: () {
+                      isSearchEnabled.value = !isSearchEnabled.value;
+                      _searchController.text = "";
+                    },
+                  ),
+                  IconButton(
+                    icon: BlocBuilder<FilterCubit, FilterState>(
+                      builder: (context, state) {
+                        bool haveFilter = state.isFilterApplied;
+                        return Icon(
+                          haveFilter
+                              ? Iconsax.filter_tick_copy
+                              : Iconsax.filter_copy,
+                          color: haveFilter ? Colors.green : null,
+                        );
+                      },
+                    ),
+                    onPressed: () => filterModelBottomSheet(context),
+                  ),
+                ],
               ),
             );
           },
@@ -633,26 +593,37 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                   MultiValueListenableBuilder(
                     listenables: [isSearchEnabled, _navbarSelectedIndex],
                     builder: (BuildContext context) {
-                      if (isSearchEnabled.value &&
-                          _navbarSelectedIndex.value == 0) {
-                        return SliverPadding(
-                          padding: _mainScreenPadding,
-                          sliver: SliverAppBar(
-                            automaticallyImplyLeading: false,
-                            pinned: isSearchEnabled.value,
-                            title: CustomFormField.searchBar(
-                              "Search",
-                              isSearchEnabled,
-                              _searchController,
-                            ),
-                          ),
-                        );
-                      } else {
-                        return SliverPadding(
-                          padding: paddingInsets,
-                          sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
-                        );
-                      }
+                      return BlocBuilder<FilterCubit, FilterState>(
+                        builder: (context, filterState) {
+                          bool haveFilter = filterState.isFilterApplied;
+
+                          if (isSearchEnabled.value &&
+                              _navbarSelectedIndex.value == 0) {
+                            return SliverPadding(
+                              padding: _mainScreenPadding,
+                              sliver: SliverAppBar(
+                                automaticallyImplyLeading: false,
+                                pinned: isSearchEnabled.value,
+                                title: CustomFormField.searchBar(
+                                  "Search",
+                                  isSearchEnabled,
+                                  _searchController,
+                                ),
+                              ),
+                            );
+                          } else if (haveFilter &&
+                              _navbarSelectedIndex.value == 0) {
+                            return SliverToBoxAdapter(child: SizedBox.shrink());
+                          } else {
+                            return SliverPadding(
+                              padding: paddingInsets,
+                              sliver: SliverToBoxAdapter(
+                                child: _roomSummaryCard(),
+                              ),
+                            );
+                          }
+                        },
+                      );
                     },
                   ),
                   ValueListenableBuilder(
