@@ -486,11 +486,14 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
 
           isEditable = loggedInUserData.active;
 
-          context.read<FilterCubit>().updateState(
-            FilterState(id: state.id, data: lendenTransactionData),
-            loggedInUserData.id,
-            TransactionType.lenden,
-          );
+          final filterState = context.read<FilterCubit>().state;
+          if (!filterState.isFilterApplied) {
+            context.read<FilterCubit>().updateState(
+              FilterState(id: state.id, data: lendenTransactionData),
+              loggedInUserData.id,
+              TransactionType.lenden,
+            );
+          }
         }
 
         return Scaffold(

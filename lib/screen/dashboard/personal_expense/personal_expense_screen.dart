@@ -149,11 +149,14 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           hasNoRecordFound = state.dataList.isEmpty;
           if (state.data.isNotEmpty) {
             transactionArr = state.dataList;
-            context.read<FilterCubit>().updateState(
-              FilterState(id: state.id, data: transactionArr),
-              _loggedInUser.id,
-              TransactionType.personal,
-            );
+            final filterState = context.read<FilterCubit>().state;
+            if (!filterState.isFilterApplied) {
+              context.read<FilterCubit>().updateState(
+                FilterState(id: state.id, data: transactionArr),
+                _loggedInUser.id,
+                TransactionType.personal,
+              );
+            }
           }
         }
 
