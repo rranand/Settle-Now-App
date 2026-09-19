@@ -48,6 +48,7 @@ export './enum/bank.dart';
 export './enum/notification_type.dart';
 export './enum/bottom_navigation_type.dart';
 export './enum/notification_channel_type.dart';
+export './enum/filter_type.dart';
 export './token_manager/auth_event_bus.dart';
 export './token_manager/session_manager.dart';
 export './token_manager/token_storage.dart';

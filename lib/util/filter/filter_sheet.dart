@@ -26,7 +26,7 @@ class FilterSheet extends StatefulWidget {
 
 class _FilterSheetState extends State<FilterSheet> {
   String loggedInUserID = "";
-  List<String> filterSections = [];
+  List<FilterType> filterSections = [];
   List<RoomLinkedModel> roomData = [];
   List<BaseUserModel> userData = [];
   final ValueNotifier<int> _filterSelectedIndex = ValueNotifier(0);
@@ -58,42 +58,42 @@ class _FilterSheetState extends State<FilterSheet> {
     end: DateTime.now(),
   );
 
-  bool isFilterApplied(String filterType) {
+  bool isFilterApplied(FilterType filterType) {
     switch (filterType) {
-      case "Sort By":
+      case FilterType.sort:
         {
           return !(_selectedSortBy.value == SortBy.dateCreated &&
               _selectedSortRule.value == SortRules.descending);
         }
-      case "Amount":
+      case FilterType.amount:
         {
           return _selectedAmountRange.value.hashCode != _amountRange.hashCode;
         }
-      case "Category":
+      case FilterType.category:
         {
           return _selectedCategory.value.isNotEmpty;
         }
-      case "Date Created":
+      case FilterType.createdOn:
         {
           return _selectedDateRange.value.hashCode != _dateRange.hashCode;
         }
-      case "Room":
+      case FilterType.room:
         {
           return _selectedRoom.value.isNotEmpty;
         }
-      case "Type":
+      case FilterType.transactionType:
         {
           return _selectedLendenType.value != LendenType.none;
         }
-      case "Created By":
+      case FilterType.createdBy:
         {
           return _selectedUser.value.isNotEmpty;
         }
-      case "Split With":
+      case FilterType.splitWith:
         {
           return _selectedSplitWith.value.isNotEmpty;
         }
-      case "":
+      case FilterType.none:
         {
           bool flag = false;
           for (int i = 0; !flag && i < filterSections.length; i++) {
@@ -101,21 +101,17 @@ class _FilterSheetState extends State<FilterSheet> {
           }
           return flag;
         }
-      default:
-        {
-          return false;
-        }
     }
   }
 
-  void resetfilterHandler(String filterType) {
+  void resetfilterHandler(FilterType filterType) {
     switch (filterType) {
-      case "Sort By":
+      case FilterType.sort:
         {
           _selectedSortBy.value = SortBy.dateCreated;
           _selectedSortRule.value = SortRules.descending;
         }
-      case "Amount":
+      case FilterType.amount:
         {
           _selectedAmountRange.value = _amountRange;
           if (filterType == filterSections[_filterSelectedIndex.value]) {
@@ -123,11 +119,11 @@ class _FilterSheetState extends State<FilterSheet> {
             _maxController.text = _amountRange.end.toInt().toString();
           }
         }
-      case "Category":
+      case FilterType.category:
         {
           _selectedCategory.value = {};
         }
-      case "Date Created":
+      case FilterType.createdOn:
         {
           _selectedDateRange.value = _dateRange;
           if (filterType == filterSections[_filterSelectedIndex.value]) {
@@ -135,30 +131,28 @@ class _FilterSheetState extends State<FilterSheet> {
             _maxController.text = convertInDateFormat(_dateRange.end);
           }
         }
-      case "Room":
+      case FilterType.room:
         {
           _selectedRoom.value = {};
         }
-      case "Type":
+      case FilterType.transactionType:
         {
           _selectedLendenType.value = LendenType.none;
         }
-      case "Created By":
+      case FilterType.createdBy:
         {
           _selectedUser.value = {};
         }
-      case "Split With":
+      case FilterType.splitWith:
         {
           _selectedSplitWith.value = {};
         }
-      case "":
+      case FilterType.none:
         {
           for (int i = 0; i < filterSections.length; i++) {
             resetfilterHandler(filterSections[i]);
           }
         }
-      default:
-        {}
     }
   }
 
@@ -314,32 +308,32 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.personal):
         {
           filterSections = [
-            "Sort By",
-            "Amount",
-            "Category",
-            "Date Created",
-            "Room",
+            FilterType.sort,
+            FilterType.amount,
+            FilterType.category,
+            FilterType.createdOn,
+            FilterType.room,
           ];
         }
       case (TransactionType.lenden):
         {
           filterSections = [
-            "Sort By",
-            "Amount",
-            "Created By",
-            "Date Created",
-            "Type",
+            FilterType.sort,
+            FilterType.amount,
+            FilterType.createdOn,
+            FilterType.createdBy,
+            FilterType.transactionType,
           ];
         }
       case (TransactionType.room):
         {
           filterSections = [
-            "Sort By",
-            "Amount",
-            "Category",
-            "Created By",
-            "Date Created",
-            "Split With",
+            FilterType.sort,
+            FilterType.amount,
+            FilterType.category,
+            FilterType.createdOn,
+            FilterType.createdBy,
+            FilterType.splitWith,
           ];
         }
       default:
@@ -422,7 +416,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 amountRange: _selectedAmountRange.value,
                 dateRange: _selectedDateRange.value,
                 data: data,
-                isFilterApplied: isFilterApplied(""),
+                isFilterApplied: isFilterApplied(FilterType.none),
               ),
               loggedInUserID,
               widget.transactionType,
@@ -451,7 +445,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 amountRange: _selectedAmountRange.value,
                 dateRange: _selectedDateRange.value,
                 data: data,
-                isFilterApplied: isFilterApplied(""),
+                isFilterApplied: isFilterApplied(FilterType.none),
               ),
               loggedInUserID,
               widget.transactionType,
@@ -481,7 +475,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 dateRange: _selectedDateRange.value,
                 data: data,
                 splitWith: _selectedSplitWith.value,
-                isFilterApplied: isFilterApplied(""),
+                isFilterApplied: isFilterApplied(FilterType.none),
               ),
               loggedInUserID,
               widget.transactionType,
@@ -495,9 +489,9 @@ class _FilterSheetState extends State<FilterSheet> {
     }
   }
 
-  Widget _filterWidget(String filterType) {
+  Widget _filterWidget(FilterType filterType) {
     switch (filterType) {
-      case "Sort By":
+      case FilterType.sort:
         {
           return MultiValueListenableBuilder(
             listenables: [_selectedSortBy, _selectedSortRule],
@@ -541,7 +535,7 @@ class _FilterSheetState extends State<FilterSheet> {
             },
           );
         }
-      case "Category":
+      case FilterType.category:
         {
           return ValueListenableBuilder(
             valueListenable: _selectedCategory,
@@ -561,7 +555,7 @@ class _FilterSheetState extends State<FilterSheet> {
             },
           );
         }
-      case "Room":
+      case FilterType.room:
         {
           return roomData.isNotEmpty
               ? ValueListenableBuilder(
@@ -583,7 +577,7 @@ class _FilterSheetState extends State<FilterSheet> {
               )
               : noRecordFoundWidget("No Data Found", context);
         }
-      case "Date Created":
+      case FilterType.createdOn:
         {
           _minController.text = convertInDateFormat(
             _selectedDateRange.value.start,
@@ -658,7 +652,7 @@ class _FilterSheetState extends State<FilterSheet> {
             },
           );
         }
-      case "Type":
+      case FilterType.transactionType:
         {
           return ValueListenableBuilder(
             valueListenable: _selectedLendenType,
@@ -687,7 +681,7 @@ class _FilterSheetState extends State<FilterSheet> {
             },
           );
         }
-      case "Created By":
+      case FilterType.createdBy:
         {
           return userData.isNotEmpty
               ? ValueListenableBuilder(
@@ -737,7 +731,7 @@ class _FilterSheetState extends State<FilterSheet> {
               )
               : noRecordFoundWidget("No Data Found", context);
         }
-      case "Split With":
+      case FilterType.splitWith:
         {
           return userData.isNotEmpty
               ? ValueListenableBuilder(
@@ -787,7 +781,7 @@ class _FilterSheetState extends State<FilterSheet> {
               )
               : noRecordFoundWidget("No Data Found", context);
         }
-      case "Amount":
+      case FilterType.amount:
         {
           _minController.text =
               _selectedAmountRange.value.start.toInt().toString();
@@ -963,7 +957,7 @@ class _FilterSheetState extends State<FilterSheet> {
                             child: Stack(
                               children: [
                                 CustomButton.customTextButton(
-                                  filterSections[index],
+                                  filterSections[index].label,
                                   buttonWidth: 120,
                                   buttonHeight: calculateCardHeight(
                                     context,
@@ -1057,7 +1051,7 @@ class _FilterSheetState extends State<FilterSheet> {
               backgroundColor: Colors.grey.shade100,
               buttonTextColor: Colors.black,
               onPressed: () {
-                resetfilterHandler("");
+                resetfilterHandler(FilterType.none);
                 configureFilter(true);
               },
             ),
